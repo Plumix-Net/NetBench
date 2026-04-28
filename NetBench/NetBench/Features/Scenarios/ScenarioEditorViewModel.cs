@@ -56,6 +56,7 @@ public partial class ScenarioEditorViewModel : ObservableObject
             Scenario.Requests.Add(req);
 
         await _repository.SaveAsync(Scenario, ct);
+        _navigation.NavigateTo(null);
     }
 
     [RelayCommand]

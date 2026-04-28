@@ -37,7 +37,7 @@ public sealed class LoadEngine : IAsyncDisposable
         var token = _cts.Token;
         var startedAt = DateTime.UtcNow;
 
-        _consumerTask = Task.Run(() => ConsumeResultsAsync(token), token);
+        _consumerTask = Task.Run(ConsumeResultsAsync);
 
         var statsTask = Task.Run(() => EmitStatsAsync(token), token);
 
@@ -161,11 +161,10 @@ public sealed class LoadEngine : IAsyncDisposable
         }
     }
 
-    private async Task ConsumeResultsAsync(CancellationToken token)
+    private async Task ConsumeResultsAsync()
     {
-        // Results are already recorded in-line by workers; channel exists for future
-        // subscribers (e.g. live result streaming to UI). Drain it here.
-        await foreach (var _ in _channel.Reader.ReadAllAsync(token).ConfigureAwait(false))
+        // TryComplete() is always called before this task is awaited, so CancellationToken.None is safe.
+        await foreach (var _ in _channel.Reader.ReadAllAsync(CancellationToken.None).ConfigureAwait(false))
         {
         }
     }

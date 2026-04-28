@@ -62,13 +62,16 @@ public sealed class StatisticsAggregator
         var elapsedNs = GetTimestampNs() - _startTimestampNs;
         var elapsedSec = elapsedNs / 1_000_000_000.0;
 
-        double p50, p95, p99;
+        double p50 = 0, p95 = 0, p99 = 0;
         lock (_histogram)
         {
-            // histogram stores microseconds → convert to ms
-            p50 = _histogram.GetValueAtPercentile(50.0) / 1000.0;
-            p95 = _histogram.GetValueAtPercentile(95.0) / 1000.0;
-            p99 = _histogram.GetValueAtPercentile(99.0) / 1000.0;
+            if (_histogram.TotalCount > 0)
+            {
+                // histogram stores microseconds → convert to ms
+                p50 = _histogram.GetValueAtPercentile(50.0) / 1000.0;
+                p95 = _histogram.GetValueAtPercentile(95.0) / 1000.0;
+                p99 = _histogram.GetValueAtPercentile(99.0) / 1000.0;
+            }
         }
 
         return new TestRunStats

@@ -9,7 +9,17 @@
 
     <Grid ColumnDefinitions="280,*">
         <ContentControl Grid.Column="0" Content="{Binding Sidebar}" />
-        <ContentControl Grid.Column="1" Content="{Binding CurrentPage}" />
+
+        <Grid Grid.Column="1">
+            <ContentControl Content="{Binding CurrentPage}" />
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8"
+                        IsVisible="{Binding CurrentPage, Converter={x:Static ObjectConverters.IsNull}}">
+                <TextBlock Text="Select a scenario to get started"
+                           Foreground="Gray" FontSize="16" HorizontalAlignment="Center" />
+                <TextBlock Text="Use ▶ to run, ✎ to edit, or create a new scenario"
+                           Foreground="Gray" FontSize="12" HorizontalAlignment="Center" />
+            </StackPanel>
+        </Grid>
     </Grid>
 
 </UserControl>

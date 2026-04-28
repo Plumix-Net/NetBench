@@ -15,5 +15,6 @@ public partial class ShellViewModel : ObservableObject
     {
         Sidebar = sidebar;
         navigation.PageChanged += page => CurrentPage = page;
+        _ = sidebar.LoadCommand.ExecuteAsync(null);
     }
 }

@@ -42,6 +42,10 @@ public partial class TestRunViewModel : ObservableObject, IAsyncDisposable
         {
             await _engine.RunAsync(Scenario, _cts.Token);
         }
+        catch (OperationCanceledException)
+        {
+            // user pressed Stop — report is still fired via RunCompleted in LoadEngine.finally
+        }
         finally
         {
             IsRunning = false;
