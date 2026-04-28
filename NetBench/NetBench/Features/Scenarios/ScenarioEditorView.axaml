@@ -1,0 +1,77 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:NetBench.Features.Scenarios"
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="700"
+             x:Class="NetBench.Features.Scenarios.ScenarioEditorView"
+             x:DataType="vm:ScenarioEditorViewModel">
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="24">
+
+        <TextBlock Grid.Row="0" Text="Edit Scenario"
+                   FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16" />
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="12">
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Name" />
+                    <TextBox Text="{Binding Name}" />
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Target URL" />
+                    <TextBox Text="{Binding Target}" />
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Concurrent users" />
+                    <NumericUpDown Value="{Binding ConcurrentUsers}" Minimum="1" Maximum="10000" />
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Duration (seconds)" />
+                    <NumericUpDown Value="{Binding DurationSeconds}" Minimum="1" Maximum="3600" />
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Ramp-up (seconds)" />
+                    <NumericUpDown Value="{Binding RampUpSeconds}" Minimum="0" Maximum="600" />
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Think time (ms)" />
+                    <NumericUpDown Value="{Binding ThinkTimeMs}" Minimum="0" Maximum="60000" />
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Requests" FontWeight="SemiBold" />
+                    <ItemsControl ItemsSource="{Binding Requests}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="80,*,Auto" Margin="0,4">
+                                    <TextBox Grid.Column="0" Text="{Binding Method}" />
+                                    <TextBox Grid.Column="1" Text="{Binding Path}" Margin="8,0" />
+                                    <Button Grid.Column="2" Content="✕"
+                                            Command="{Binding $parent[UserControl].((vm:ScenarioEditorViewModel)DataContext).RemoveRequestCommand}"
+                                            CommandParameter="{Binding}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Content="+ Add Request" Command="{Binding AddRequestCommand}" />
+                </StackPanel>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8"
+                    HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Cancel" Command="{Binding CancelCommand}" />
+            <Button Content="Save" Command="{Binding SaveCommand}" Classes="accent" />
+        </StackPanel>
+
+    </Grid>
+
+</UserControl>

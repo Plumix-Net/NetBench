@@ -21,5 +21,8 @@
 
         <!-- Core packages -->
         <PackageVersion Include="HdrHistogram" Version="2.5.0" />
+
+        <!-- DI -->
+        <PackageVersion Include="Pure.DI" Version="2.3.6" />
     </ItemGroup>
 </Project>

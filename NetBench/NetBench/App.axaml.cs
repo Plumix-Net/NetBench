@@ -1,11 +1,9 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
-using System.Linq;
 using Avalonia.Markup.Xaml;
-using NetBench.ViewModels;
-using NetBench.Views;
+using NetBench.Composition;
+using NetBench.Features.Shell;
 
 namespace NetBench;
 
@@ -18,22 +16,27 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        var composition = new Composition.Composition();
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow
+            desktop.MainWindow = new Views.MainWindow
             {
-                DataContext = new MainViewModel()
+                DataContext = composition.Root,
             };
         }
-        else if (ApplicationLifetime is IActivityApplicationLifetime singleViewFactoryApplicationLifetime)
+        else if (ApplicationLifetime is IActivityApplicationLifetime activity)
         {
-            singleViewFactoryApplicationLifetime.MainViewFactory = () => new MainView { DataContext = new MainViewModel() };
-        }
-        else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
-        {
-            singleViewPlatform.MainView = new MainView
+            activity.MainViewFactory = () => new ShellView
             {
-                DataContext = new MainViewModel()
+                DataContext = composition.Root,
+            };
+        }
+        else if (ApplicationLifetime is ISingleViewApplicationLifetime singleView)
+        {
+            singleView.MainView = new ShellView
+            {
+                DataContext = composition.Root,
             };
         }
 
