@@ -90,6 +90,9 @@ public sealed class LoadEngine : IAsyncDisposable
 
     private async Task WorkerAsync(LoadScenario scenario, long deadlineTimestamp, int workerIndex, CancellationToken token)
     {
+        if (scenario.Requests.Count == 0)
+            return;
+
         while (!token.IsCancellationRequested &&
                Stopwatch.GetTimestamp() < deadlineTimestamp)
         {

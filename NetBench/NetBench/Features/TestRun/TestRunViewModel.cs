@@ -1,3 +1,4 @@
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NetBench.Core.Engine;
@@ -29,8 +30,8 @@ public partial class TestRunViewModel : ObservableObject, IAsyncDisposable
         _createReport = createReport;
 
         _engine = new LoadEngine();
-        _engine.StatsUpdated += stats => CurrentStats = stats;
-        _engine.RunCompleted += report => _navigation.NavigateTo(_createReport(report));
+        _engine.StatsUpdated += stats => Dispatcher.UIThread.Post(() => CurrentStats = stats);
+        _engine.RunCompleted += report => Dispatcher.UIThread.Post(() => _navigation.NavigateTo(_createReport(report)));
     }
 
     [RelayCommand]

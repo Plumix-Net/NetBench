@@ -44,6 +44,7 @@ public partial class ScenarioListViewModel : ObservableObject
     private async Task AddScenarioAsync(CancellationToken ct)
     {
         var scenario = new LoadScenario { Name = "New scenario" };
+        scenario.Requests.Add(new RequestStep { Method = "GET", Path = "/" });
         await _repository.SaveAsync(scenario, ct);
         Scenarios.Add(scenario);
         _navigation.NavigateTo(_createEditor(scenario));
