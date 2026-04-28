@@ -1,0 +1,11 @@
+﻿<Solution>
+  <Project Path="NetBench.Android/NetBench.Android.csproj">
+    <Deploy />
+  </Project>
+  <Project Path="NetBench.Browser/NetBench.Browser.csproj" />
+  <Project Path="NetBench.Desktop/NetBench.Desktop.csproj" />
+  <Project Path="NetBench.iOS/NetBench.iOS.csproj">
+    <Deploy />
+  </Project>
+  <Project Path="NetBench/NetBench.csproj" />
+</Solution>
