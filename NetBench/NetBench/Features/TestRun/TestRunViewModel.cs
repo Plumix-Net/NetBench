@@ -1,10 +1,12 @@
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using NetBench.Controls;
 using NetBench.Core.Engine;
 using NetBench.Core.Models;
 using NetBench.Features.Report;
 using NetBench.Services;
+using System.Collections.ObjectModel;
 
 namespace NetBench.Features.TestRun;
 
@@ -20,6 +22,9 @@ public partial class TestRunViewModel : ObservableObject, IAsyncDisposable
     [ObservableProperty] private TestRunStats? _currentStats;
     [ObservableProperty] private bool _isRunning;
 
+    public ObservableCollection<ChartPoint> RpsPoints { get; } = [];
+    public ObservableCollection<ChartPoint> P95Points { get; } = [];
+
     public TestRunViewModel(
         LoadScenario scenario,
         INavigationService navigation,
@@ -30,8 +35,15 @@ public partial class TestRunViewModel : ObservableObject, IAsyncDisposable
         _createReport = createReport;
 
         _engine = new LoadEngine();
-        _engine.StatsUpdated += stats => Dispatcher.UIThread.Post(() => CurrentStats = stats);
-        _engine.RunCompleted += report => Dispatcher.UIThread.Post(() => _navigation.NavigateTo(_createReport(report)));
+        _engine.StatsUpdated += stats => Dispatcher.UIThread.Post(() =>
+        {
+            CurrentStats = stats;
+            var t = stats.Elapsed.TotalSeconds;
+            AddPoint(RpsPoints, t, stats.RequestsPerSecond);
+            AddPoint(P95Points, t, stats.LatencyP95Ms);
+        });
+        _engine.RunCompleted += report => Dispatcher.UIThread.Post(() =>
+            _navigation.NavigateTo(_createReport(report)));
     }
 
     [RelayCommand]
@@ -55,6 +67,13 @@ public partial class TestRunViewModel : ObservableObject, IAsyncDisposable
 
     [RelayCommand]
     private void Stop() => _cts?.Cancel();
+
+    private static void AddPoint(ObservableCollection<ChartPoint> pts, double x, double y)
+    {
+        pts.Add(new ChartPoint(x, y));
+        if (pts.Count > 120)
+            pts.RemoveAt(0);
+    }
 
     public async ValueTask DisposeAsync()
     {

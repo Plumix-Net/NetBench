@@ -62,6 +62,33 @@
                     </Border>
                 </WrapPanel>
 
+                <TextBlock Text="Latency distribution" FontWeight="SemiBold" />
+                <Border Background="#1A1A1A" CornerRadius="8" Padding="16">
+                    <ItemsControl ItemsSource="{Binding LatencyBars}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:LatencyBar">
+                                <Grid ColumnDefinitions="48,*,80" Margin="0,5">
+                                    <TextBlock Grid.Column="0"
+                                               Text="{Binding Label}"
+                                               Foreground="Gray" FontSize="12"
+                                               VerticalAlignment="Center" />
+                                    <ProgressBar Grid.Column="1"
+                                                 Value="{Binding Value}"
+                                                 Maximum="{Binding Maximum}"
+                                                 Height="14"
+                                                 Margin="8,0"
+                                                 CornerRadius="3" />
+                                    <TextBlock Grid.Column="2"
+                                               Text="{Binding ValueText}"
+                                               FontSize="12" FontWeight="SemiBold"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+
                 <TextBlock Text="Status codes" FontWeight="SemiBold" />
                 <ItemsControl ItemsSource="{Binding Report.StatusCodes}">
                     <ItemsControl.ItemTemplate>
