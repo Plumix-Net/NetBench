@@ -8,7 +8,7 @@ namespace NetBench.Core.Engine;
 
 public sealed class LoadEngine : IAsyncDisposable
 {
-    private static readonly TimeSpan StatsInterval = TimeSpan.FromMilliseconds(250);
+    private static readonly TimeSpan _statsInterval = TimeSpan.FromMilliseconds(250);
 
     private readonly HttpClient _httpClient;
     private readonly Channel<RequestResult> _channel;
@@ -178,7 +178,7 @@ public sealed class LoadEngine : IAsyncDisposable
         {
             try
             {
-                await Task.Delay(StatsInterval, token).ConfigureAwait(false);
+                await Task.Delay(_statsInterval, token).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
