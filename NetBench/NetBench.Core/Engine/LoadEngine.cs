@@ -50,7 +50,7 @@ public sealed class LoadEngine : IAsyncDisposable
             _channel.Writer.TryComplete();
             await (_consumerTask ?? Task.CompletedTask).ConfigureAwait(false);
 
-            _cts.Cancel();
+            await _cts.CancelAsync().ConfigureAwait(false);
             await statsTask.ConfigureAwait(false);
 
             var report = _aggregator.BuildReport(scenario, startedAt);
@@ -195,7 +195,8 @@ public sealed class LoadEngine : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        _cts?.Cancel();
+        if (_cts is not null)
+            await _cts.CancelAsync().ConfigureAwait(false);
         if (_consumerTask is not null)
             await _consumerTask.ConfigureAwait(false);
         _httpClient.Dispose();

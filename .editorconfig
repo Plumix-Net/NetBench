@@ -1,0 +1,62 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+[*.{yml,yaml,json,axaml,xaml,xml,csproj,props,targets,slnx}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.cs]
+# --- Стиль: var ---
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = true:suggestion
+
+# --- Стиль: современный C# ---
+csharp_style_namespace_declarations = file_scoped:warning
+csharp_style_prefer_primary_constructors = false:none
+csharp_prefer_simple_using_statement = true:suggestion
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+csharp_style_expression_bodied_properties = true:suggestion
+csharp_style_pattern_matching_over_is_with_cast_check = true:suggestion
+csharp_style_prefer_switch_expression = true:suggestion
+dotnet_style_collection_initializer = true:suggestion
+dotnet_style_prefer_collection_expression = when_types_loosely_match:suggestion
+
+# --- Usings ---
+dotnet_sort_system_directives_first = true
+csharp_using_directive_placement = outside_namespace:warning
+dotnet_diagnostic.IDE0005.severity = warning   # лишние usings
+
+# --- Именование: приватные поля с подчёркиванием ---
+dotnet_naming_rule.private_fields_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_underscore.style = underscore_camel_case
+dotnet_naming_rule.private_fields_underscore.severity = warning
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_style.underscore_camel_case.capitalization = camel_case
+dotnet_naming_style.underscore_camel_case.required_prefix = _
+
+# --- Threading-анализаторы ---
+dotnet_diagnostic.VSTHRD003.severity = none    # правило про JTF-контексты VS; движок сам владеет своими задачами
+
+# --- Корректность (важно для load-testing ядра) ---
+dotnet_diagnostic.CA2007.severity = none       # ConfigureAwait: UI-проект решает сам
+dotnet_diagnostic.CA1848.severity = none       # LoggerMessage — оверкилл на этом этапе
+dotnet_diagnostic.CA1001.severity = warning    # типы с IDisposable-полями должны быть disposable
+dotnet_diagnostic.CA2012.severity = warning    # ValueTask использовать корректно
+dotnet_diagnostic.CA1810.severity = warning    # статические инициализаторы
+
+# --- Перф-правила (zero-alloc ядро) ---
+dotnet_diagnostic.CA1822.severity = suggestion # член может быть static
+dotnet_diagnostic.CA1859.severity = warning    # конкретные типы вместо интерфейсов где можно
+dotnet_diagnostic.CA1860.severity = warning    # Count > 0 вместо Any()
+dotnet_diagnostic.CA1861.severity = warning    # не аллоцировать массивы-константы в аргументах

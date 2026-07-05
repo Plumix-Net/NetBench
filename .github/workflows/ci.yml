@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      # Мобильные и browser-головы требуют workloads — в основном цикле
+      # собираем только Desktop-цепочку (Core → NetBench → Desktop) и тесты.
+      - name: Build (Desktop)
+        run: dotnet build NetBench/NetBench.Desktop/NetBench.Desktop.csproj -c Release
+
+      - name: Test (Core)
+        run: dotnet test NetBench/NetBench.Core.Tests/NetBench.Core.Tests.csproj -c Release
