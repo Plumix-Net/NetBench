@@ -39,6 +39,8 @@ public partial class ScenarioEditorViewModel : ObservableObject
         _thinkTimeMs = (int)scenario.Load.ThinkTime.TotalMilliseconds;
 
         Requests = new ObservableCollection<RequestStep>(scenario.Requests);
+        if (Requests.Count == 0)
+            Requests.Add(new RequestStep { Method = "GET", Path = "/" });
     }
 
     [RelayCommand]

@@ -88,15 +88,19 @@ public sealed class LoadEngine : IAsyncDisposable
         await Task.WhenAll(tasks).ConfigureAwait(false);
     }
 
+    private static readonly RequestStep _defaultStep = new() { Method = "GET", Path = "/" };
+
     private async Task WorkerAsync(LoadScenario scenario, long deadlineTimestamp, int workerIndex, CancellationToken token)
     {
-        if (scenario.Requests.Count == 0)
-            return;
+        // Сценарий без шагов — валидный случай: просто бьём GET'ом в сам Target.
+        IReadOnlyList<RequestStep> steps = scenario.Requests.Count > 0
+            ? scenario.Requests
+            : [_defaultStep];
 
         while (!token.IsCancellationRequested &&
                Stopwatch.GetTimestamp() < deadlineTimestamp)
         {
-            foreach (var step in scenario.Requests)
+            foreach (var step in steps)
             {
                 if (token.IsCancellationRequested || Stopwatch.GetTimestamp() >= deadlineTimestamp)
                     break;
@@ -113,7 +117,11 @@ public sealed class LoadEngine : IAsyncDisposable
 
     private async Task<RequestResult> ExecuteStepAsync(string target, RequestStep step, CancellationToken token)
     {
-        var url = target.TrimEnd('/') + step.Path;
+        // Path "/" или пустой — значит бить в Target как есть (пользователь мог
+        // указать в Target полный URL с путём); иначе приклеиваем path к базе.
+        var url = step.Path is "" or "/"
+            ? target
+            : target.TrimEnd('/') + step.Path;
         var startNs = GetTimestampNs();
 
         _aggregator.IncrementActiveConnections();
