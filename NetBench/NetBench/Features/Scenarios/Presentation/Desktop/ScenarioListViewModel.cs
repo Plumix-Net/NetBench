@@ -10,19 +10,19 @@ public partial class ScenarioListViewModel : ObservableObject
 {
     private readonly IScenarioRepository _repository;
     private readonly INavigationService _navigation;
-    private readonly Func<LoadScenario, ScenarioEditorViewModel> _createEditor;
+    private readonly Func<ScenarioViewModel, ScenarioEditorViewModel> _createEditor;
     private readonly Func<LoadScenario, TestRunViewModel> _createTestRun;
 
     [ObservableProperty]
-    private ObservableCollection<LoadScenario> _scenarios = [];
+    private ObservableCollection<ScenarioViewModel> _scenarios = [];
 
     [ObservableProperty]
-    private LoadScenario? _selectedScenario;
+    private ScenarioViewModel? _selectedScenario;
 
     public ScenarioListViewModel(
         IScenarioRepository repository,
         INavigationService navigation,
-        Func<LoadScenario, ScenarioEditorViewModel> createEditor,
+        Func<ScenarioViewModel, ScenarioEditorViewModel> createEditor,
         Func<LoadScenario, TestRunViewModel> createTestRun)
     {
         _repository = repository;
@@ -35,7 +35,7 @@ public partial class ScenarioListViewModel : ObservableObject
     private async Task LoadAsync(CancellationToken ct)
     {
         var all = await _repository.LoadAllAsync(ct);
-        Scenarios = new ObservableCollection<LoadScenario>(all);
+        Scenarios = new ObservableCollection<ScenarioViewModel>(all.Select(s => new ScenarioViewModel(s)));
     }
 
     [RelayCommand]
@@ -44,28 +44,30 @@ public partial class ScenarioListViewModel : ObservableObject
         var scenario = new LoadScenario { Name = "New scenario" };
         scenario.Requests.Add(new RequestStep { Method = "GET", Path = "/" });
         await _repository.SaveAsync(scenario, ct);
-        Scenarios.Add(scenario);
-        _navigation.NavigateTo(_createEditor(scenario));
+
+        var vm = new ScenarioViewModel(scenario);
+        Scenarios.Add(vm);
+        _navigation.NavigateTo(_createEditor(vm));
     }
 
     [RelayCommand]
-    private void EditScenario(LoadScenario scenario) =>
+    private void EditScenario(ScenarioViewModel scenario) =>
         _navigation.NavigateTo(_createEditor(scenario));
 
     [RelayCommand]
-    private void RunScenario(LoadScenario scenario) =>
-        _navigation.NavigateTo(_createTestRun(scenario));
+    private void RunScenario(ScenarioViewModel scenario) =>
+        _navigation.NavigateTo(_createTestRun(scenario.Model));
 
     [RelayCommand]
-    private async Task DeleteScenarioAsync(LoadScenario scenario, CancellationToken ct)
+    private async Task DeleteScenarioAsync(ScenarioViewModel scenario, CancellationToken ct)
     {
-        await _repository.DeleteAsync(scenario.Id, ct);
+        await _repository.DeleteAsync(scenario.Model.Id, ct);
         Scenarios.Remove(scenario);
 
         if (CurrentPage(scenario))
             _navigation.NavigateTo(null);
     }
 
-    private bool CurrentPage(LoadScenario scenario) =>
-        SelectedScenario?.Id == scenario.Id;
+    private bool CurrentPage(ScenarioViewModel scenario) =>
+        SelectedScenario?.Model.Id == scenario.Model.Id;
 }

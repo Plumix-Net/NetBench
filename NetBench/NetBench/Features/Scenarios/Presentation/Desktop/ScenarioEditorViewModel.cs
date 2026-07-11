@@ -10,7 +10,7 @@ public partial class ScenarioEditorViewModel : ObservableObject
     private readonly IScenarioRepository _repository;
     private readonly INavigationService _navigation;
 
-    public LoadScenario Scenario { get; }
+    public ScenarioViewModel Scenario { get; }
     public ObservableCollection<RequestStep> Requests { get; }
 
     [ObservableProperty] private string _name = string.Empty;
@@ -21,7 +21,7 @@ public partial class ScenarioEditorViewModel : ObservableObject
     [ObservableProperty] private int _thinkTimeMs;
 
     public ScenarioEditorViewModel(
-        LoadScenario scenario,
+        ScenarioViewModel scenario,
         IScenarioRepository repository,
         INavigationService navigation)
     {
@@ -29,14 +29,15 @@ public partial class ScenarioEditorViewModel : ObservableObject
         _repository = repository;
         _navigation = navigation;
 
-        _name = scenario.Name;
-        _target = scenario.Target;
-        _concurrentUsers = scenario.Load.ConcurrentUsers;
-        _durationSeconds = (int)scenario.Load.Duration.TotalSeconds;
-        _rampUpSeconds = (int)scenario.Load.RampUp.TotalSeconds;
-        _thinkTimeMs = (int)scenario.Load.ThinkTime.TotalMilliseconds;
+        var model = scenario.Model;
+        _name = model.Name;
+        _target = model.Target;
+        _concurrentUsers = model.Load.ConcurrentUsers;
+        _durationSeconds = (int)model.Load.Duration.TotalSeconds;
+        _rampUpSeconds = (int)model.Load.RampUp.TotalSeconds;
+        _thinkTimeMs = (int)model.Load.ThinkTime.TotalMilliseconds;
 
-        Requests = new ObservableCollection<RequestStep>(scenario.Requests);
+        Requests = new ObservableCollection<RequestStep>(model.Requests);
         if (Requests.Count == 0)
             Requests.Add(new RequestStep { Method = "GET", Path = "/" });
     }
@@ -46,16 +47,18 @@ public partial class ScenarioEditorViewModel : ObservableObject
     {
         Scenario.Name = Name;
         Scenario.Target = Target;
-        Scenario.Load.ConcurrentUsers = ConcurrentUsers;
-        Scenario.Load.Duration = TimeSpan.FromSeconds(DurationSeconds);
-        Scenario.Load.RampUp = TimeSpan.FromSeconds(RampUpSeconds);
-        Scenario.Load.ThinkTime = TimeSpan.FromMilliseconds(ThinkTimeMs);
 
-        Scenario.Requests.Clear();
+        var model = Scenario.Model;
+        model.Load.ConcurrentUsers = ConcurrentUsers;
+        model.Load.Duration = TimeSpan.FromSeconds(DurationSeconds);
+        model.Load.RampUp = TimeSpan.FromSeconds(RampUpSeconds);
+        model.Load.ThinkTime = TimeSpan.FromMilliseconds(ThinkTimeMs);
+
+        model.Requests.Clear();
         foreach (var req in Requests)
-            Scenario.Requests.Add(req);
+            model.Requests.Add(req);
 
-        await _repository.SaveAsync(Scenario, ct);
+        await _repository.SaveAsync(model, ct);
         _navigation.NavigateTo(null);
     }
 

@@ -62,6 +62,7 @@ NetBench/
 ## Принятые паттерны
 
 - **Clean architecture по фичам:** все слои фичи — в `NetBench/Features/<F>/{Domain,Data,Presentation}`. Domain/Data общие для платформ и не зависят от UI; Presentation делится на `Desktop` и `Mobile`, стейт-менеджеры у каждой платформы свои.
+- **Доменные модели — POCO:** никакого `INotifyPropertyChanged` и прочих UI-механик в Domain. Если XAML нужна реактивность — ObservableObject-обёртка в `Presentation/Desktop` с write-through в модель (пример — `ScenarioViewModel`).
 - **Платформенное деление в csproj, не в коде:** никаких `#if ANDROID` — desktop- и mobile-половины исключаются из компиляции условными `Compile`/`AvaloniaXaml` Remove по `$(IsMobileTarget)`. Новые платформенные файлы клади в правильную папку (`Desktop\**`, `Mobile\**`, `Presentation\{Desktop,Mobile}`) — csproj подхватит сам.
 - **Desktop (MVVM):** CommunityToolkit.Mvvm (`[ObservableProperty]`, `[RelayCommand]`). ViewModels — в `Presentation/Desktop` рядом с View.
 - **Mobile (Plumix):** Flutter-подобные виджеты (`Plumix`, `Plumix.Material`), состояние — `Cubit<TState>` + иммутабельные record-состояния (`Plumix.Bloc`); зависимости — через `RepositoryProvider`/`BlocProvider` в `MobileShell`.

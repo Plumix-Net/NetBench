@@ -10,7 +10,7 @@ namespace NetBench.Desktop;
 
 public sealed class ViewLocator : IDataTemplate
 {
-    private static readonly Dictionary<Type, Func<Control>> Registry = new()
+    private static readonly Dictionary<Type, Func<Control>> _registry = new()
     {
         [typeof(ShellViewModel)]          = static () => new ShellView(),
         [typeof(ScenarioListViewModel)]   = static () => new ScenarioListView(),
@@ -20,7 +20,7 @@ public sealed class ViewLocator : IDataTemplate
     };
 
     public Control? Build(object? param) =>
-        param is not null && Registry.TryGetValue(param.GetType(), out var factory)
+        param is not null && _registry.TryGetValue(param.GetType(), out var factory)
             ? factory()
             : new TextBlock { Text = $"No view for: {param?.GetType().Name}" };
 

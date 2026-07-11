@@ -29,7 +29,7 @@ internal partial class Composition
 
         // Roots
         .Root<ShellViewModel>("Root")
-        .Root<Func<LoadScenario, ScenarioEditorViewModel>>("CreateEditor")
+        .Root<Func<ScenarioViewModel, ScenarioEditorViewModel>>("CreateEditor")
         .Root<Func<LoadScenario, TestRunViewModel>>("CreateTestRun")
         .Root<Func<TestRunReport, ReportViewModel>>("CreateReport");
 }

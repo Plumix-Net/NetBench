@@ -1,28 +1,10 @@
-using System.ComponentModel;
-
 namespace NetBench.Features.Scenarios.Domain;
 
-public sealed class LoadScenario : INotifyPropertyChanged
+public sealed class LoadScenario
 {
-    private string _name = string.Empty;
-    private string _target = string.Empty;
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     public Guid Id { get; init; } = Guid.NewGuid();
-
-    public string Name
-    {
-        get => _name;
-        set { if (_name != value) { _name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name))); } }
-    }
-
-    public string Target
-    {
-        get => _target;
-        set { if (_target != value) { _target = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Target))); } }
-    }
-
+    public string Name { get; set; } = string.Empty;
+    public string Target { get; set; } = string.Empty;
     public List<RequestStep> Requests { get; init; } = [];
     public LoadConfig Load { get; init; } = new();
 }

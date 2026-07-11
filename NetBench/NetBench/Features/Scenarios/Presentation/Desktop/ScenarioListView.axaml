@@ -3,7 +3,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:NetBench.Features.Scenarios.Presentation.Desktop"
-             xmlns:models="using:NetBench.Features.Scenarios.Domain"
              mc:Ignorable="d" d:DesignWidth="280" d:DesignHeight="700"
              x:Class="NetBench.Features.Scenarios.Presentation.Desktop.ScenarioListView"
              x:DataType="vm:ScenarioListViewModel">
@@ -18,7 +17,7 @@
                  SelectedItem="{Binding SelectedScenario}"
                  Background="Transparent">
             <ListBox.ItemTemplate>
-                <DataTemplate x:DataType="models:LoadScenario">
+                <DataTemplate x:DataType="vm:ScenarioViewModel">
                     <Grid ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,2">
                         <TextBlock Grid.Column="0"
                                    Text="{Binding Name}"
