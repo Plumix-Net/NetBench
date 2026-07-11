@@ -1,5 +1,3 @@
-using UIKit;
-
 namespace NetBench.iOS;
 
 public class Application

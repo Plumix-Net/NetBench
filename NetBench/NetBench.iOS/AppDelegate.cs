@@ -1,9 +1,6 @@
-using Foundation;
-using UIKit;
 using Avalonia;
-using Avalonia.Controls;
+using NetBench.Mobile;
 using Avalonia.iOS;
-using Avalonia.Media;
 
 namespace NetBench.iOS;
 
@@ -12,7 +9,8 @@ namespace NetBench.iOS;
 // application events from iOS.
 [Register("AppDelegate")]
 #pragma warning disable CA1711 // Identifiers should not have incorrect suffix
-public partial class AppDelegate : AvaloniaAppDelegate<App>
+// Мобильная голова бутстрапит Plumix-версию UI (MobileApp), а не desktop-App.
+public partial class AppDelegate : AvaloniaAppDelegate<MobileApp>
 #pragma warning restore CA1711 // Identifiers should not have incorrect suffix
 {
     protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)

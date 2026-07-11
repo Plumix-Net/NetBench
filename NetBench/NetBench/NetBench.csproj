@@ -1,29 +1,60 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks>net10.0;net10.0-android;net10.0-ios</TargetFrameworks>
+    <!-- Нужен CI: на runner'е без мобильных workloads собираем только desktop (-p:MobileTargets=false) -->
+    <TargetFrameworks Condition="'$(MobileTargets)' == 'false'">net10.0</TargetFrameworks>
+
+    <IsMobileTarget>false</IsMobileTarget>
+    <IsMobileTarget Condition="$(TargetFramework.Contains('-android')) or $(TargetFramework.Contains('-ios'))">true</IsMobileTarget>
+
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-android'))">23</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-ios'))">13.0</SupportedOSPlatformVersion>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\NetBench.Core\NetBench.Core.csproj" />
+  <!-- Мобильные таргеты компилируют только Plumix-презентацию (Mobile/), -->
+  <ItemGroup Condition="'$(IsMobileTarget)' == 'true'">
+    <Compile Remove="Desktop\**;Features\**\Presentation\Desktop\**" />
+    <AvaloniaXaml Remove="Desktop\**;Features\**\Presentation\Desktop\**" />
+    <!-- Android неявно импортирует Android.Widget — его ListView/Switch и т.п.
+         конфликтуют с Plumix-виджетами; в общем коде Android API не нужен. -->
+    <Using Remove="Android.Widget" Condition="$(TargetFramework.Contains('-android'))" />
+  </ItemGroup>
+  <!-- desktop-таргет — только Avalonia-презентацию (Desktop/). -->
+  <ItemGroup Condition="'$(IsMobileTarget)' != 'true'">
+    <Compile Remove="Mobile\**;Features\**\Presentation\Mobile\**" />
+    <AvaloniaXaml Remove="Mobile\**;Features\**\Presentation\Mobile\**" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Pure.DI" PrivateAssets="all" />
-  </ItemGroup>
-
+  <!-- Общее: Avalonia-инфраструктура и ядро движка -->
   <ItemGroup>
     <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="Avalonia.Fonts.Inter" />
+    <PackageReference Include="HdrHistogram" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- Desktop-презентация: MVVM + Pure.DI -->
+  <ItemGroup Condition="'$(IsMobileTarget)' != 'true'">
+    <PackageReference Include="Pure.DI" PrivateAssets="all" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="AvaloniaUI.DiagnosticsSupport">
       <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="CommunityToolkit.Mvvm" />
+  </ItemGroup>
+
+  <!-- Мобильная презентация: Plumix -->
+  <ItemGroup Condition="'$(IsMobileTarget)' == 'true'">
+    <PackageReference Include="Plumix" />
+    <PackageReference Include="Plumix.Material" />
+    <PackageReference Include="Plumix.Bloc" />
   </ItemGroup>
 </Project>

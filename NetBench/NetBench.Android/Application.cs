@@ -1,21 +1,20 @@
-﻿using Android.App;
-using Android.Runtime;
+﻿using Android.Runtime;
 using Avalonia;
+using NetBench.Mobile;
 using Avalonia.Android;
 
-namespace NetBench.Android
-{
-    [Application]
-    public class Application : AvaloniaAndroidApplication<App>
-    {
-        protected Application(nint javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
-        {
-        }
+namespace NetBench.Android;
 
-        protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
-        {
-            return base.CustomizeAppBuilder(builder)
-            .WithInterFont();
-        }
+[Application]
+public class Application : AvaloniaAndroidApplication<MobileApp>
+{
+    protected Application(nint javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
+    {
+    }
+
+    protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
+    {
+        return base.CustomizeAppBuilder(builder)
+        .WithInterFont();
     }
 }

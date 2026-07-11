@@ -7,49 +7,72 @@ HTTP load-testing tool с GUI (аналог k6/hey/wrk) на Avalonia. Demo-пр
 Всё выполняется из корня репозитория. Solution — `NetBench/NetBench.slnx`.
 
 ```bash
-# Сборка desktop-цепочки (Core → NetBench → Desktop) — основной цикл разработки
+# Сборка desktop-цепочки — основной цикл разработки
 dotnet build NetBench/NetBench.Desktop/NetBench.Desktop.csproj
 
 # Тесты
-dotnet test NetBench/NetBench.Core.Tests/NetBench.Core.Tests.csproj
+dotnet test NetBench/NetBench.Tests/NetBench.Tests.csproj
 
 # Запуск desktop-приложения
 dotnet run --project NetBench/NetBench.Desktop/NetBench.Desktop.csproj
+
+# Мобильный (Plumix) флейвор общего проекта — быстрая проверка компиляции
+dotnet build NetBench/NetBench/NetBench.csproj -f net10.0-android
+
+# Полная Android-голова (APK)
+dotnet build NetBench/NetBench.Android/NetBench.Android.csproj
 ```
 
-Полный slnx (Android/iOS/Browser) требует установленных workloads — не собирай его без необходимости, платформенные головы проверяются отдельно.
+Общий проект `NetBench` мультитаргетный (`net10.0;net10.0-android;net10.0-ios`) — его restore требует установленных workloads android/ios. В окружении без workloads добавляй `-p:MobileTargets=false` (оставляет только `net10.0`) — так делает CI.
 
 ## Структура
+
+Один общий проект: у каждой фичи свои domain/data/presentation-слои, платформенные головы — только bootstrap.
 
 ```
 NetBench/
 ├── Directory.Build.props      # общие настройки: Nullable, ImplicitUsings, LangVersion, анализаторы
 ├── Directory.Packages.props   # central package management; версия Avalonia — $(AvaloniaVersion)
-├── NetBench.Core/             # движок нагрузки, БЕЗ зависимостей на UI
-│   ├── Engine/                # LoadEngine: HttpClient + Channel<RequestResult> pipeline
-│   ├── Statistics/            # StatisticsAggregator: HDR Histogram, lock-free счётчики
-│   ├── Models/                # RequestResult (struct!), LoadScenario, TestRunStats
-│   └── Storage/               # ScenarioRepository (локальные JSON-файлы)
-├── NetBench.Core.Tests/       # xUnit-тесты ядра
-├── NetBench/                  # общий UI-проект (Avalonia)
-│   ├── Features/              # feature-folders: Shell, Scenarios, TestRun, Report
-│   │                          #   каждая фича = View.axaml + ViewModel рядом
-│   ├── Composition/           # Pure.DI-контейнер (compile-time DI)
-│   ├── Controls/              # кастомные контролы (LineChart)
-│   └── Services/              # NavigationService и пр.
-└── NetBench.{Desktop,Android,iOS,Browser}/  # платформенные головы, только bootstrap
+├── NetBench/                  # ЕДИНСТВЕННЫЙ общий проект (мультитаргет, TreatWarningsAsErrors)
+│   ├── NetBench.csproj        # net10.0 → Desktop/Browser (Avalonia), net10.0-android/-ios → Mobile (Plumix);
+│   │                          #   Desktop\** и Presentation\Desktop компилируются только в net10.0,
+│   │                          #   Mobile\** и Presentation\Mobile — только в android/ios (условные Compile/AvaloniaXaml/пакеты)
+│   ├── Features/              # clean architecture по фичам
+│   │   ├── Scenarios/
+│   │   │   ├── Domain/        #   LoadScenario, IScenarioRepository
+│   │   │   ├── Data/          #   JsonScenarioRepository (source-generated JSON — trimming/AOT-safe)
+│   │   │   └── Presentation/
+│   │   │       ├── Desktop/   #     View.axaml + ViewModel (MVVM, CommunityToolkit)
+│   │   │       └── Mobile/    #     Plumix-виджеты + Cubit/State (Plumix.Bloc)
+│   │   ├── TestRun/
+│   │   │   ├── Domain/        #   RequestResult (struct!), TestRunStats, StatisticsAggregator (HDR Histogram)
+│   │   │   ├── Data/          #   LoadEngine: HttpClient + Channel<RequestResult> pipeline
+│   │   │   └── Presentation/Desktop/
+│   │   ├── Report/Presentation/Desktop/
+│   │   └── Shell/Presentation/{Desktop,Mobile}   # Mobile: MobileShell — мобильный composition root
+│   ├── Desktop/               # внефичевое desktop: App, ViewLocator, Views, Composition (Pure.DI),
+│   │                          #   Services (Navigation), Controls (LineChart)
+│   ├── Mobile/                # внефичевое mobile: MobileApp (PlumixApplication)
+│   └── Assets/
+├── NetBench.Tests/            # xUnit-тесты domain/data-слоёв (собираются против net10.0)
+└── NetBench.{Desktop,Android,iOS,Browser}/  # головы, только bootstrap:
+                               # Desktop/Browser → App, Android/iOS → MobileApp
 ```
 
 ## Принятые паттерны
 
-- **MVVM:** CommunityToolkit.Mvvm (`[ObservableProperty]`, `[RelayCommand]`). ViewModels — в feature-папке рядом с View.
-- **DI:** Pure.DI, конфигурация в `NetBench/Composition/Composition.cs`. Новые ViewModel регистрируются там; для VM с runtime-аргументом — root вида `Func<TArg, TViewModel>`.
+- **Clean architecture по фичам:** все слои фичи — в `NetBench/Features/<F>/{Domain,Data,Presentation}`. Domain/Data общие для платформ и не зависят от UI; Presentation делится на `Desktop` и `Mobile`, стейт-менеджеры у каждой платформы свои.
+- **Платформенное деление в csproj, не в коде:** никаких `#if ANDROID` — desktop- и mobile-половины исключаются из компиляции условными `Compile`/`AvaloniaXaml` Remove по `$(IsMobileTarget)`. Новые платформенные файлы клади в правильную папку (`Desktop\**`, `Mobile\**`, `Presentation\{Desktop,Mobile}`) — csproj подхватит сам.
+- **Desktop (MVVM):** CommunityToolkit.Mvvm (`[ObservableProperty]`, `[RelayCommand]`). ViewModels — в `Presentation/Desktop` рядом с View.
+- **Mobile (Plumix):** Flutter-подобные виджеты (`Plumix`, `Plumix.Material`), состояние — `Cubit<TState>` + иммутабельные record-состояния (`Plumix.Bloc`); зависимости — через `RepositoryProvider`/`BlocProvider` в `MobileShell`.
+- **DI (desktop):** Pure.DI, конфигурация в `NetBench/Desktop/Composition/Composition.cs`. Новые ViewModel регистрируются там; для VM с runtime-аргументом — root вида `Func<TArg, TViewModel>`.
 - **Bindings:** compiled bindings включены по умолчанию (`AvaloniaUseCompiledBindingsByDefault`) — в axaml указывай `x:DataType`.
-- **Навигация:** через `INavigationService`.
+- **Навигация (desktop):** через `INavigationService`.
+- **Сериализация:** только source-generated `System.Text.Json` (`JsonSerializerContext`) — рефлексия ломает trimming на мобильных таргетах.
 - **Пакеты:** версии только в `Directory.Packages.props` (CPM), в csproj — `PackageReference` без `Version`. Все Avalonia-пакеты — строго `$(AvaloniaVersion)`.
 - **Общие настройки проектов** (Nullable, LangVersion и т.п.) — только в `Directory.Build.props`, не дублировать в csproj.
 
-## Перф-правила ядра (NetBench.Core) — не «рефакторить»
+## Перф-правила движка (Features/TestRun) — не «рефакторить»
 
 Производительность — смысл этого приложения. Эти решения приняты сознательно:
 
@@ -57,11 +80,11 @@ NetBench/
 - Горячий путь (запись результатов при 10k+ req/s) — без аллокаций: `Span<T>`/`ReadOnlySpan<T>` для парсинга, `ArrayPool` для буферов, никакого LINQ.
 - Поток результатов — `Channel<RequestResult>` (bounded, SingleReader); агрегация — lock-free счётчики (`Interlocked`) + HDR Histogram под коротким lock.
 - UI получает данные только агрегированными снапшотами (интервал ~250ms), а не по одному результату.
-- В `NetBench.Core` включён `TreatWarningsAsErrors`.
+- В проекте `NetBench` включён `TreatWarningsAsErrors` (для всех таргетов).
 
 ## Правила разработки
 
-- Новая логика в Core — вместе с тестами в `NetBench.Core.Tests`.
-- Бизнес-логика живёт только в Core; UI-проект не должен знать про HttpClient или гистограммы.
+- Новая логика в Domain/Data-слоях — вместе с тестами в `NetBench.Tests`.
+- Слои не смешивать: Presentation не знает про `HttpClient`, гистограммы и файлы; Domain/Data не знают про Avalonia/Plumix.
 - Код и комментарии — в стиле существующего кода; UI-тексты приложения на русском.
-- CI (GitHub Actions) собирает Desktop и гоняет тесты Core на каждый push/PR.
+- CI (GitHub Actions): job `build-and-test` собирает Desktop (`-p:MobileTargets=false`) и гоняет тесты; job `build-mobile` ставит android workload и собирает Plumix-флейвор.

@@ -1,0 +1,113 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:NetBench.Features.Report.Presentation.Desktop"
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="700"
+             x:Class="NetBench.Features.Report.Presentation.Desktop.ReportView"
+             x:DataType="vm:ReportViewModel">
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="24">
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="Test Report" FontSize="20" FontWeight="SemiBold" />
+            <TextBlock Text="{Binding Report.Scenario.Name}" Foreground="Gray" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="16">
+
+                <WrapPanel>
+                    <Border Background="#1E1E1E" CornerRadius="8" Padding="20,12" Margin="0,0,12,12">
+                        <StackPanel>
+                            <TextBlock Text="RPS" FontSize="12" Foreground="Gray" />
+                            <TextBlock Text="{Binding Report.Summary.RequestsPerSecond, StringFormat={}{0:F0}}"
+                                       FontSize="28" FontWeight="Bold" />
+                        </StackPanel>
+                    </Border>
+                    <Border Background="#1E1E1E" CornerRadius="8" Padding="20,12" Margin="0,0,12,12">
+                        <StackPanel>
+                            <TextBlock Text="p50" FontSize="12" Foreground="Gray" />
+                            <TextBlock Text="{Binding Report.Summary.LatencyP50Ms, StringFormat={}{0:F0} ms}"
+                                       FontSize="28" FontWeight="Bold" />
+                        </StackPanel>
+                    </Border>
+                    <Border Background="#1E1E1E" CornerRadius="8" Padding="20,12" Margin="0,0,12,12">
+                        <StackPanel>
+                            <TextBlock Text="p95" FontSize="12" Foreground="Gray" />
+                            <TextBlock Text="{Binding Report.Summary.LatencyP95Ms, StringFormat={}{0:F0} ms}"
+                                       FontSize="28" FontWeight="Bold" />
+                        </StackPanel>
+                    </Border>
+                    <Border Background="#1E1E1E" CornerRadius="8" Padding="20,12" Margin="0,0,12,12">
+                        <StackPanel>
+                            <TextBlock Text="p99" FontSize="12" Foreground="Gray" />
+                            <TextBlock Text="{Binding Report.Summary.LatencyP99Ms, StringFormat={}{0:F0} ms}"
+                                       FontSize="28" FontWeight="Bold" />
+                        </StackPanel>
+                    </Border>
+                    <Border Background="#1E1E1E" CornerRadius="8" Padding="20,12" Margin="0,0,12,12">
+                        <StackPanel>
+                            <TextBlock Text="Errors" FontSize="12" Foreground="Gray" />
+                            <TextBlock Text="{Binding Report.Summary.ErrorRate, StringFormat={}{0:P1}}"
+                                       FontSize="28" FontWeight="Bold" />
+                        </StackPanel>
+                    </Border>
+                    <Border Background="#1E1E1E" CornerRadius="8" Padding="20,12" Margin="0,0,12,12">
+                        <StackPanel>
+                            <TextBlock Text="Total requests" FontSize="12" Foreground="Gray" />
+                            <TextBlock Text="{Binding Report.Summary.TotalRequests}"
+                                       FontSize="28" FontWeight="Bold" />
+                        </StackPanel>
+                    </Border>
+                </WrapPanel>
+
+                <TextBlock Text="Latency distribution" FontWeight="SemiBold" />
+                <Border Background="#1A1A1A" CornerRadius="8" Padding="16">
+                    <ItemsControl ItemsSource="{Binding LatencyBars}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:LatencyBar">
+                                <Grid ColumnDefinitions="48,*,80" Margin="0,5">
+                                    <TextBlock Grid.Column="0"
+                                               Text="{Binding Label}"
+                                               Foreground="Gray" FontSize="12"
+                                               VerticalAlignment="Center" />
+                                    <ProgressBar Grid.Column="1"
+                                                 Value="{Binding Value}"
+                                                 Maximum="{Binding Maximum}"
+                                                 Height="14"
+                                                 Margin="8,0"
+                                                 CornerRadius="3" />
+                                    <TextBlock Grid.Column="2"
+                                               Text="{Binding ValueText}"
+                                               FontSize="12" FontWeight="SemiBold"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+
+                <TextBlock Text="Status codes" FontWeight="SemiBold" />
+                <ItemsControl ItemsSource="{Binding Report.StatusCodes}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,2">
+                                <TextBlock Text="{Binding StatusCode}" Width="60" />
+                                <TextBlock Text="{Binding Count}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <Button Grid.Row="2" Content="Close"
+                Command="{Binding CloseCommand}"
+                HorizontalAlignment="Right" Margin="0,16,0,0" />
+
+    </Grid>
+
+</UserControl>

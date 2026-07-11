@@ -1,6 +1,4 @@
-﻿using Android.App;
-using Android.Content.PM;
-using Avalonia;
+﻿using Android.Content.PM;
 using Avalonia.Android;
 
 namespace NetBench.Android;

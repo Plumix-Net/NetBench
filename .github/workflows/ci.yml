@@ -15,10 +15,27 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      # Мобильные и browser-головы требуют workloads — в основном цикле
-      # собираем только Desktop-цепочку (Core → NetBench → Desktop) и тесты.
+      # Общий проект мультитаргетный (net10.0 + android/ios); на runner'е без
+      # мобильных workloads отключаем мобильные таргеты флагом MobileTargets=false.
       - name: Build (Desktop)
-        run: dotnet build NetBench/NetBench.Desktop/NetBench.Desktop.csproj -c Release
+        run: dotnet build NetBench/NetBench.Desktop/NetBench.Desktop.csproj -c Release -p:MobileTargets=false
 
-      - name: Test (Core)
-        run: dotnet test NetBench/NetBench.Core.Tests/NetBench.Core.Tests.csproj -c Release
+      - name: Test
+        run: dotnet test NetBench/NetBench.Tests/NetBench.Tests.csproj -c Release -p:MobileTargets=false
+
+  build-mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install Android workload
+        run: dotnet workload install android
+
+      # Проверяем Plumix-флейвор общего проекта; iOS-таргет на linux недоступен,
+      # поэтому ограничиваем TargetFrameworks одним android.
+      - name: Build (Mobile, android)
+        run: dotnet build NetBench/NetBench/NetBench.csproj -c Release -p:TargetFrameworks=net10.0-android

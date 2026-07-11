@@ -1,0 +1,10 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="NetBench.Mobile.MobileApp"
+             RequestedThemeVariant="Default">
+
+    <!-- FluentTheme нужна Plumix как источник базовых ресурсов (шрифты и пр.) -->
+    <Application.Styles>
+        <FluentTheme />
+    </Application.Styles>
+</Application>

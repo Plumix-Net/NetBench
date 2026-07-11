@@ -1,0 +1,57 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:NetBench.Features.Scenarios.Presentation.Desktop"
+             xmlns:models="using:NetBench.Features.Scenarios.Domain"
+             mc:Ignorable="d" d:DesignWidth="280" d:DesignHeight="700"
+             x:Class="NetBench.Features.Scenarios.Presentation.Desktop.ScenarioListView"
+             x:DataType="vm:ScenarioListViewModel">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <TextBlock Grid.Row="0" Text="Scenarios"
+                   Margin="16,16,16,8" FontWeight="SemiBold" FontSize="14" />
+
+        <ListBox Grid.Row="1"
+                 ItemsSource="{Binding Scenarios}"
+                 SelectedItem="{Binding SelectedScenario}"
+                 Background="Transparent">
+            <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="models:LoadScenario">
+                    <Grid ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,2">
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding Name}"
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis" />
+                        <Button Grid.Column="1"
+                                Content="▶"
+                                ToolTip.Tip="Run"
+                                Padding="6,4"
+                                Command="{Binding $parent[UserControl].((vm:ScenarioListViewModel)DataContext).RunScenarioCommand}"
+                                CommandParameter="{Binding}" />
+                        <Button Grid.Column="2"
+                                Content="✎"
+                                ToolTip.Tip="Edit"
+                                Padding="6,4"
+                                Command="{Binding $parent[UserControl].((vm:ScenarioListViewModel)DataContext).EditScenarioCommand}"
+                                CommandParameter="{Binding}" />
+                        <Button Grid.Column="3"
+                                Content="✕"
+                                ToolTip.Tip="Delete"
+                                Padding="6,4"
+                                Command="{Binding $parent[UserControl].((vm:ScenarioListViewModel)DataContext).DeleteScenarioCommand}"
+                                CommandParameter="{Binding}" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <Button Grid.Row="2"
+                Content="+ New Scenario"
+                Command="{Binding AddScenarioCommand}"
+                Margin="12,8" HorizontalAlignment="Stretch" />
+
+    </Grid>
+
+</UserControl>
