@@ -1,6 +1,7 @@
 using NetBench.Features.Scenarios.Domain;
 using NetBench.Features.TestRun.Domain;
 using NetBench.Features.Scenarios.Data;
+using NetBench.Features.TestRun.Data;
 using NetBench.Features.Report.Presentation.Desktop;
 using NetBench.Features.Scenarios.Presentation.Desktop;
 using NetBench.Features.Shell.Presentation.Desktop;
@@ -19,6 +20,9 @@ internal partial class Composition
         // Singletons
         .Bind<INavigationService>().As(Singleton).To<NavigationService>()
         .Bind<IScenarioRepository>().As(Singleton).To<JsonScenarioRepository>()
+        .Bind<IReportStore>().As(Singleton).To<InMemoryReportStore>()
+        .Bind<IThemeService>().As(Singleton).To<ThemeService>()
+        .Bind<IFileSaveService>().As(Singleton).To<FileSaveService>()
         .Bind<ScenarioListViewModel>().As(Singleton).To<ScenarioListViewModel>()
         .Bind<ShellViewModel>().As(Singleton).To<ShellViewModel>()
 
@@ -26,10 +30,12 @@ internal partial class Composition
         .Bind<ScenarioEditorViewModel>().To<ScenarioEditorViewModel>()
         .Bind<TestRunViewModel>().To<TestRunViewModel>()
         .Bind<ReportViewModel>().To<ReportViewModel>()
+        .Bind<CompareViewModel>().To<CompareViewModel>()
 
         // Roots
         .Root<ShellViewModel>("Root")
         .Root<Func<ScenarioViewModel, ScenarioEditorViewModel>>("CreateEditor")
         .Root<Func<LoadScenario, TestRunViewModel>>("CreateTestRun")
-        .Root<Func<TestRunReport, ReportViewModel>>("CreateReport");
+        .Root<Func<TestRunReport, ReportViewModel>>("CreateReport")
+        .Root<Func<TestRunReport, CompareViewModel>>("CreateCompare");
 }

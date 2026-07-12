@@ -1,0 +1,117 @@
+<!-- ControlTheme'ы дизайн-системы: MetricCard, LatencyBar. -->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ctrl="using:NetBench.Desktop.Controls">
+
+    <ControlTheme x:Key="{x:Type ctrl:MetricCard}" TargetType="ctrl:MetricCard">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{DynamicResource BgCard}"
+                        CornerRadius="8"
+                        Padding="18,16">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <Ellipse Name="PART_Dot"
+                                     Width="7" Height="7"
+                                     VerticalAlignment="Center"
+                                     Fill="{DynamicResource TextMid}"
+                                     IsVisible="{TemplateBinding ShowDot}" />
+                            <TextBlock Text="{TemplateBinding Label}"
+                                       FontSize="11" FontWeight="Bold"
+                                       LetterSpacing="0.6"
+                                       Foreground="{DynamicResource TextMid}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                            <TextBlock Name="PART_Value"
+                                       Text="{TemplateBinding Value}"
+                                       FontFamily="{DynamicResource MonoFont}"
+                                       FontSize="30" FontWeight="ExtraBold"
+                                       Foreground="{DynamicResource TextHi}" />
+                            <TextBlock Name="PART_Unit"
+                                       Text="{TemplateBinding Unit}"
+                                       FontSize="15" FontWeight="Bold"
+                                       Margin="2,0,0,4"
+                                       VerticalAlignment="Bottom"
+                                       Foreground="{DynamicResource TextHi}"
+                                       IsVisible="False" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+
+        <Style Selector="^:unit /template/ TextBlock#PART_Unit">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+
+        <Style Selector="^:rps /template/ TextBlock#PART_Value">
+            <Setter Property="Foreground" Value="{DynamicResource Rps}" />
+        </Style>
+        <Style Selector="^:rps /template/ TextBlock#PART_Unit">
+            <Setter Property="Foreground" Value="{DynamicResource Rps}" />
+        </Style>
+        <Style Selector="^:rps /template/ Ellipse#PART_Dot">
+            <Setter Property="Fill" Value="{DynamicResource Rps}" />
+        </Style>
+
+        <Style Selector="^:latency /template/ TextBlock#PART_Value">
+            <Setter Property="Foreground" Value="{DynamicResource Latency}" />
+        </Style>
+        <Style Selector="^:latency /template/ TextBlock#PART_Unit">
+            <Setter Property="Foreground" Value="{DynamicResource Latency}" />
+        </Style>
+        <Style Selector="^:latency /template/ Ellipse#PART_Dot">
+            <Setter Property="Fill" Value="{DynamicResource Latency}" />
+        </Style>
+
+        <Style Selector="^:error /template/ TextBlock#PART_Value">
+            <Setter Property="Foreground" Value="{DynamicResource Error}" />
+        </Style>
+        <Style Selector="^:error /template/ TextBlock#PART_Unit">
+            <Setter Property="Foreground" Value="{DynamicResource Error}" />
+        </Style>
+        <Style Selector="^:error /template/ Ellipse#PART_Dot">
+            <Setter Property="Fill" Value="{DynamicResource Error}" />
+        </Style>
+
+        <Style Selector="^:success /template/ TextBlock#PART_Value">
+            <Setter Property="Foreground" Value="{DynamicResource Success}" />
+        </Style>
+        <Style Selector="^:success /template/ TextBlock#PART_Unit">
+            <Setter Property="Foreground" Value="{DynamicResource Success}" />
+        </Style>
+        <Style Selector="^:success /template/ Ellipse#PART_Dot">
+            <Setter Property="Fill" Value="{DynamicResource Success}" />
+        </Style>
+    </ControlTheme>
+
+    <ControlTheme x:Key="{x:Type ctrl:LatencyBar}" TargetType="ctrl:LatencyBar">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid ColumnDefinitions="50,*,72">
+                    <TextBlock Grid.Column="0"
+                               Text="{TemplateBinding Label}"
+                               FontSize="12"
+                               Foreground="{DynamicResource TextMid}"
+                               VerticalAlignment="Center" />
+                    <ProgressBar Grid.Column="1"
+                                 Minimum="0" Maximum="100"
+                                 Value="{TemplateBinding Percentage}"
+                                 Height="9" MinHeight="9"
+                                 CornerRadius="100"
+                                 Margin="14,0"
+                                 Background="{DynamicResource Border}"
+                                 Foreground="{DynamicResource Latency}" />
+                    <TextBlock Grid.Column="2"
+                               Text="{TemplateBinding Display}"
+                               FontFamily="{DynamicResource MonoFont}"
+                               FontSize="13"
+                               Foreground="{DynamicResource Text}"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center" />
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>

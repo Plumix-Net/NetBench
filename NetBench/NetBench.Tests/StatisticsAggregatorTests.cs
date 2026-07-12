@@ -74,16 +74,36 @@ public class StatisticsAggregatorTests
         var aggregator = new StatisticsAggregator();
         aggregator.Record(Ok(10, statusCode: 200));
         aggregator.Record(Ok(10, statusCode: 200));
-        aggregator.Record(Ok(10, statusCode: 404));
-        aggregator.Record(RequestResult.Error(0, 1_000_000)); // ошибки не попадают в разбивку по кодам
+        aggregator.Record(new RequestResult(0, 10_000_000, statusCode: 404, bytesReceived: 0, isError: true));
+        aggregator.Record(RequestResult.Error(0, 1_000_000)); // сетевой сбой → код 0
 
         var report = aggregator.BuildReport(new LoadScenario { Name = "test" }, DateTime.UtcNow);
 
-        Assert.Equal(2, report.StatusCodes.Count);
-        Assert.Equal(200, report.StatusCodes[0].StatusCode);
-        Assert.Equal(2, report.StatusCodes[0].Count);
-        Assert.Equal(404, report.StatusCodes[1].StatusCode);
-        Assert.Equal(1, report.StatusCodes[1].Count);
+        Assert.Equal(3, report.StatusCodes.Count);
+        Assert.Equal(0, report.StatusCodes[0].StatusCode);
+        Assert.Equal(1, report.StatusCodes[0].Count);
+        Assert.Equal(200, report.StatusCodes[1].StatusCode);
+        Assert.Equal(2, report.StatusCodes[1].Count);
+        Assert.Equal(404, report.StatusCodes[2].StatusCode);
+        Assert.Equal(1, report.StatusCodes[2].Count);
+    }
+
+    [Fact]
+    public void BuildReportCollectsSnapshotTimeline()
+    {
+        var aggregator = new StatisticsAggregator();
+        aggregator.Record(Ok(10));
+        aggregator.Snapshot();
+        aggregator.Record(Ok(20));
+        aggregator.Snapshot();
+
+        var report = aggregator.BuildReport(new LoadScenario { Name = "test" }, DateTime.UtcNow);
+
+        // Два явных снапшота + финальный из BuildReport
+        Assert.Equal(3, report.Timeline.Count);
+        Assert.Equal(1, report.Timeline[0].TotalRequests);
+        Assert.Equal(2, report.Timeline[1].TotalRequests);
+        Assert.Equal(2, report.Timeline[2].TotalRequests);
     }
 
     [Fact]

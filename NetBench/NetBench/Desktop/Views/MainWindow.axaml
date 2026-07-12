@@ -4,12 +4,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:shell="using:NetBench.Features.Shell.Presentation.Desktop"
         xmlns:vm="using:NetBench.Features.Shell.Presentation.Desktop"
-        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="700"
+        mc:Ignorable="d" d:DesignWidth="1440" d:DesignHeight="900"
         x:Class="NetBench.Desktop.Views.MainWindow"
         x:DataType="vm:ShellViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="NetBench"
-        MinWidth="900" MinHeight="600">
+        Width="1440" Height="900"
+        MinWidth="1100" MinHeight="640"
+        Background="{DynamicResource BgBase}"
+        FontFamily="{DynamicResource UiFont}">
 
     <shell:ShellView />
 

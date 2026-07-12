@@ -10,8 +10,8 @@ public class LineChart : Control
     public static readonly StyledProperty<ObservableCollection<ChartPoint>?> PointsProperty =
         AvaloniaProperty.Register<LineChart, ObservableCollection<ChartPoint>?>(nameof(Points));
 
-    public static readonly StyledProperty<Color> LineColorProperty =
-        AvaloniaProperty.Register<LineChart, Color>(nameof(LineColor), Colors.DodgerBlue);
+    public static readonly StyledProperty<IBrush?> StrokeProperty =
+        AvaloniaProperty.Register<LineChart, IBrush?>(nameof(Stroke), Brushes.DodgerBlue);
 
     public ObservableCollection<ChartPoint>? Points
     {
@@ -19,15 +19,15 @@ public class LineChart : Control
         set => SetValue(PointsProperty, value);
     }
 
-    public Color LineColor
+    public IBrush? Stroke
     {
-        get => GetValue(LineColorProperty);
-        set => SetValue(LineColorProperty, value);
+        get => GetValue(StrokeProperty);
+        set => SetValue(StrokeProperty, value);
     }
 
     static LineChart()
     {
-        AffectsRender<LineChart>(LineColorProperty);
+        AffectsRender<LineChart>(StrokeProperty);
         PointsProperty.Changed.AddClassHandler<LineChart>((c, e) =>
         {
             if (e.OldValue is ObservableCollection<ChartPoint> old)
@@ -65,7 +65,8 @@ public class LineChart : Control
         if (maxY <= 0) maxY = 1;
 
         const double padV = 0.08;
-        var pen = new Pen(new SolidColorBrush(LineColor), 1.5);
+        var pen = new Pen(Stroke ?? Brushes.DodgerBlue, 2.5,
+            lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round);
 
         Point Map(ChartPoint p) => new Point(
             (p.X - minX) / (maxX - minX) * w,

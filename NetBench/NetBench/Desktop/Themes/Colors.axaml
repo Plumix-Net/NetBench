@@ -1,0 +1,138 @@
+<!-- Палитра NetBench — токены из дизайн-системы (claude.ai/design, tokens.css).
+     Семантические акценты фиксированы: Rps=throughput, Latency, Error, Success. -->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.ThemeDictionaries>
+
+        <ResourceDictionary x:Key="Dark">
+            <!-- Поверхности -->
+            <Color x:Key="BgBaseColor">#101014</Color>
+            <Color x:Key="BgSunkenColor">#0A0A0C</Color>
+            <Color x:Key="BgPanelColor">#16161A</Color>
+            <Color x:Key="BgCardColor">#1E1E24</Color>
+            <Color x:Key="BgCardHoverColor">#25252C</Color>
+            <!-- Структура -->
+            <Color x:Key="BorderColor">#232329</Color>
+            <Color x:Key="BorderStrongColor">#2A2A31</Color>
+            <!-- Текстовая шкала -->
+            <Color x:Key="TextHiColor">#FFFFFF</Color>
+            <Color x:Key="TextColor">#EDEDF0</Color>
+            <Color x:Key="TextMidColor">#8A8A94</Color>
+            <Color x:Key="TextDimColor">#6A6A74</Color>
+            <Color x:Key="TextFaintColor">#5A5A64</Color>
+            <!-- Семантические акценты -->
+            <Color x:Key="RpsColor">#1E90FF</Color>
+            <Color x:Key="LatencyColor">#FFA500</Color>
+            <Color x:Key="ErrorColor">#FF4D4F</Color>
+            <Color x:Key="SuccessColor">#52C41A</Color>
+            <Color x:Key="RpsHoverColor">#4AA3FF</Color>
+            <Color x:Key="ErrorHoverColor">#FF6B6D</Color>
+            <!-- Полупрозрачные подложки -->
+            <Color x:Key="RpsTintColor">#241E90FF</Color>
+            <Color x:Key="LatencyTintColor">#24FFA500</Color>
+            <Color x:Key="ErrorTintColor">#24FF4D4F</Color>
+            <Color x:Key="SuccessTintColor">#2452C41A</Color>
+            <Color x:Key="SelectionBgColor">#1F1E90FF</Color>
+            <Color x:Key="SelectionBorderColor">#591E90FF</Color>
+            <Color x:Key="ErrorBannerBgColor">#1AFF4D4F</Color>
+            <Color x:Key="ErrorBannerBorderColor">#4DFF4D4F</Color>
+            <Color x:Key="DangerHoverColor">#2EFF4D4F</Color>
+            <Color x:Key="OnAccentColor">#FFFFFF</Color>
+
+            <SolidColorBrush x:Key="BgBase" Color="{StaticResource BgBaseColor}" />
+            <SolidColorBrush x:Key="BgSunken" Color="{StaticResource BgSunkenColor}" />
+            <SolidColorBrush x:Key="BgPanel" Color="{StaticResource BgPanelColor}" />
+            <SolidColorBrush x:Key="BgCard" Color="{StaticResource BgCardColor}" />
+            <SolidColorBrush x:Key="BgCardHover" Color="{StaticResource BgCardHoverColor}" />
+            <SolidColorBrush x:Key="Border" Color="{StaticResource BorderColor}" />
+            <SolidColorBrush x:Key="BorderStrong" Color="{StaticResource BorderStrongColor}" />
+            <SolidColorBrush x:Key="TextHi" Color="{StaticResource TextHiColor}" />
+            <SolidColorBrush x:Key="Text" Color="{StaticResource TextColor}" />
+            <SolidColorBrush x:Key="TextMid" Color="{StaticResource TextMidColor}" />
+            <SolidColorBrush x:Key="TextDim" Color="{StaticResource TextDimColor}" />
+            <SolidColorBrush x:Key="TextFaint" Color="{StaticResource TextFaintColor}" />
+            <SolidColorBrush x:Key="Rps" Color="{StaticResource RpsColor}" />
+            <SolidColorBrush x:Key="Latency" Color="{StaticResource LatencyColor}" />
+            <SolidColorBrush x:Key="Error" Color="{StaticResource ErrorColor}" />
+            <SolidColorBrush x:Key="Success" Color="{StaticResource SuccessColor}" />
+            <SolidColorBrush x:Key="RpsHover" Color="{StaticResource RpsHoverColor}" />
+            <SolidColorBrush x:Key="ErrorHover" Color="{StaticResource ErrorHoverColor}" />
+            <SolidColorBrush x:Key="RpsTint" Color="{StaticResource RpsTintColor}" />
+            <SolidColorBrush x:Key="LatencyTint" Color="{StaticResource LatencyTintColor}" />
+            <SolidColorBrush x:Key="ErrorTint" Color="{StaticResource ErrorTintColor}" />
+            <SolidColorBrush x:Key="SuccessTint" Color="{StaticResource SuccessTintColor}" />
+            <SolidColorBrush x:Key="SelectionBg" Color="{StaticResource SelectionBgColor}" />
+            <SolidColorBrush x:Key="SelectionBorder" Color="{StaticResource SelectionBorderColor}" />
+            <SolidColorBrush x:Key="ErrorBannerBg" Color="{StaticResource ErrorBannerBgColor}" />
+            <SolidColorBrush x:Key="ErrorBannerBorder" Color="{StaticResource ErrorBannerBorderColor}" />
+            <SolidColorBrush x:Key="DangerHover" Color="{StaticResource DangerHoverColor}" />
+            <SolidColorBrush x:Key="OnAccent" Color="{StaticResource OnAccentColor}" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="Light">
+            <!-- Поверхности -->
+            <Color x:Key="BgBaseColor">#F5F6F8</Color>
+            <Color x:Key="BgSunkenColor">#E7E9ED</Color>
+            <Color x:Key="BgPanelColor">#FFFFFF</Color>
+            <Color x:Key="BgCardColor">#FFFFFF</Color>
+            <Color x:Key="BgCardHoverColor">#EEF0F3</Color>
+            <!-- Структура -->
+            <Color x:Key="BorderColor">#E3E5EA</Color>
+            <Color x:Key="BorderStrongColor">#D2D6DD</Color>
+            <!-- Текстовая шкала -->
+            <Color x:Key="TextHiColor">#0C0D10</Color>
+            <Color x:Key="TextColor">#22242A</Color>
+            <Color x:Key="TextMidColor">#5C616C</Color>
+            <Color x:Key="TextDimColor">#878C97</Color>
+            <Color x:Key="TextFaintColor">#AEB2BC</Color>
+            <!-- Семантические акценты (темнее — ради AA-контраста на светлом) -->
+            <Color x:Key="RpsColor">#1370D6</Color>
+            <Color x:Key="LatencyColor">#D9820A</Color>
+            <Color x:Key="ErrorColor">#E23A3C</Color>
+            <Color x:Key="SuccessColor">#3E9C12</Color>
+            <Color x:Key="RpsHoverColor">#0F5FB8</Color>
+            <Color x:Key="ErrorHoverColor">#C92E30</Color>
+            <!-- Полупрозрачные подложки -->
+            <Color x:Key="RpsTintColor">#1F1370D6</Color>
+            <Color x:Key="LatencyTintColor">#29D9820A</Color>
+            <Color x:Key="ErrorTintColor">#1FE23A3C</Color>
+            <Color x:Key="SuccessTintColor">#243E9C12</Color>
+            <Color x:Key="SelectionBgColor">#1F1370D6</Color>
+            <Color x:Key="SelectionBorderColor">#591370D6</Color>
+            <Color x:Key="ErrorBannerBgColor">#1AE23A3C</Color>
+            <Color x:Key="ErrorBannerBorderColor">#4DE23A3C</Color>
+            <Color x:Key="DangerHoverColor">#2EE23A3C</Color>
+            <Color x:Key="OnAccentColor">#FFFFFF</Color>
+
+            <SolidColorBrush x:Key="BgBase" Color="{StaticResource BgBaseColor}" />
+            <SolidColorBrush x:Key="BgSunken" Color="{StaticResource BgSunkenColor}" />
+            <SolidColorBrush x:Key="BgPanel" Color="{StaticResource BgPanelColor}" />
+            <SolidColorBrush x:Key="BgCard" Color="{StaticResource BgCardColor}" />
+            <SolidColorBrush x:Key="BgCardHover" Color="{StaticResource BgCardHoverColor}" />
+            <SolidColorBrush x:Key="Border" Color="{StaticResource BorderColor}" />
+            <SolidColorBrush x:Key="BorderStrong" Color="{StaticResource BorderStrongColor}" />
+            <SolidColorBrush x:Key="TextHi" Color="{StaticResource TextHiColor}" />
+            <SolidColorBrush x:Key="Text" Color="{StaticResource TextColor}" />
+            <SolidColorBrush x:Key="TextMid" Color="{StaticResource TextMidColor}" />
+            <SolidColorBrush x:Key="TextDim" Color="{StaticResource TextDimColor}" />
+            <SolidColorBrush x:Key="TextFaint" Color="{StaticResource TextFaintColor}" />
+            <SolidColorBrush x:Key="Rps" Color="{StaticResource RpsColor}" />
+            <SolidColorBrush x:Key="Latency" Color="{StaticResource LatencyColor}" />
+            <SolidColorBrush x:Key="Error" Color="{StaticResource ErrorColor}" />
+            <SolidColorBrush x:Key="Success" Color="{StaticResource SuccessColor}" />
+            <SolidColorBrush x:Key="RpsHover" Color="{StaticResource RpsHoverColor}" />
+            <SolidColorBrush x:Key="ErrorHover" Color="{StaticResource ErrorHoverColor}" />
+            <SolidColorBrush x:Key="RpsTint" Color="{StaticResource RpsTintColor}" />
+            <SolidColorBrush x:Key="LatencyTint" Color="{StaticResource LatencyTintColor}" />
+            <SolidColorBrush x:Key="ErrorTint" Color="{StaticResource ErrorTintColor}" />
+            <SolidColorBrush x:Key="SuccessTint" Color="{StaticResource SuccessTintColor}" />
+            <SolidColorBrush x:Key="SelectionBg" Color="{StaticResource SelectionBgColor}" />
+            <SolidColorBrush x:Key="SelectionBorder" Color="{StaticResource SelectionBorderColor}" />
+            <SolidColorBrush x:Key="ErrorBannerBg" Color="{StaticResource ErrorBannerBgColor}" />
+            <SolidColorBrush x:Key="ErrorBannerBorder" Color="{StaticResource ErrorBannerBorderColor}" />
+            <SolidColorBrush x:Key="DangerHover" Color="{StaticResource DangerHoverColor}" />
+            <SolidColorBrush x:Key="OnAccent" Color="{StaticResource OnAccentColor}" />
+        </ResourceDictionary>
+
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

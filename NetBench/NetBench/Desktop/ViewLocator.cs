@@ -17,6 +17,7 @@ public sealed class ViewLocator : IDataTemplate
         [typeof(ScenarioEditorViewModel)] = static () => new ScenarioEditorView(),
         [typeof(TestRunViewModel)]        = static () => new TestRunView(),
         [typeof(ReportViewModel)]         = static () => new ReportView(),
+        [typeof(CompareViewModel)]        = static () => new CompareView(),
     };
 
     public Control? Build(object? param) =>

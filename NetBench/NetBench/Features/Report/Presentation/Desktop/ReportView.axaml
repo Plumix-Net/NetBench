@@ -3,111 +3,146 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:NetBench.Features.Report.Presentation.Desktop"
-             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="700"
+             xmlns:ctrl="using:NetBench.Desktop.Controls"
+             mc:Ignorable="d" d:DesignWidth="1180" d:DesignHeight="900"
              x:Class="NetBench.Features.Report.Presentation.Desktop.ReportView"
              x:DataType="vm:ReportViewModel">
 
-    <Grid RowDefinitions="Auto,*,Auto" Margin="24">
+    <UserControl.Styles>
+        <!-- Тона строк таблицы кодов ответов -->
+        <Style Selector="TextBlock.success"><Setter Property="Foreground" Value="{DynamicResource Success}" /></Style>
+        <Style Selector="TextBlock.info"><Setter Property="Foreground" Value="{DynamicResource Rps}" /></Style>
+        <Style Selector="TextBlock.warn"><Setter Property="Foreground" Value="{DynamicResource Latency}" /></Style>
+        <Style Selector="TextBlock.error"><Setter Property="Foreground" Value="{DynamicResource Error}" /></Style>
+        <Style Selector="Ellipse.success"><Setter Property="Fill" Value="{DynamicResource Success}" /></Style>
+        <Style Selector="Ellipse.info"><Setter Property="Fill" Value="{DynamicResource Rps}" /></Style>
+        <Style Selector="Ellipse.warn"><Setter Property="Fill" Value="{DynamicResource Latency}" /></Style>
+        <Style Selector="Ellipse.error"><Setter Property="Fill" Value="{DynamicResource Error}" /></Style>
+    </UserControl.Styles>
 
-        <StackPanel Grid.Row="0" Margin="0,0,0,16">
-            <TextBlock Text="Test Report" FontSize="20" FontWeight="SemiBold" />
-            <TextBlock Text="{Binding Report.Scenario.Name}" Foreground="Gray" />
-        </StackPanel>
+    <ScrollViewer>
+        <StackPanel Margin="40,32">
 
-        <ScrollViewer Grid.Row="1">
-            <StackPanel Spacing="16">
+            <TextBlock Classes="crumbs" Text="Отчёт" Margin="0,0,0,16" />
 
-                <WrapPanel>
-                    <Border Background="#1E1E1E" CornerRadius="8" Padding="20,12" Margin="0,0,12,12">
-                        <StackPanel>
-                            <TextBlock Text="RPS" FontSize="12" Foreground="Gray" />
-                            <TextBlock Text="{Binding Report.Summary.RequestsPerSecond, StringFormat={}{0:F0}}"
-                                       FontSize="28" FontWeight="Bold" />
-                        </StackPanel>
-                    </Border>
-                    <Border Background="#1E1E1E" CornerRadius="8" Padding="20,12" Margin="0,0,12,12">
-                        <StackPanel>
-                            <TextBlock Text="p50" FontSize="12" Foreground="Gray" />
-                            <TextBlock Text="{Binding Report.Summary.LatencyP50Ms, StringFormat={}{0:F0} ms}"
-                                       FontSize="28" FontWeight="Bold" />
-                        </StackPanel>
-                    </Border>
-                    <Border Background="#1E1E1E" CornerRadius="8" Padding="20,12" Margin="0,0,12,12">
-                        <StackPanel>
-                            <TextBlock Text="p95" FontSize="12" Foreground="Gray" />
-                            <TextBlock Text="{Binding Report.Summary.LatencyP95Ms, StringFormat={}{0:F0} ms}"
-                                       FontSize="28" FontWeight="Bold" />
-                        </StackPanel>
-                    </Border>
-                    <Border Background="#1E1E1E" CornerRadius="8" Padding="20,12" Margin="0,0,12,12">
-                        <StackPanel>
-                            <TextBlock Text="p99" FontSize="12" Foreground="Gray" />
-                            <TextBlock Text="{Binding Report.Summary.LatencyP99Ms, StringFormat={}{0:F0} ms}"
-                                       FontSize="28" FontWeight="Bold" />
-                        </StackPanel>
-                    </Border>
-                    <Border Background="#1E1E1E" CornerRadius="8" Padding="20,12" Margin="0,0,12,12">
-                        <StackPanel>
-                            <TextBlock Text="Errors" FontSize="12" Foreground="Gray" />
-                            <TextBlock Text="{Binding Report.Summary.ErrorRate, StringFormat={}{0:P1}}"
-                                       FontSize="28" FontWeight="Bold" />
-                        </StackPanel>
-                    </Border>
-                    <Border Background="#1E1E1E" CornerRadius="8" Padding="20,12" Margin="0,0,12,12">
-                        <StackPanel>
-                            <TextBlock Text="Total requests" FontSize="12" Foreground="Gray" />
-                            <TextBlock Text="{Binding Report.Summary.TotalRequests}"
-                                       FontSize="28" FontWeight="Bold" />
-                        </StackPanel>
-                    </Border>
-                </WrapPanel>
+            <!-- Баннер: все запросы упали -->
+            <Border Background="{DynamicResource ErrorBannerBg}"
+                    BorderBrush="{DynamicResource ErrorBannerBorder}" BorderThickness="1"
+                    CornerRadius="8" Padding="20,16" Margin="0,0,0,24"
+                    IsVisible="{Binding AllFailed}">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Panel Width="18" Height="18" VerticalAlignment="Center">
+                        <Ellipse Stroke="{DynamicResource Error}" StrokeThickness="1.6" />
+                        <Path Data="M6,6 L12,12 M12,6 L6,12"
+                              Stroke="{DynamicResource Error}" StrokeThickness="1.6" StrokeLineCap="Round" />
+                    </Panel>
+                    <TextBlock Text="Все запросы завершились ошибкой — целевой хост не принял ни одного соединения за время прогона."
+                               FontSize="13" Foreground="{DynamicResource Error}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Border>
 
-                <TextBlock Text="Latency distribution" FontWeight="SemiBold" />
-                <Border Background="#1A1A1A" CornerRadius="8" Padding="16">
-                    <ItemsControl ItemsSource="{Binding LatencyBars}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="vm:LatencyBar">
-                                <Grid ColumnDefinitions="48,*,80" Margin="0,5">
-                                    <TextBlock Grid.Column="0"
-                                               Text="{Binding Label}"
-                                               Foreground="Gray" FontSize="12"
-                                               VerticalAlignment="Center" />
-                                    <ProgressBar Grid.Column="1"
-                                                 Value="{Binding Value}"
-                                                 Maximum="{Binding Maximum}"
-                                                 Height="14"
-                                                 Margin="8,0"
-                                                 CornerRadius="3" />
-                                    <TextBlock Grid.Column="2"
-                                               Text="{Binding ValueText}"
-                                               FontSize="12" FontWeight="SemiBold"
-                                               VerticalAlignment="Center"
-                                               HorizontalAlignment="Right" />
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </Border>
+            <!-- Сводка -->
+            <Border Background="{DynamicResource BgCard}" CornerRadius="8"
+                    Padding="26,22" Margin="0,0,0,24">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Grid.Column="0" Spacing="4">
+                        <TextBlock Text="{Binding ScenarioName}" FontSize="19" FontWeight="ExtraBold"
+                                   Foreground="{DynamicResource TextHi}" />
+                        <TextBlock Classes="mono" Text="{Binding TargetText}"
+                                   Foreground="{DynamicResource TextMid}" />
+                        <TextBlock Classes="mono" Text="{Binding MetaText}" FontSize="12"
+                                   Foreground="{DynamicResource TextDim}" Margin="0,6,0,0" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
+                        <Button Classes="ghost" Content="Экспорт JSON" Command="{Binding ExportJsonCommand}" />
+                        <Button Classes="ghost" Content="Экспорт HTML" Command="{Binding ExportHtmlCommand}" />
+                        <Button Classes="ghost" Content="Экспорт CSV" Command="{Binding ExportCsvCommand}" />
+                        <Button Classes="run" Content="Сравнить" Command="{Binding CompareCommand}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
 
-                <TextBlock Text="Status codes" FontWeight="SemiBold" />
-                <ItemsControl ItemsSource="{Binding Report.StatusCodes}">
+            <!-- Метрики -->
+            <Grid ColumnDefinitions="*,14,*,14,*,14,*,14,*" Margin="0,0,0,26">
+                <ctrl:MetricCard Grid.Column="0" Label="RPS" Tone="Rps" Value="{Binding RpsText}" />
+                <ctrl:MetricCard Grid.Column="2" Label="P50" Tone="Latency" Value="{Binding P50Text}" Unit="ms" />
+                <ctrl:MetricCard Grid.Column="4" Label="P95" Tone="Latency" Value="{Binding P95Text}" Unit="ms" />
+                <ctrl:MetricCard Grid.Column="6" Label="P99" Tone="Latency" Value="{Binding P99Text}" Unit="ms" />
+                <ctrl:MetricCard Grid.Column="8" Label="ОШИБКИ" Tone="{Binding ErrorTone}"
+                                 Value="{Binding ErrorPctText}" Unit="%" />
+            </Grid>
+
+            <!-- Распределение задержек -->
+            <TextBlock Classes="sechead" Text="РАСПРЕДЕЛЕНИЕ ЗАДЕРЖЕК" Margin="0,0,0,14" />
+            <Border Background="{DynamicResource BgCard}" CornerRadius="8" Padding="22,20">
+                <ItemsControl ItemsSource="{Binding LatencyRows}">
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,2">
-                                <TextBlock Text="{Binding StatusCode}" Width="60" />
-                                <TextBlock Text="{Binding Count}" />
-                            </StackPanel>
+                        <DataTemplate x:DataType="vm:LatencyRow">
+                            <ctrl:LatencyBar Margin="0,6"
+                                             Label="{Binding Label}"
+                                             Percentage="{Binding Percentage}"
+                                             Display="{Binding Display}" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+            </Border>
 
+            <!-- Коды ответов -->
+            <TextBlock Classes="sechead" Text="КОДЫ ОТВЕТОВ" Margin="0,26,0,14" />
+            <Border Background="{DynamicResource BgCard}" CornerRadius="8" ClipToBounds="True">
+                <StackPanel>
+                    <Border Background="{DynamicResource BgPanel}" Padding="18,12"
+                            BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1">
+                        <Grid ColumnDefinitions="19,70,*,70">
+                            <TextBlock Grid.Column="1" Classes="label" Text="КОД" />
+                            <TextBlock Grid.Column="2" Classes="label" Text="КОЛИЧЕСТВО" />
+                            <TextBlock Grid.Column="3" Classes="label" Text="%" HorizontalAlignment="Right" />
+                        </Grid>
+                    </Border>
+                    <ItemsControl ItemsSource="{Binding StatusRows}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:StatusRow">
+                                <Border Padding="18,12" BorderBrush="{DynamicResource Border}"
+                                        BorderThickness="0,0,0,1">
+                                    <Grid ColumnDefinitions="19,70,*,70">
+                                        <Ellipse Grid.Column="0" Width="7" Height="7"
+                                                 HorizontalAlignment="Left" VerticalAlignment="Center"
+                                                 Classes.success="{Binding IsSuccess}"
+                                                 Classes.info="{Binding IsInfo}"
+                                                 Classes.warn="{Binding IsWarn}"
+                                                 Classes.error="{Binding IsError}" />
+                                        <TextBlock Grid.Column="1" Classes="mono" FontWeight="Bold"
+                                                   Text="{Binding CodeLabel}"
+                                                   Classes.success="{Binding IsSuccess}"
+                                                   Classes.info="{Binding IsInfo}"
+                                                   Classes.warn="{Binding IsWarn}"
+                                                   Classes.error="{Binding IsError}" />
+                                        <TextBlock Grid.Column="2" Classes="mono"
+                                                   Foreground="{DynamicResource Text}"
+                                                   Text="{Binding CountText}" />
+                                        <TextBlock Grid.Column="3" Classes="mono"
+                                                   Foreground="{DynamicResource TextMid}"
+                                                   HorizontalAlignment="Right">
+                                            <Run Text="{Binding PctText}" /><Run Text="%" />
+                                        </TextBlock>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- Задержка во времени -->
+            <StackPanel IsVisible="{Binding HasTimeline}">
+                <TextBlock Classes="sechead" Text="ЗАДЕРЖКА P95 ВО ВРЕМЕНИ (МС)" Margin="0,26,0,14" />
+                <Border Background="{DynamicResource BgCard}" CornerRadius="8" Padding="18">
+                    <ctrl:LineChart Height="140" Points="{Binding LatencyTimeline}"
+                                    Stroke="{DynamicResource Latency}" />
+                </Border>
             </StackPanel>
-        </ScrollViewer>
 
-        <Button Grid.Row="2" Content="Close"
-                Command="{Binding CloseCommand}"
-                HorizontalAlignment="Right" Margin="0,16,0,0" />
-
-    </Grid>
+        </StackPanel>
+    </ScrollViewer>
 
 </UserControl>

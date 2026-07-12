@@ -7,46 +7,44 @@ namespace NetBench.Features.Scenarios.Presentation.Desktop;
 
 public partial class ScenarioEditorViewModel : ObservableObject
 {
+    public static IReadOnlyList<string> HttpMethods { get; } = ["GET", "POST", "PUT", "PATCH", "DELETE"];
+
     private readonly IScenarioRepository _repository;
-    private readonly INavigationService _navigation;
 
     public ScenarioViewModel Scenario { get; }
-    public ObservableCollection<RequestStep> Requests { get; }
+    public ObservableCollection<RequestStep> Requests { get; } = [];
 
-    [ObservableProperty] private string _name = string.Empty;
-    [ObservableProperty] private string _target = string.Empty;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HeaderText))]
+    private string _name = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasTargetError))]
+    private string _target = string.Empty;
+
     [ObservableProperty] private int _concurrentUsers;
     [ObservableProperty] private int _durationSeconds;
     [ObservableProperty] private int _rampUpSeconds;
     [ObservableProperty] private int _thinkTimeMs;
 
-    public ScenarioEditorViewModel(
-        ScenarioViewModel scenario,
-        IScenarioRepository repository,
-        INavigationService navigation)
+    public ScenarioEditorViewModel(ScenarioViewModel scenario, IScenarioRepository repository)
     {
         Scenario = scenario;
         _repository = repository;
-        _navigation = navigation;
-
-        var model = scenario.Model;
-        _name = model.Name;
-        _target = model.Target;
-        _concurrentUsers = model.Load.ConcurrentUsers;
-        _durationSeconds = (int)model.Load.Duration.TotalSeconds;
-        _rampUpSeconds = (int)model.Load.RampUp.TotalSeconds;
-        _thinkTimeMs = (int)model.Load.ThinkTime.TotalMilliseconds;
-
-        Requests = new ObservableCollection<RequestStep>(model.Requests);
-        if (Requests.Count == 0)
-            Requests.Add(new RequestStep { Method = "GET", Path = "/" });
+        ResetFromModel();
     }
+
+    public string HeaderText => string.IsNullOrWhiteSpace(Name) ? "Новый сценарий" : Name;
+
+    public bool HasTargetError => string.IsNullOrWhiteSpace(Target);
 
     [RelayCommand]
     private async Task SaveAsync(CancellationToken ct)
     {
-        Scenario.Name = Name;
-        Scenario.Target = Target;
+        Scenario.Name = string.IsNullOrWhiteSpace(Name) ? "Сценарий без названия" : Name.Trim();
+        Scenario.Target = Target.Trim();
+        Name = Scenario.Name;
+        Target = Scenario.Target;
 
         var model = Scenario.Model;
         model.Load.ConcurrentUsers = ConcurrentUsers;
@@ -56,11 +54,14 @@ public partial class ScenarioEditorViewModel : ObservableObject
 
         model.Requests.Clear();
         foreach (var req in Requests)
-            model.Requests.Add(req);
+            model.Requests.Add(Clone(req));
 
         await _repository.SaveAsync(model, ct);
-        _navigation.NavigateTo(null);
     }
+
+    /// <summary>Откат черновика к сохранённому состоянию сценария.</summary>
+    [RelayCommand]
+    private void Cancel() => ResetFromModel();
 
     [RelayCommand]
     private void AddRequest() =>
@@ -70,6 +71,27 @@ public partial class ScenarioEditorViewModel : ObservableObject
     private void RemoveRequest(RequestStep step) =>
         Requests.Remove(step);
 
-    [RelayCommand]
-    private void Cancel() => _navigation.NavigateTo(null);
+    private void ResetFromModel()
+    {
+        var model = Scenario.Model;
+        Name = model.Name;
+        Target = model.Target;
+        ConcurrentUsers = model.Load.ConcurrentUsers;
+        DurationSeconds = (int)model.Load.Duration.TotalSeconds;
+        RampUpSeconds = (int)model.Load.RampUp.TotalSeconds;
+        ThinkTimeMs = (int)model.Load.ThinkTime.TotalMilliseconds;
+
+        // Редактируем копии шагов — модель меняется только при сохранении.
+        Requests.Clear();
+        foreach (var req in model.Requests)
+            Requests.Add(Clone(req));
+    }
+
+    private static RequestStep Clone(RequestStep step) => new()
+    {
+        Method = step.Method,
+        Path = step.Path,
+        Headers = new Dictionary<string, string>(step.Headers),
+        Body = step.Body,
+    };
 }

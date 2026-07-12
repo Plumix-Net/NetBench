@@ -1,0 +1,10 @@
+<!-- Типографика NetBench: Inter — интерфейс, JetBrains Mono (с фолбэками) — URL и метрики. -->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Inter поставляется пакетом Avalonia.Fonts.Inter (см. WithInterFont в головах) -->
+    <FontFamily x:Key="UiFont">fonts:Inter#Inter</FontFamily>
+    <!-- JetBrains Mono не встроен — деградируем на системные моноширинные -->
+    <FontFamily x:Key="MonoFont">JetBrains Mono,SF Mono,Menlo,Consolas,DejaVu Sans Mono</FontFamily>
+
+</ResourceDictionary>

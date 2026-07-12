@@ -39,8 +39,10 @@ public sealed class StatisticsAggregator
 
         if (result.IsError)
             Interlocked.Increment(ref _errorCount);
-        else
-            _statusCodes.AddOrUpdate(result.StatusCode, 1, (_, c) => c + 1);
+
+        // Разбивка по кодам нужна и для ошибок: 4xx/5xx — реальные коды,
+        // сетевые сбои — код 0 («нет ответа»).
+        _statusCodes.AddOrUpdate(result.StatusCode, 1, (_, c) => c + 1);
 
         InterlockedMin(ref _minLatencyNs, latencyNs);
         InterlockedMax(ref _maxLatencyNs, latencyNs);
@@ -48,6 +50,10 @@ public sealed class StatisticsAggregator
 
     public void IncrementActiveConnections() => Interlocked.Increment(ref _activeConnections);
     public void DecrementActiveConnections() => Interlocked.Decrement(ref _activeConnections);
+
+    // Хроника снапшотов для графика «задержка во времени» в отчёте.
+    // Пишется ~4 раза/с из цикла статистики — это холодный путь.
+    private readonly List<TestRunStats> _timeline = [];
 
     public TestRunStats Snapshot()
     {
@@ -74,7 +80,7 @@ public sealed class StatisticsAggregator
             }
         }
 
-        return new TestRunStats
+        var stats = new TestRunStats
         {
             TotalRequests = total,
             ErrorCount = errors,
@@ -89,6 +95,13 @@ public sealed class StatisticsAggregator
             LatencyMaxMs = maxNs / 1_000_000.0,
             LatencyMeanMs = total > 0 ? sumNs / 1_000_000.0 / total : 0,
         };
+
+        lock (_timeline)
+        {
+            _timeline.Add(stats);
+        }
+
+        return stats;
     }
 
     public TestRunReport BuildReport(LoadScenario scenario, DateTime startedAt)
@@ -99,6 +112,12 @@ public sealed class StatisticsAggregator
             .OrderBy(b => b.StatusCode)
             .ToList();
 
+        TestRunStats[] timeline;
+        lock (_timeline)
+        {
+            timeline = [.. _timeline];
+        }
+
         return new TestRunReport
         {
             Scenario = scenario,
@@ -106,6 +125,7 @@ public sealed class StatisticsAggregator
             FinishedAt = DateTime.UtcNow,
             Summary = summary,
             StatusCodes = buckets,
+            Timeline = timeline,
         };
     }
 

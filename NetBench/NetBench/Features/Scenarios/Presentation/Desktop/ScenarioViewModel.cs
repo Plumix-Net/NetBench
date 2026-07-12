@@ -7,8 +7,14 @@ public sealed partial class ScenarioViewModel : ObservableObject
 {
     public LoadScenario Model { get; }
 
-    [ObservableProperty] private string _name;
-    [ObservableProperty] private string _target;
+    [ObservableProperty]
+    private string _name;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HostLabel))]
+    [NotifyPropertyChangedFor(nameof(TargetLabel))]
+    [NotifyPropertyChangedFor(nameof(HasTarget))]
+    private string _target;
 
     public ScenarioViewModel(LoadScenario model)
     {
@@ -16,6 +22,16 @@ public sealed partial class ScenarioViewModel : ObservableObject
         _name = model.Name;
         _target = model.Target;
     }
+
+    public bool HasTarget => !string.IsNullOrWhiteSpace(Target);
+
+    /// <summary>Хост без схемы — подпись строки в сайдбаре.</summary>
+    public string HostLabel => HasTarget
+        ? Target.Replace("https://", "").Replace("http://", "")
+        : "(цель не задана)";
+
+    /// <summary>Target для нижней панели запуска.</summary>
+    public string TargetLabel => HasTarget ? Target : "(цель не задана)";
 
     partial void OnNameChanged(string value) => Model.Name = value;
     partial void OnTargetChanged(string value) => Model.Target = value;

@@ -27,6 +27,9 @@ public sealed class TestRunReport
     public DateTime FinishedAt { get; init; }
     public TestRunStats Summary { get; init; } = null!;
     public IReadOnlyList<StatusCodeBucket> StatusCodes { get; init; } = [];
+
+    /// <summary>Снапшоты статистики по ходу прогона (~4/с) — для графиков в отчёте.</summary>
+    public IReadOnlyList<TestRunStats> Timeline { get; init; } = [];
 }
 
 public sealed class StatusCodeBucket

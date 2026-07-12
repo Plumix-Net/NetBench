@@ -3,53 +3,105 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:NetBench.Features.Scenarios.Presentation.Desktop"
-             mc:Ignorable="d" d:DesignWidth="280" d:DesignHeight="700"
+             mc:Ignorable="d" d:DesignWidth="260" d:DesignHeight="900"
              x:Class="NetBench.Features.Scenarios.Presentation.Desktop.ScenarioListView"
              x:DataType="vm:ScenarioListViewModel">
 
-    <Grid RowDefinitions="Auto,*,Auto">
+    <Grid RowDefinitions="Auto,*,Auto" Background="{DynamicResource BgPanel}">
 
-        <TextBlock Grid.Row="0" Text="Scenarios"
-                   Margin="16,16,16,8" FontWeight="SemiBold" FontSize="14" />
+        <!-- Шапка: wordmark + переключатель темы -->
+        <Border Grid.Row="0" Padding="18,20,18,14"
+                BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Spacing="2">
+                    <TextBlock Text="NetBench" FontSize="17" FontWeight="ExtraBold"
+                               Foreground="{DynamicResource TextHi}" />
+                    <TextBlock Text="Нагрузочное тестирование" FontSize="11"
+                               Foreground="{DynamicResource TextDim}" />
+                </StackPanel>
+                <Button Grid.Column="1" Classes="themebtn" VerticalAlignment="Center"
+                        Command="{Binding ToggleThemeCommand}"
+                        ToolTip.Tip="Переключить тему">
+                    <Panel>
+                        <!-- Луна (в тёмной теме) -->
+                        <Path IsVisible="{Binding IsDark}"
+                              Data="M13,8.5 A5.5,5.5 0 1 1 6.5,2 A4.5,4.5 0 1 0 13,8.5 Z"
+                              Fill="{Binding $parent[Button].Foreground}"
+                              Width="15" Height="15" Stretch="Uniform" />
+                        <!-- Солнце (в светлой теме) -->
+                        <Panel IsVisible="{Binding !IsDark}" Width="16" Height="16">
+                            <Ellipse Width="7" Height="7" Fill="{Binding $parent[Button].Foreground}" />
+                            <Path Data="M8,0.3 V2.3 M8,13.7 V15.7 M0.3,8 H2.3 M13.7,8 H15.7 M2.5,2.5 L3.9,3.9 M12.1,12.1 L13.5,13.5 M13.5,2.5 L12.1,3.9 M3.9,12.1 L2.5,13.5"
+                                  Stroke="{Binding $parent[Button].Foreground}"
+                                  StrokeThickness="1.4" StrokeLineCap="Round" />
+                        </Panel>
+                    </Panel>
+                </Button>
+            </Grid>
+        </Border>
 
-        <ListBox Grid.Row="1"
+        <!-- Список сценариев -->
+        <ListBox Grid.Row="1" Classes="scenarios"
                  ItemsSource="{Binding Scenarios}"
-                 SelectedItem="{Binding SelectedScenario}"
-                 Background="Transparent">
+                 SelectedItem="{Binding SelectedScenario}">
             <ListBox.ItemTemplate>
                 <DataTemplate x:DataType="vm:ScenarioViewModel">
-                    <Grid ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,2">
-                        <TextBlock Grid.Column="0"
-                                   Text="{Binding Name}"
-                                   VerticalAlignment="Center"
-                                   TextTrimming="CharacterEllipsis" />
-                        <Button Grid.Column="1"
-                                Content="▶"
-                                ToolTip.Tip="Run"
-                                Padding="6,4"
-                                Command="{Binding $parent[UserControl].((vm:ScenarioListViewModel)DataContext).RunScenarioCommand}"
-                                CommandParameter="{Binding}" />
-                        <Button Grid.Column="2"
-                                Content="✎"
-                                ToolTip.Tip="Edit"
-                                Padding="6,4"
-                                Command="{Binding $parent[UserControl].((vm:ScenarioListViewModel)DataContext).EditScenarioCommand}"
-                                CommandParameter="{Binding}" />
-                        <Button Grid.Column="3"
-                                Content="✕"
-                                ToolTip.Tip="Delete"
-                                Padding="6,4"
-                                Command="{Binding $parent[UserControl].((vm:ScenarioListViewModel)DataContext).DeleteScenarioCommand}"
-                                CommandParameter="{Binding}" />
+                    <Grid ColumnDefinitions="Auto,*">
+                        <!-- Акцентная полоса выбранной строки -->
+                        <Border Grid.Column="0" Width="3" CornerRadius="2"
+                                Margin="-9,1,6,1"
+                                Background="{DynamicResource Rps}"
+                                IsVisible="{Binding $parent[ListBoxItem].IsSelected}" />
+                        <Grid Grid.Column="1" ColumnDefinitions="*,Auto">
+                            <StackPanel Grid.Column="0" Spacing="2">
+                                <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Text}"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock Classes="mono" Text="{Binding HostLabel}" FontSize="11"
+                                           Foreground="{DynamicResource TextDim}"
+                                           TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                            <!-- Действия — видны при наведении (стиль .sacts) -->
+                            <StackPanel Grid.Column="1" Classes="sacts"
+                                        Orientation="Horizontal" Spacing="4"
+                                        VerticalAlignment="Top">
+                                <Button Classes="sact" ToolTip.Tip="Запустить"
+                                        Command="{Binding $parent[UserControl].((vm:ScenarioListViewModel)DataContext).RunScenarioCommand}"
+                                        CommandParameter="{Binding}">
+                                    <Path Data="M0,0 L9,5 L0,10 Z" Width="9" Height="10"
+                                          Fill="{Binding $parent[Button].Foreground}" Stretch="Uniform" />
+                                </Button>
+                                <Button Classes="sact" ToolTip.Tip="Редактировать"
+                                        Command="{Binding $parent[UserControl].((vm:ScenarioListViewModel)DataContext).EditScenarioCommand}"
+                                        CommandParameter="{Binding}">
+                                    <Path Data="M8.5,1.5 L10.5,3.5 L4,10 H2 V8 Z" Width="11" Height="11"
+                                          Stroke="{Binding $parent[Button].Foreground}"
+                                          StrokeThickness="1.2" StrokeJoin="Round" Stretch="Uniform" />
+                                </Button>
+                                <Button Classes="sact danger" ToolTip.Tip="Удалить"
+                                        Command="{Binding $parent[UserControl].((vm:ScenarioListViewModel)DataContext).DeleteScenarioCommand}"
+                                        CommandParameter="{Binding}">
+                                    <Path Data="M1,1 L9,9 M9,1 L1,9" Width="9" Height="9"
+                                          Stroke="{Binding $parent[Button].Foreground}"
+                                          StrokeThickness="1.4" StrokeLineCap="Round" />
+                                </Button>
+                            </StackPanel>
+                        </Grid>
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <Button Grid.Row="2"
-                Content="+ New Scenario"
-                Command="{Binding AddScenarioCommand}"
-                Margin="12,8" HorizontalAlignment="Stretch" />
+        <!-- Новый сценарий -->
+        <Button Grid.Row="2" Classes="newbtn" Margin="10"
+                Command="{Binding AddScenarioCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="7">
+                <Path Data="M6,1 V11 M1,6 H11" Width="12" Height="12"
+                      Stroke="{Binding $parent[Button].Foreground}"
+                      StrokeThickness="1.6" StrokeLineCap="Round" />
+                <TextBlock Text="Новый сценарий" FontSize="13" />
+            </StackPanel>
+        </Button>
 
     </Grid>
 
