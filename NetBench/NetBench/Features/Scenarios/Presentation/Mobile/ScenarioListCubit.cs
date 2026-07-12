@@ -1,5 +1,6 @@
 using NetBench.Features.Scenarios.Domain;
 using Plumix.Bloc;
+using NetBench.Localization;
 
 namespace NetBench.Features.Scenarios.Presentation.Mobile;
 
@@ -36,7 +37,7 @@ public sealed class ScenarioListCubit : Cubit<ScenarioListState>
 
     public async Task AddScenarioAsync(CancellationToken ct = default)
     {
-        var scenario = new LoadScenario { Name = "Новый сценарий" };
+        var scenario = new LoadScenario { Name = Strings.Instance.Root.Scenarios.New };
         scenario.Requests.Add(new RequestStep { Method = "GET", Path = "/" });
 
         await _repository.SaveAsync(scenario, ct);

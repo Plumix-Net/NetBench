@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:NetBench.Features.Scenarios.Presentation.Desktop"
+             xmlns:l10n="using:NetBench.Localization"
              mc:Ignorable="d" d:DesignWidth="260" d:DesignHeight="900"
              x:Class="NetBench.Features.Scenarios.Presentation.Desktop.ScenarioListView"
              x:DataType="vm:ScenarioListViewModel">
@@ -14,14 +15,14 @@
                 BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1">
             <Grid ColumnDefinitions="*,Auto">
                 <StackPanel Grid.Column="0" Spacing="2">
-                    <TextBlock Text="NetBench" FontSize="17" FontWeight="ExtraBold"
+                    <TextBlock Text="{Binding Root.App.Title, Source={x:Static l10n:Strings.Instance}}" FontSize="17" FontWeight="ExtraBold"
                                Foreground="{DynamicResource TextHi}" />
-                    <TextBlock Text="Нагрузочное тестирование" FontSize="11"
+                    <TextBlock Text="{Binding Root.App.Tagline, Source={x:Static l10n:Strings.Instance}}" FontSize="11"
                                Foreground="{DynamicResource TextDim}" />
                 </StackPanel>
                 <Button Grid.Column="1" Classes="themebtn" VerticalAlignment="Center"
                         Command="{Binding ToggleThemeCommand}"
-                        ToolTip.Tip="Переключить тему">
+                        ToolTip.Tip="{Binding Root.Scenarios.ToggleTheme, Source={x:Static l10n:Strings.Instance}}">
                     <Panel>
                         <!-- Луна (в тёмной теме) -->
                         <Path IsVisible="{Binding IsDark}"
@@ -65,20 +66,20 @@
                             <StackPanel Grid.Column="1" Classes="sacts"
                                         Orientation="Horizontal" Spacing="4"
                                         VerticalAlignment="Top">
-                                <Button Classes="sact" ToolTip.Tip="Запустить"
+                                <Button Classes="sact" ToolTip.Tip="{Binding Root.Common.Run, Source={x:Static l10n:Strings.Instance}}"
                                         Command="{Binding $parent[UserControl].((vm:ScenarioListViewModel)DataContext).RunScenarioCommand}"
                                         CommandParameter="{Binding}">
                                     <Path Data="M0,0 L9,5 L0,10 Z" Width="9" Height="10"
                                           Fill="{Binding $parent[Button].Foreground}" Stretch="Uniform" />
                                 </Button>
-                                <Button Classes="sact" ToolTip.Tip="Редактировать"
+                                <Button Classes="sact" ToolTip.Tip="{Binding Root.Scenarios.Edit, Source={x:Static l10n:Strings.Instance}}"
                                         Command="{Binding $parent[UserControl].((vm:ScenarioListViewModel)DataContext).EditScenarioCommand}"
                                         CommandParameter="{Binding}">
                                     <Path Data="M8.5,1.5 L10.5,3.5 L4,10 H2 V8 Z" Width="11" Height="11"
                                           Stroke="{Binding $parent[Button].Foreground}"
                                           StrokeThickness="1.2" StrokeJoin="Round" Stretch="Uniform" />
                                 </Button>
-                                <Button Classes="sact danger" ToolTip.Tip="Удалить"
+                                <Button Classes="sact danger" ToolTip.Tip="{Binding Root.Scenarios.Delete, Source={x:Static l10n:Strings.Instance}}"
                                         Command="{Binding $parent[UserControl].((vm:ScenarioListViewModel)DataContext).DeleteScenarioCommand}"
                                         CommandParameter="{Binding}">
                                     <Path Data="M1,1 L9,9 M9,1 L1,9" Width="9" Height="9"
@@ -99,7 +100,7 @@
                 <Path Data="M6,1 V11 M1,6 H11" Width="12" Height="12"
                       Stroke="{Binding $parent[Button].Foreground}"
                       StrokeThickness="1.6" StrokeLineCap="Round" />
-                <TextBlock Text="Новый сценарий" FontSize="13" />
+                <TextBlock Text="{Binding Root.Scenarios.New, Source={x:Static l10n:Strings.Instance}}" FontSize="13" />
             </StackPanel>
         </Button>
 

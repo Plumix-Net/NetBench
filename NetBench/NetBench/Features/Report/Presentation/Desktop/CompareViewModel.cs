@@ -11,7 +11,7 @@ public sealed class CompareOption(TestRunReport report)
 {
     public TestRunReport Report { get; } = report;
     public string Label { get; } =
-        $"{report.Scenario.Name} · {report.StartedAt.ToLocalTime():dd.MM HH:mm}";
+        $"{report.Scenario.Name} · {report.StartedAt.ToLocalTime():g}";
 }
 
 /// <summary>Одна колонка сравнения — сводка отчёта.</summary>

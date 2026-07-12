@@ -16,6 +16,8 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+    <AdditionalFiles Include="Localization\i18n\*.i18n.json" />
+    <AdditionalFiles Include="Localization\slang.json" />
   </ItemGroup>
 
   <!-- Мобильные таргеты компилируют только Plumix-презентацию (Mobile/), -->
@@ -38,6 +40,7 @@
     <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="Avalonia.Fonts.Inter" />
     <PackageReference Include="HdrHistogram" />
+    <PackageReference Include="Slang.Net" />
     <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" PrivateAssets="all" />
   </ItemGroup>
 

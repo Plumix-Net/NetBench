@@ -1,5 +1,6 @@
 using NetBench.Desktop.Controls;
 using NetBench.Features.TestRun.Domain;
+using NetBench.Localization;
 
 namespace NetBench.Features.Report.Presentation.Desktop;
 
@@ -27,8 +28,9 @@ public sealed class StatusRow(string codeLabel, long count, double pct, MetricTo
 /// <summary>Общее форматирование отчёта для экранов «Отчёт» и «Сравнение».</summary>
 public static class ReportFormatting
 {
-    public static string Meta(TestRunReport report) =>
-        $"{report.StartedAt.ToLocalTime():dd.MM.yyyy HH:mm} · {report.Summary.Elapsed.TotalSeconds:F0} с";
+    public static string Meta(TestRunReport report) => Strings.Instance.Root.Report.Meta(
+        report.StartedAt.ToLocalTime().ToString("g"),
+        report.Summary.Elapsed.TotalSeconds.ToString("F0"));
 
     public static MetricTone ErrorTone(TestRunStats summary) =>
         summary.ErrorRate >= 0.05 ? MetricTone.Error : MetricTone.Success;
@@ -40,16 +42,17 @@ public static class ReportFormatting
         var max = Math.Max(s.LatencyMaxMs, 1);
         return
         [
-            Row("Min", s.LatencyMinMs, max),
-            Row("p50", s.LatencyP50Ms, max),
-            Row("Mean", s.LatencyMeanMs, max),
-            Row("p95", s.LatencyP95Ms, max),
-            Row("p99", s.LatencyP99Ms, max),
-            Row("Max", s.LatencyMaxMs, max),
+            Row(Strings.Instance.Root.Report.LatencyMin, s.LatencyMinMs, max),
+            Row(Strings.Instance.Root.Common.P50, s.LatencyP50Ms, max),
+            Row(Strings.Instance.Root.Report.LatencyMean, s.LatencyMeanMs, max),
+            Row(Strings.Instance.Root.Common.P95, s.LatencyP95Ms, max),
+            Row(Strings.Instance.Root.Common.P99, s.LatencyP99Ms, max),
+            Row(Strings.Instance.Root.Report.LatencyMax, s.LatencyMaxMs, max),
         ];
 
         static LatencyRow Row(string label, double ms, double max) =>
-            new(label, ms / max * 100, $"{ms:F0} ms");
+            new(label, ms / max * 100,
+                Strings.Instance.Root.Report.LatencyValue(ms.ToString("F0")));
     }
 
     public static IReadOnlyList<StatusRow> StatusRows(TestRunReport report)

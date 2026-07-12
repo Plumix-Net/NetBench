@@ -1,0 +1,98 @@
+{
+  "app": {
+    "title": "NetBench",
+    "tagline": "Load testing"
+  },
+  "common": {
+    "run": "Run",
+    "stop": "Stop",
+    "save": "Save",
+    "cancel": "Cancel",
+    "errors": "ERRORS",
+    "rps": "RPS",
+    "p50": "P50",
+    "p95": "P95",
+    "p99": "P99",
+    "millisecondsShort": "ms",
+    "percent": "%"
+  },
+  "scenarios": {
+    "new": "New scenario",
+    "unnamed": "Untitled scenario",
+    "targetNotSet": "target not set",
+    "targetNotSetParenthesized": "(target not set)",
+    "toggleTheme": "Toggle theme",
+    "edit": "Edit",
+    "delete": "Delete",
+    "mobileTitle": "Scenarios",
+    "loadFailed": "Could not load scenarios: {error: string}",
+    "emptyMobile": "No scenarios yet — create the first one with the “+” button",
+    "requestCount(param=count)": {
+      "one": "request: {count}",
+      "other": "requests: {count}"
+    },
+    "editor": {
+      "breadcrumb": "Scenario editor",
+      "name": "NAME",
+      "namePlaceholder": "for example, Checkout Flow",
+      "targetUrl": "TARGET URL",
+      "targetPlaceholder": "https://api.example.com/endpoint",
+      "targetRequired": "Enter a Target URL to run the scenario",
+      "users": "USERS",
+      "durationSeconds": "DURATION (S)",
+      "rampUpSeconds": "RAMP-UP (S)",
+      "thinkTimeMilliseconds": "THINK TIME (MS)",
+      "requestSteps": "REQUEST STEPS",
+      "pathPlaceholder": "/path",
+      "removeStep": "Remove step",
+      "noSteps": "No steps — load will use GET requests directly against the Target URL.",
+      "addRequest": "+ Add request"
+    }
+  },
+  "shell": {
+    "emptyTitle": "No scenarios yet",
+    "emptyDescription": "Create a scenario to start load testing.",
+    "createFirst": "+ Create first scenario",
+    "targetRequired": "Enter a Target URL to run"
+  },
+  "testRun": {
+    "recording": "RECORDING",
+    "latencyP95": "P95 LATENCY",
+    "totalRequests": "TOTAL REQUESTS",
+    "connections": "CONNECTIONS",
+    "throughputChart": "THROUGHPUT (RPS)",
+    "latencyChart": "P95 LATENCY (MS)"
+  },
+  "report": {
+    "breadcrumb": "Report",
+    "allFailed": "Every request failed — the target host did not accept a connection during the run.",
+    "exportJson": "Export JSON",
+    "exportHtml": "Export HTML",
+    "exportCsv": "Export CSV",
+    "compareAction": "Compare",
+    "latencyDistribution": "LATENCY DISTRIBUTION",
+    "responseCodes": "RESPONSE CODES",
+    "code": "CODE",
+    "count": "COUNT",
+    "latencyTimeline": "P95 LATENCY OVER TIME (MS)",
+    "meta": "{date: string} · {seconds: string} s",
+    "latencyValue": "{value: string} ms",
+    "latencyMin": "Min",
+    "latencyMean": "Mean",
+    "latencyMax": "Max",
+    "compare": {
+      "breadcrumb": "Report comparison",
+      "title": "Comparison",
+      "back": "Back to report"
+    },
+    "html": {
+      "errors": "Errors",
+      "responseCodes": "Response codes",
+      "code": "Code",
+      "count": "Count"
+    }
+  },
+  "diagnostics": {
+    "viewNotFound": "No view found for {typeName: string}"
+  }
+}

@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:NetBench.Features.Report.Presentation.Desktop"
              xmlns:ctrl="using:NetBench.Desktop.Controls"
+             xmlns:l10n="using:NetBench.Localization"
              mc:Ignorable="d" d:DesignWidth="1180" d:DesignHeight="900"
              x:Class="NetBench.Features.Report.Presentation.Desktop.ReportView"
              x:DataType="vm:ReportViewModel">
@@ -23,7 +24,7 @@
     <ScrollViewer>
         <StackPanel Margin="40,32">
 
-            <TextBlock Classes="crumbs" Text="Отчёт" Margin="0,0,0,16" />
+            <TextBlock Classes="crumbs" Text="{Binding Root.Report.Breadcrumb, Source={x:Static l10n:Strings.Instance}}" Margin="0,0,0,16" />
 
             <!-- Баннер: все запросы упали -->
             <Border Background="{DynamicResource ErrorBannerBg}"
@@ -36,7 +37,7 @@
                         <Path Data="M6,6 L12,12 M12,6 L6,12"
                               Stroke="{DynamicResource Error}" StrokeThickness="1.6" StrokeLineCap="Round" />
                     </Panel>
-                    <TextBlock Text="Все запросы завершились ошибкой — целевой хост не принял ни одного соединения за время прогона."
+                    <TextBlock Text="{Binding Root.Report.AllFailed, Source={x:Static l10n:Strings.Instance}}"
                                FontSize="13" Foreground="{DynamicResource Error}" VerticalAlignment="Center" />
                 </StackPanel>
             </Border>
@@ -54,26 +55,26 @@
                                    Foreground="{DynamicResource TextDim}" Margin="0,6,0,0" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
-                        <Button Classes="ghost" Content="Экспорт JSON" Command="{Binding ExportJsonCommand}" />
-                        <Button Classes="ghost" Content="Экспорт HTML" Command="{Binding ExportHtmlCommand}" />
-                        <Button Classes="ghost" Content="Экспорт CSV" Command="{Binding ExportCsvCommand}" />
-                        <Button Classes="run" Content="Сравнить" Command="{Binding CompareCommand}" />
+                        <Button Classes="ghost" Content="{Binding Root.Report.ExportJson, Source={x:Static l10n:Strings.Instance}}" Command="{Binding ExportJsonCommand}" />
+                        <Button Classes="ghost" Content="{Binding Root.Report.ExportHtml, Source={x:Static l10n:Strings.Instance}}" Command="{Binding ExportHtmlCommand}" />
+                        <Button Classes="ghost" Content="{Binding Root.Report.ExportCsv, Source={x:Static l10n:Strings.Instance}}" Command="{Binding ExportCsvCommand}" />
+                        <Button Classes="run" Content="{Binding Root.Report.CompareAction, Source={x:Static l10n:Strings.Instance}}" Command="{Binding CompareCommand}" />
                     </StackPanel>
                 </Grid>
             </Border>
 
             <!-- Метрики -->
             <Grid ColumnDefinitions="*,14,*,14,*,14,*,14,*" Margin="0,0,0,26">
-                <ctrl:MetricCard Grid.Column="0" Label="RPS" Tone="Rps" Value="{Binding RpsText}" />
-                <ctrl:MetricCard Grid.Column="2" Label="P50" Tone="Latency" Value="{Binding P50Text}" Unit="ms" />
-                <ctrl:MetricCard Grid.Column="4" Label="P95" Tone="Latency" Value="{Binding P95Text}" Unit="ms" />
-                <ctrl:MetricCard Grid.Column="6" Label="P99" Tone="Latency" Value="{Binding P99Text}" Unit="ms" />
-                <ctrl:MetricCard Grid.Column="8" Label="ОШИБКИ" Tone="{Binding ErrorTone}"
-                                 Value="{Binding ErrorPctText}" Unit="%" />
+                <ctrl:MetricCard Grid.Column="0" Label="{Binding Root.Common.Rps, Source={x:Static l10n:Strings.Instance}}" Tone="Rps" Value="{Binding RpsText}" />
+                <ctrl:MetricCard Grid.Column="2" Label="{Binding Root.Common.P50, Source={x:Static l10n:Strings.Instance}}" Tone="Latency" Value="{Binding P50Text}" Unit="{Binding Root.Common.MillisecondsShort, Source={x:Static l10n:Strings.Instance}}" />
+                <ctrl:MetricCard Grid.Column="4" Label="{Binding Root.Common.P95, Source={x:Static l10n:Strings.Instance}}" Tone="Latency" Value="{Binding P95Text}" Unit="{Binding Root.Common.MillisecondsShort, Source={x:Static l10n:Strings.Instance}}" />
+                <ctrl:MetricCard Grid.Column="6" Label="{Binding Root.Common.P99, Source={x:Static l10n:Strings.Instance}}" Tone="Latency" Value="{Binding P99Text}" Unit="{Binding Root.Common.MillisecondsShort, Source={x:Static l10n:Strings.Instance}}" />
+                <ctrl:MetricCard Grid.Column="8" Label="{Binding Root.Common.Errors, Source={x:Static l10n:Strings.Instance}}" Tone="{Binding ErrorTone}"
+                                 Value="{Binding ErrorPctText}" Unit="{Binding Root.Common.Percent, Source={x:Static l10n:Strings.Instance}}" />
             </Grid>
 
             <!-- Распределение задержек -->
-            <TextBlock Classes="sechead" Text="РАСПРЕДЕЛЕНИЕ ЗАДЕРЖЕК" Margin="0,0,0,14" />
+            <TextBlock Classes="sechead" Text="{Binding Root.Report.LatencyDistribution, Source={x:Static l10n:Strings.Instance}}" Margin="0,0,0,14" />
             <Border Background="{DynamicResource BgCard}" CornerRadius="8" Padding="22,20">
                 <ItemsControl ItemsSource="{Binding LatencyRows}">
                     <ItemsControl.ItemTemplate>
@@ -88,15 +89,15 @@
             </Border>
 
             <!-- Коды ответов -->
-            <TextBlock Classes="sechead" Text="КОДЫ ОТВЕТОВ" Margin="0,26,0,14" />
+            <TextBlock Classes="sechead" Text="{Binding Root.Report.ResponseCodes, Source={x:Static l10n:Strings.Instance}}" Margin="0,26,0,14" />
             <Border Background="{DynamicResource BgCard}" CornerRadius="8" ClipToBounds="True">
                 <StackPanel>
                     <Border Background="{DynamicResource BgPanel}" Padding="18,12"
                             BorderBrush="{DynamicResource Border}" BorderThickness="0,0,0,1">
                         <Grid ColumnDefinitions="19,70,*,70">
-                            <TextBlock Grid.Column="1" Classes="label" Text="КОД" />
-                            <TextBlock Grid.Column="2" Classes="label" Text="КОЛИЧЕСТВО" />
-                            <TextBlock Grid.Column="3" Classes="label" Text="%" HorizontalAlignment="Right" />
+                            <TextBlock Grid.Column="1" Classes="label" Text="{Binding Root.Report.Code, Source={x:Static l10n:Strings.Instance}}" />
+                            <TextBlock Grid.Column="2" Classes="label" Text="{Binding Root.Report.Count, Source={x:Static l10n:Strings.Instance}}" />
+                            <TextBlock Grid.Column="3" Classes="label" Text="{Binding Root.Common.Percent, Source={x:Static l10n:Strings.Instance}}" HorizontalAlignment="Right" />
                         </Grid>
                     </Border>
                     <ItemsControl ItemsSource="{Binding StatusRows}">
@@ -123,7 +124,7 @@
                                         <TextBlock Grid.Column="3" Classes="mono"
                                                    Foreground="{DynamicResource TextMid}"
                                                    HorizontalAlignment="Right">
-                                            <Run Text="{Binding PctText}" /><Run Text="%" />
+                                            <Run Text="{Binding PctText}" /><Run Text="{Binding Root.Common.Percent, Source={x:Static l10n:Strings.Instance}}" />
                                         </TextBlock>
                                     </Grid>
                                 </Border>
@@ -135,7 +136,7 @@
 
             <!-- Задержка во времени -->
             <StackPanel IsVisible="{Binding HasTimeline}">
-                <TextBlock Classes="sechead" Text="ЗАДЕРЖКА P95 ВО ВРЕМЕНИ (МС)" Margin="0,26,0,14" />
+                <TextBlock Classes="sechead" Text="{Binding Root.Report.LatencyTimeline, Source={x:Static l10n:Strings.Instance}}" Margin="0,26,0,14" />
                 <Border Background="{DynamicResource BgCard}" CornerRadius="8" Padding="18">
                     <ctrl:LineChart Height="140" Points="{Binding LatencyTimeline}"
                                     Stroke="{DynamicResource Latency}" />

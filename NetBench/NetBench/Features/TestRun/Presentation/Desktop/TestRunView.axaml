@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:NetBench.Features.TestRun.Presentation.Desktop"
              xmlns:ctrl="using:NetBench.Desktop.Controls"
+             xmlns:l10n="using:NetBench.Localization"
              mc:Ignorable="d" d:DesignWidth="1180" d:DesignHeight="840"
              x:Class="NetBench.Features.TestRun.Presentation.Desktop.TestRunView"
              x:DataType="vm:TestRunViewModel">
@@ -21,7 +22,7 @@
         <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" Margin="0,16,0,18">
             <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
                 <Ellipse Classes="recdot" Width="8" Height="8" Fill="{DynamicResource Error}" />
-                <TextBlock Text="ЗАПИСЬ" FontSize="12" FontWeight="Bold"
+                <TextBlock Text="{Binding Root.TestRun.Recording, Source={x:Static l10n:Strings.Instance}}" FontSize="12" FontWeight="Bold"
                            Foreground="{DynamicResource Error}" LetterSpacing="0.6" />
             </StackPanel>
             <ProgressBar Grid.Column="1" Classes="slim" Margin="16,0"
@@ -34,16 +35,16 @@
 
         <!-- Live-метрики -->
         <Grid Grid.Row="2" ColumnDefinitions="*,14,*,14,*,14,*,14,*" Margin="0,0,0,24">
-            <ctrl:MetricCard Grid.Column="0" Label="RPS" Tone="Rps" ShowDot="True"
+            <ctrl:MetricCard Grid.Column="0" Label="{Binding Root.Common.Rps, Source={x:Static l10n:Strings.Instance}}" Tone="Rps" ShowDot="True"
                              Value="{Binding RpsText}" />
-            <ctrl:MetricCard Grid.Column="2" Label="ЗАДЕРЖКА P95" Tone="Latency" ShowDot="True"
-                             Value="{Binding P95Text}" Unit="ms" />
-            <ctrl:MetricCard Grid.Column="4" Label="ОШИБКИ" ShowDot="True"
+            <ctrl:MetricCard Grid.Column="2" Label="{Binding Root.TestRun.LatencyP95, Source={x:Static l10n:Strings.Instance}}" Tone="Latency" ShowDot="True"
+                             Value="{Binding P95Text}" Unit="{Binding Root.Common.MillisecondsShort, Source={x:Static l10n:Strings.Instance}}" />
+            <ctrl:MetricCard Grid.Column="4" Label="{Binding Root.Common.Errors, Source={x:Static l10n:Strings.Instance}}" ShowDot="True"
                              Tone="{Binding ErrorTone}"
-                             Value="{Binding ErrorPctText}" Unit="%" />
-            <ctrl:MetricCard Grid.Column="6" Label="ВСЕГО ЗАПРОСОВ"
+                             Value="{Binding ErrorPctText}" Unit="{Binding Root.Common.Percent, Source={x:Static l10n:Strings.Instance}}" />
+            <ctrl:MetricCard Grid.Column="6" Label="{Binding Root.TestRun.TotalRequests, Source={x:Static l10n:Strings.Instance}}"
                              Value="{Binding TotalText}" />
-            <ctrl:MetricCard Grid.Column="8" Label="СОЕДИНЕНИЯ"
+            <ctrl:MetricCard Grid.Column="8" Label="{Binding Root.TestRun.Connections, Source={x:Static l10n:Strings.Instance}}"
                              Value="{Binding ConnectionsText}" />
         </Grid>
 
@@ -51,14 +52,14 @@
         <Grid Grid.Row="3" ColumnDefinitions="*,16,*" VerticalAlignment="Top">
             <Border Grid.Column="0" Background="{DynamicResource BgCard}" CornerRadius="8" Padding="18">
                 <StackPanel Spacing="12">
-                    <TextBlock Classes="sechead" Text="ПРОПУСКНАЯ СПОСОБНОСТЬ (RPS)" />
+                    <TextBlock Classes="sechead" Text="{Binding Root.TestRun.ThroughputChart, Source={x:Static l10n:Strings.Instance}}" />
                     <ctrl:LineChart Height="140" Points="{Binding RpsPoints}"
                                     Stroke="{DynamicResource Rps}" />
                 </StackPanel>
             </Border>
             <Border Grid.Column="2" Background="{DynamicResource BgCard}" CornerRadius="8" Padding="18">
                 <StackPanel Spacing="12">
-                    <TextBlock Classes="sechead" Text="ЗАДЕРЖКА P95 (МС)" />
+                    <TextBlock Classes="sechead" Text="{Binding Root.TestRun.LatencyChart, Source={x:Static l10n:Strings.Instance}}" />
                     <ctrl:LineChart Height="140" Points="{Binding P95Points}"
                                     Stroke="{DynamicResource Latency}" />
                 </StackPanel>

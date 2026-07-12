@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:NetBench.Features.Scenarios.Presentation.Desktop"
              xmlns:dom="using:NetBench.Features.Scenarios.Domain"
+             xmlns:l10n="using:NetBench.Localization"
              mc:Ignorable="d" d:DesignWidth="1180" d:DesignHeight="900"
              x:Class="NetBench.Features.Scenarios.Presentation.Desktop.ScenarioEditorView"
              x:DataType="vm:ScenarioEditorViewModel">
@@ -11,48 +12,48 @@
     <ScrollViewer>
         <StackPanel Margin="40,32" MaxWidth="960" HorizontalAlignment="Stretch">
 
-            <TextBlock Classes="crumbs" Text="Редактор сценария" Margin="0,0,0,6" />
+            <TextBlock Classes="crumbs" Text="{Binding Root.Scenarios.Editor.Breadcrumb, Source={x:Static l10n:Strings.Instance}}" Margin="0,0,0,6" />
             <TextBlock Classes="h1" Text="{Binding HeaderText}" Margin="0,0,0,24" />
 
             <!-- Название -->
-            <TextBlock Classes="label" Text="НАЗВАНИЕ" Margin="0,0,0,7" />
-            <TextBox Text="{Binding Name}" PlaceholderText="например, Checkout Flow" Margin="0,0,0,20" />
+            <TextBlock Classes="label" Text="{Binding Root.Scenarios.Editor.Name, Source={x:Static l10n:Strings.Instance}}" Margin="0,0,0,7" />
+            <TextBox Text="{Binding Name}" PlaceholderText="{Binding Root.Scenarios.Editor.NamePlaceholder, Source={x:Static l10n:Strings.Instance}}" Margin="0,0,0,20" />
 
             <!-- Target URL -->
-            <TextBlock Classes="label" Text="TARGET URL" Margin="0,0,0,7" />
+            <TextBlock Classes="label" Text="{Binding Root.Scenarios.Editor.TargetUrl, Source={x:Static l10n:Strings.Instance}}" Margin="0,0,0,7" />
             <TextBox Classes="mono" Classes.invalid="{Binding HasTargetError}"
                      Text="{Binding Target}"
-                     PlaceholderText="https://api.example.com/endpoint" />
+                     PlaceholderText="{Binding Root.Scenarios.Editor.TargetPlaceholder, Source={x:Static l10n:Strings.Instance}}" />
             <TextBlock Classes="err" Margin="0,6,0,0"
-                       Text="Укажите Target URL, чтобы запустить сценарий"
+                       Text="{Binding Root.Scenarios.Editor.TargetRequired, Source={x:Static l10n:Strings.Instance}}"
                        IsVisible="{Binding HasTargetError}" />
 
             <!-- Параметры нагрузки -->
             <Grid ColumnDefinitions="*,16,*,16,*,16,*" Margin="0,20,0,24">
                 <StackPanel Grid.Column="0" Spacing="7">
-                    <TextBlock Classes="label" Text="ПОЛЬЗОВАТЕЛИ" />
+                    <TextBlock Classes="label" Text="{Binding Root.Scenarios.Editor.Users, Source={x:Static l10n:Strings.Instance}}" />
                     <NumericUpDown Value="{Binding ConcurrentUsers}" Minimum="1" Maximum="10000"
                                    Increment="1" FormatString="0" />
                 </StackPanel>
                 <StackPanel Grid.Column="2" Spacing="7">
-                    <TextBlock Classes="label" Text="ДЛИТЕЛЬНОСТЬ (С)" />
+                    <TextBlock Classes="label" Text="{Binding Root.Scenarios.Editor.DurationSeconds, Source={x:Static l10n:Strings.Instance}}" />
                     <NumericUpDown Value="{Binding DurationSeconds}" Minimum="1" Maximum="3600"
                                    Increment="1" FormatString="0" />
                 </StackPanel>
                 <StackPanel Grid.Column="4" Spacing="7">
-                    <TextBlock Classes="label" Text="RAMP-UP (С)" />
+                    <TextBlock Classes="label" Text="{Binding Root.Scenarios.Editor.RampUpSeconds, Source={x:Static l10n:Strings.Instance}}" />
                     <NumericUpDown Value="{Binding RampUpSeconds}" Minimum="0" Maximum="600"
                                    Increment="1" FormatString="0" />
                 </StackPanel>
                 <StackPanel Grid.Column="6" Spacing="7">
-                    <TextBlock Classes="label" Text="THINK TIME (МС)" />
+                    <TextBlock Classes="label" Text="{Binding Root.Scenarios.Editor.ThinkTimeMilliseconds, Source={x:Static l10n:Strings.Instance}}" />
                     <NumericUpDown Value="{Binding ThinkTimeMs}" Minimum="0" Maximum="60000"
                                    Increment="50" FormatString="0" />
                 </StackPanel>
             </Grid>
 
             <!-- Шаги запросов -->
-            <TextBlock Classes="label" Text="ШАГИ ЗАПРОСОВ" Margin="0,0,0,7" />
+            <TextBlock Classes="label" Text="{Binding Root.Scenarios.Editor.RequestSteps, Source={x:Static l10n:Strings.Instance}}" Margin="0,0,0,7" />
             <Border BorderBrush="{DynamicResource Border}" BorderThickness="1" CornerRadius="8"
                     IsVisible="{Binding !!Requests.Count}">
                 <ItemsControl ItemsSource="{Binding Requests}">
@@ -66,9 +67,9 @@
                                               SelectedItem="{Binding Method}"
                                               HorizontalAlignment="Stretch" />
                                     <TextBox Grid.Column="2" Classes="mono"
-                                             Text="{Binding Path}" PlaceholderText="/path" />
+                                             Text="{Binding Path}" PlaceholderText="{Binding Root.Scenarios.Editor.PathPlaceholder, Source={x:Static l10n:Strings.Instance}}" />
                                     <Button Grid.Column="4" Classes="sact danger" Width="26" Height="26"
-                                            ToolTip.Tip="Убрать шаг" Background="Transparent"
+                                            ToolTip.Tip="{Binding Root.Scenarios.Editor.RemoveStep, Source={x:Static l10n:Strings.Instance}}" Background="Transparent"
                                             Command="{Binding $parent[UserControl].((vm:ScenarioEditorViewModel)DataContext).RemoveRequestCommand}"
                                             CommandParameter="{Binding}">
                                         <Path Data="M1,1 L9,9 M9,1 L1,9" Width="9" Height="9"
@@ -81,17 +82,17 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </Border>
-            <TextBlock Text="Шагов нет — нагрузка пойдёт GET-запросами прямо в Target URL."
+            <TextBlock Text="{Binding Root.Scenarios.Editor.NoSteps, Source={x:Static l10n:Strings.Instance}}"
                        Foreground="{DynamicResource TextDim}" FontSize="12"
                        IsVisible="{Binding !Requests.Count}" />
             <Button Classes="ghost" Margin="0,10,0,0" HorizontalAlignment="Left"
-                    Content="+ Добавить запрос" Command="{Binding AddRequestCommand}" />
+                    Content="{Binding Root.Scenarios.Editor.AddRequest, Source={x:Static l10n:Strings.Instance}}" Command="{Binding AddRequestCommand}" />
 
             <!-- Действия -->
             <StackPanel Orientation="Horizontal" Spacing="10"
                         HorizontalAlignment="Right" Margin="0,28,0,0">
-                <Button Classes="ghost" Content="Отмена" Command="{Binding CancelCommand}" />
-                <Button Classes="run" Content="Сохранить" Command="{Binding SaveCommand}" />
+                <Button Classes="ghost" Content="{Binding Root.Common.Cancel, Source={x:Static l10n:Strings.Instance}}" Command="{Binding CancelCommand}" />
+                <Button Classes="run" Content="{Binding Root.Common.Save, Source={x:Static l10n:Strings.Instance}}" Command="{Binding SaveCommand}" />
             </StackPanel>
 
         </StackPanel>

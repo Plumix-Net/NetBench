@@ -1,0 +1,100 @@
+{
+  "app": {
+    "title": "NetBench",
+    "tagline": "Нагрузочное тестирование"
+  },
+  "common": {
+    "run": "Запустить",
+    "stop": "Стоп",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "errors": "ОШИБКИ",
+    "rps": "RPS",
+    "p50": "P50",
+    "p95": "P95",
+    "p99": "P99",
+    "millisecondsShort": "мс",
+    "percent": "%"
+  },
+  "scenarios": {
+    "new": "Новый сценарий",
+    "unnamed": "Сценарий без названия",
+    "targetNotSet": "цель не задана",
+    "targetNotSetParenthesized": "(цель не задана)",
+    "toggleTheme": "Переключить тему",
+    "edit": "Редактировать",
+    "delete": "Удалить",
+    "mobileTitle": "Сценарии",
+    "loadFailed": "Не удалось загрузить сценарии: {error: string}",
+    "emptyMobile": "Нет сценариев — создайте первый кнопкой «+»",
+    "requestCount(param=count)": {
+      "one": "запрос: {count}",
+      "few": "запроса: {count}",
+      "many": "запросов: {count}",
+      "other": "запросов: {count}"
+    },
+    "editor": {
+      "breadcrumb": "Редактор сценария",
+      "name": "НАЗВАНИЕ",
+      "namePlaceholder": "например, Checkout Flow",
+      "targetUrl": "TARGET URL",
+      "targetPlaceholder": "https://api.example.com/endpoint",
+      "targetRequired": "Укажите Target URL, чтобы запустить сценарий",
+      "users": "ПОЛЬЗОВАТЕЛИ",
+      "durationSeconds": "ДЛИТЕЛЬНОСТЬ (С)",
+      "rampUpSeconds": "RAMP-UP (С)",
+      "thinkTimeMilliseconds": "THINK TIME (МС)",
+      "requestSteps": "ШАГИ ЗАПРОСОВ",
+      "pathPlaceholder": "/path",
+      "removeStep": "Убрать шаг",
+      "noSteps": "Шагов нет — нагрузка пойдёт GET-запросами прямо в Target URL.",
+      "addRequest": "+ Добавить запрос"
+    }
+  },
+  "shell": {
+    "emptyTitle": "Пока нет сценариев",
+    "emptyDescription": "Создайте сценарий, чтобы начать нагрузочное тестирование.",
+    "createFirst": "+ Создать первый сценарий",
+    "targetRequired": "Укажите Target URL, чтобы запустить"
+  },
+  "testRun": {
+    "recording": "ЗАПИСЬ",
+    "latencyP95": "ЗАДЕРЖКА P95",
+    "totalRequests": "ВСЕГО ЗАПРОСОВ",
+    "connections": "СОЕДИНЕНИЯ",
+    "throughputChart": "ПРОПУСКНАЯ СПОСОБНОСТЬ (RPS)",
+    "latencyChart": "ЗАДЕРЖКА P95 (МС)"
+  },
+  "report": {
+    "breadcrumb": "Отчёт",
+    "allFailed": "Все запросы завершились ошибкой — целевой хост не принял ни одного соединения за время прогона.",
+    "exportJson": "Экспорт JSON",
+    "exportHtml": "Экспорт HTML",
+    "exportCsv": "Экспорт CSV",
+    "compareAction": "Сравнить",
+    "latencyDistribution": "РАСПРЕДЕЛЕНИЕ ЗАДЕРЖЕК",
+    "responseCodes": "КОДЫ ОТВЕТОВ",
+    "code": "КОД",
+    "count": "КОЛИЧЕСТВО",
+    "latencyTimeline": "ЗАДЕРЖКА P95 ВО ВРЕМЕНИ (МС)",
+    "meta": "{date: string} · {seconds: string} с",
+    "latencyValue": "{value: string} мс",
+    "latencyMin": "Мин",
+    "latencyMean": "Среднее",
+    "latencyMax": "Макс",
+    "compare": {
+      "breadcrumb": "Сравнение отчётов",
+      "title": "Сравнение",
+      "back": "К отчёту"
+    },
+    "html": {
+      "errors": "Ошибки",
+      "responseCodes": "Коды ответов",
+      "code": "Код",
+      "count": "Количество"
+    }
+  },
+  "diagnostics": {
+    "viewNotFound": "Представление для {typeName: string} не найдено"
+  }
+}

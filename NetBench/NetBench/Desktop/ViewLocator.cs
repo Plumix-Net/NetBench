@@ -5,6 +5,7 @@ using NetBench.Features.Report.Presentation.Desktop;
 using NetBench.Features.Scenarios.Presentation.Desktop;
 using NetBench.Features.Shell.Presentation.Desktop;
 using NetBench.Features.TestRun.Presentation.Desktop;
+using NetBench.Localization;
 
 namespace NetBench.Desktop;
 
@@ -23,7 +24,11 @@ public sealed class ViewLocator : IDataTemplate
     public Control? Build(object? param) =>
         param is not null && _registry.TryGetValue(param.GetType(), out var factory)
             ? factory()
-            : new TextBlock { Text = $"No view for: {param?.GetType().Name}" };
+            : new TextBlock
+            {
+                Text = Strings.Instance.Root.Diagnostics.ViewNotFound(
+                    param?.GetType().Name ?? string.Empty),
+            };
 
     public bool Match(object? data) => data is ObservableObject;
 }

@@ -5,6 +5,7 @@ using NetBench.Features.TestRun.Domain;
 using NetBench.Features.TestRun.Presentation.Desktop;
 using NetBench.Features.Report.Presentation.Desktop;
 using NetBench.Desktop.Services;
+using NetBench.Localization;
 
 namespace NetBench.Features.Scenarios.Presentation.Desktop;
 
@@ -74,7 +75,7 @@ public partial class ScenarioListViewModel : ObservableObject
     [RelayCommand]
     private async Task AddScenarioAsync(CancellationToken ct)
     {
-        var scenario = new LoadScenario { Name = "Новый сценарий" };
+        var scenario = new LoadScenario { Name = Strings.Instance.Root.Scenarios.New };
         await _repository.SaveAsync(scenario, ct);
 
         var vm = new ScenarioViewModel(scenario);

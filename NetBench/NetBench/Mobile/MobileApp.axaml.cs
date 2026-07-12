@@ -1,5 +1,6 @@
 using Avalonia.Markup.Xaml;
 using NetBench.Features.Shell.Presentation.Mobile;
+using NetBench.Localization;
 using Plumix;
 using Plumix.Widgets;
 
@@ -17,7 +18,7 @@ public partial class MobileApp : PlumixApplication
 
     protected override PlumixOptions CreateOptions() => new()
     {
-        Title = "NetBench",
+        Title = Strings.Instance.Root.App.Title,
         InitialWindowSize = new Avalonia.Size(390, 780),
     };
 }

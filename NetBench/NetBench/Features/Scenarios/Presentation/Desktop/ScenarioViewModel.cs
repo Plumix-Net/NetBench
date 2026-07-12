@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using NetBench.Features.Scenarios.Domain;
+using NetBench.Localization;
 
 namespace NetBench.Features.Scenarios.Presentation.Desktop;
 
@@ -28,10 +29,12 @@ public sealed partial class ScenarioViewModel : ObservableObject
     /// <summary>Хост без схемы — подпись строки в сайдбаре.</summary>
     public string HostLabel => HasTarget
         ? Target.Replace("https://", "").Replace("http://", "")
-        : "(цель не задана)";
+        : Strings.Instance.Root.Scenarios.TargetNotSetParenthesized;
 
     /// <summary>Target для нижней панели запуска.</summary>
-    public string TargetLabel => HasTarget ? Target : "(цель не задана)";
+    public string TargetLabel => HasTarget
+        ? Target
+        : Strings.Instance.Root.Scenarios.TargetNotSetParenthesized;
 
     partial void OnNameChanged(string value) => Model.Name = value;
     partial void OnTargetChanged(string value) => Model.Target = value;

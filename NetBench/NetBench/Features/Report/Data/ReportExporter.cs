@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using NetBench.Localization;
 
 namespace NetBench.Features.Report.Data;
 
@@ -71,6 +72,12 @@ public static class ReportExporter
     {
         var s = report.Summary;
         var inv = CultureInfo.InvariantCulture;
+        var strings = Strings.Instance.Root;
+        var culture = Strings.SupportedCultures.FirstOrDefault(candidate =>
+                candidate.Equals(CultureInfo.CurrentUICulture))
+            ?? Strings.SupportedCultures.FirstOrDefault(candidate =>
+                candidate.TwoLetterISOLanguageName == CultureInfo.CurrentUICulture.TwoLetterISOLanguageName)
+            ?? Strings.BaseCulture;
 
         var statusRows = new StringBuilder();
         foreach (var bucket in report.StatusCodes)
@@ -78,13 +85,14 @@ public static class ReportExporter
             var pct = s.TotalRequests > 0 ? bucket.Count * 100.0 / s.TotalRequests : 0;
             statusRows.Append(inv,
                 $"<tr><td>{(bucket.StatusCode == 0 ? "000" : bucket.StatusCode.ToString(inv))}</td>" +
-                $"<td>{bucket.Count.ToString("N0", inv)}</td><td>{pct.ToString("F1", inv)}%</td></tr>");
+                $"<td>{bucket.Count.ToString("N0", inv)}</td><td>{pct.ToString("F1", inv)}" +
+                $"{Html(strings.Common.Percent)}</td></tr>");
         }
 
         // Палитра — токены дизайн-системы NetBench (тёмная тема).
         return $$"""
             <!DOCTYPE html>
-            <html lang="ru">
+            <html lang="{{culture.Name}}">
             <head>
             <meta charset="utf-8">
             <title>NetBench · {{Html(report.Scenario.Name)}}</title>
@@ -108,16 +116,16 @@ public static class ReportExporter
             <body>
             <h1>{{Html(report.Scenario.Name)}}</h1>
             <div class="target mono">{{Html(report.Scenario.Target)}}</div>
-            <div class="meta mono">{{report.StartedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm", inv)}} · {{s.Elapsed.TotalSeconds.ToString("F0", inv)}}s</div>
+            <div class="meta mono">{{Html(strings.Report.Meta(report.StartedAt.ToLocalTime().ToString("g"), s.Elapsed.TotalSeconds.ToString("F0")))}}</div>
             <div class="cards">
-            <div class="card"><div class="l">RPS</div><div class="v mono rps">{{s.RequestsPerSecond.ToString("N0", inv)}}</div></div>
-            <div class="card"><div class="l">p50</div><div class="v mono lat">{{s.LatencyP50Ms.ToString("F0", inv)}}<span style="font-size:15px">ms</span></div></div>
-            <div class="card"><div class="l">p95</div><div class="v mono lat">{{s.LatencyP95Ms.ToString("F0", inv)}}<span style="font-size:15px">ms</span></div></div>
-            <div class="card"><div class="l">p99</div><div class="v mono lat">{{s.LatencyP99Ms.ToString("F0", inv)}}<span style="font-size:15px">ms</span></div></div>
-            <div class="card"><div class="l">Errors</div><div class="v mono {{(s.ErrorRate >= 0.05 ? "err" : "ok")}}">{{(s.ErrorRate * 100).ToString("F1", inv)}}<span style="font-size:15px">%</span></div></div>
+            <div class="card"><div class="l">{{Html(strings.Common.Rps)}}</div><div class="v mono rps">{{s.RequestsPerSecond.ToString("N0", inv)}}</div></div>
+            <div class="card"><div class="l">{{Html(strings.Common.P50)}}</div><div class="v mono lat">{{s.LatencyP50Ms.ToString("F0", inv)}}<span style="font-size:15px">{{Html(strings.Common.MillisecondsShort)}}</span></div></div>
+            <div class="card"><div class="l">{{Html(strings.Common.P95)}}</div><div class="v mono lat">{{s.LatencyP95Ms.ToString("F0", inv)}}<span style="font-size:15px">{{Html(strings.Common.MillisecondsShort)}}</span></div></div>
+            <div class="card"><div class="l">{{Html(strings.Common.P99)}}</div><div class="v mono lat">{{s.LatencyP99Ms.ToString("F0", inv)}}<span style="font-size:15px">{{Html(strings.Common.MillisecondsShort)}}</span></div></div>
+            <div class="card"><div class="l">{{Html(strings.Report.Html.Errors)}}</div><div class="v mono {{(s.ErrorRate >= 0.05 ? "err" : "ok")}}">{{(s.ErrorRate * 100).ToString("F1", inv)}}<span style="font-size:15px">{{Html(strings.Common.Percent)}}</span></div></div>
             </div>
-            <h2>Коды ответов</h2>
-            <table><tr><th>Код</th><th>Количество</th><th>%</th></tr>{{statusRows}}</table>
+            <h2>{{Html(strings.Report.Html.ResponseCodes)}}</h2>
+            <table><tr><th>{{Html(strings.Report.Html.Code)}}</th><th>{{Html(strings.Report.Html.Count)}}</th><th>{{Html(strings.Common.Percent)}}</th></tr>{{statusRows}}</table>
             </body>
             </html>
             """;

@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NetBench.Features.Scenarios.Domain;
 using NetBench.Desktop.Services;
+using NetBench.Localization;
 
 namespace NetBench.Features.Scenarios.Presentation.Desktop;
 
@@ -34,14 +35,18 @@ public partial class ScenarioEditorViewModel : ObservableObject
         ResetFromModel();
     }
 
-    public string HeaderText => string.IsNullOrWhiteSpace(Name) ? "Новый сценарий" : Name;
+    public string HeaderText => string.IsNullOrWhiteSpace(Name)
+        ? Strings.Instance.Root.Scenarios.New
+        : Name;
 
     public bool HasTargetError => string.IsNullOrWhiteSpace(Target);
 
     [RelayCommand]
     private async Task SaveAsync(CancellationToken ct)
     {
-        Scenario.Name = string.IsNullOrWhiteSpace(Name) ? "Сценарий без названия" : Name.Trim();
+        Scenario.Name = string.IsNullOrWhiteSpace(Name)
+            ? Strings.Instance.Root.Scenarios.Unnamed
+            : Name.Trim();
         Scenario.Target = Target.Trim();
         Name = Scenario.Name;
         Target = Scenario.Target;

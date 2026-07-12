@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:NetBench.Features.Shell.Presentation.Desktop"
+             xmlns:l10n="using:NetBench.Localization"
              mc:Ignorable="d" d:DesignWidth="1440" d:DesignHeight="900"
              x:Class="NetBench.Features.Shell.Presentation.Desktop.ShellView"
              x:DataType="vm:ShellViewModel">
@@ -30,12 +31,12 @@
                           Stroke="{DynamicResource TextFaint}" StrokeThickness="1.6"
                           StrokeLineCap="Round" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
-                <TextBlock Text="Пока нет сценариев" FontSize="16" FontWeight="Bold"
+                <TextBlock Text="{Binding Root.Shell.EmptyTitle, Source={x:Static l10n:Strings.Instance}}" FontSize="16" FontWeight="Bold"
                            Foreground="{DynamicResource Text}" HorizontalAlignment="Center" />
-                <TextBlock Text="Создайте сценарий, чтобы начать нагрузочное тестирование."
+                <TextBlock Text="{Binding Root.Shell.EmptyDescription, Source={x:Static l10n:Strings.Instance}}"
                            Foreground="{DynamicResource TextDim}" HorizontalAlignment="Center" />
                 <Button Classes="run" Margin="0,8,0,0" HorizontalAlignment="Center"
-                        Content="+ Создать первый сценарий"
+                        Content="{Binding Root.Shell.CreateFirst, Source={x:Static l10n:Strings.Instance}}"
                         Command="{Binding Sidebar.AddScenarioCommand}" />
             </StackPanel>
 
@@ -53,7 +54,7 @@
                                    FontSize="11" Foreground="{DynamicResource TextDim}" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="0" VerticalAlignment="Center">
-                        <TextBlock Text="Укажите Target URL, чтобы запустить"
+                        <TextBlock Text="{Binding Root.Shell.TargetRequired, Source={x:Static l10n:Strings.Instance}}"
                                    FontSize="11" Foreground="{DynamicResource Latency}"
                                    VerticalAlignment="Center" Margin="0,0,14,0"
                                    IsVisible="{Binding ShowTargetHint}" />
@@ -61,7 +62,7 @@
                                 IsVisible="{Binding IsRunning}">
                             <StackPanel Orientation="Horizontal" Spacing="7">
                                 <Rectangle Width="10" Height="10" Fill="{DynamicResource OnAccent}" />
-                                <TextBlock Text="Стоп" />
+                                <TextBlock Text="{Binding Root.Common.Stop, Source={x:Static l10n:Strings.Instance}}" />
                             </StackPanel>
                         </Button>
                         <Button Classes="run" Command="{Binding RunCommand}"
@@ -69,7 +70,7 @@
                             <StackPanel Orientation="Horizontal" Spacing="7">
                                 <Path Data="M0,0 L10,5.5 L0,11 Z" Width="10" Height="11"
                                       Fill="{Binding $parent[Button].Foreground}" Stretch="Uniform" />
-                                <TextBlock Text="Запустить" />
+                                <TextBlock Text="{Binding Root.Common.Run, Source={x:Static l10n:Strings.Instance}}" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
