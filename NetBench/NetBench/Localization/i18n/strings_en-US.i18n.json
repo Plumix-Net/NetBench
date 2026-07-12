@@ -16,6 +16,38 @@
     "millisecondsShort": "ms",
     "percent": "%"
   },
+  "diagnostics": {
+    "viewNotFound": "No view found for {typeName: string}"
+  },
+  "report": {
+    "breadcrumb": "Report",
+    "allFailed": "Every request failed — the target host did not accept a connection during the run.",
+    "exportJson": "Export JSON",
+    "exportHtml": "Export HTML",
+    "exportCsv": "Export CSV",
+    "compareAction": "Compare",
+    "latencyDistribution": "LATENCY DISTRIBUTION",
+    "responseCodes": "RESPONSE CODES",
+    "code": "CODE",
+    "count": "COUNT",
+    "latencyTimeline": "P95 LATENCY OVER TIME (MS)",
+    "meta": "{date: string} · {seconds: string} s",
+    "latencyValue": "{value: string} ms",
+    "latencyMin": "Min",
+    "latencyMean": "Mean",
+    "latencyMax": "Max",
+    "compare": {
+      "breadcrumb": "Report comparison",
+      "title": "Comparison",
+      "back": "Back to report"
+    },
+    "html": {
+      "errors": "Errors",
+      "responseCodes": "Response codes",
+      "code": "Code",
+      "count": "Count"
+    }
+  },
   "scenarios": {
     "new": "New scenario",
     "unnamed": "Untitled scenario",
@@ -62,37 +94,5 @@
     "connections": "CONNECTIONS",
     "throughputChart": "THROUGHPUT (RPS)",
     "latencyChart": "P95 LATENCY (MS)"
-  },
-  "report": {
-    "breadcrumb": "Report",
-    "allFailed": "Every request failed — the target host did not accept a connection during the run.",
-    "exportJson": "Export JSON",
-    "exportHtml": "Export HTML",
-    "exportCsv": "Export CSV",
-    "compareAction": "Compare",
-    "latencyDistribution": "LATENCY DISTRIBUTION",
-    "responseCodes": "RESPONSE CODES",
-    "code": "CODE",
-    "count": "COUNT",
-    "latencyTimeline": "P95 LATENCY OVER TIME (MS)",
-    "meta": "{date: string} · {seconds: string} s",
-    "latencyValue": "{value: string} ms",
-    "latencyMin": "Min",
-    "latencyMean": "Mean",
-    "latencyMax": "Max",
-    "compare": {
-      "breadcrumb": "Report comparison",
-      "title": "Comparison",
-      "back": "Back to report"
-    },
-    "html": {
-      "errors": "Errors",
-      "responseCodes": "Response codes",
-      "code": "Code",
-      "count": "Count"
-    }
-  },
-  "diagnostics": {
-    "viewNotFound": "No view found for {typeName: string}"
   }
 }

@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NetBench.Features.Scenarios.Domain;
-using NetBench.Desktop.Services;
 using NetBench.Localization;
 
 namespace NetBench.Features.Scenarios.Presentation.Desktop;

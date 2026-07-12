@@ -16,6 +16,38 @@
     "millisecondsShort": "мс",
     "percent": "%"
   },
+  "diagnostics": {
+    "viewNotFound": "Представление для {typeName: string} не найдено"
+  },
+  "report": {
+    "breadcrumb": "Отчёт",
+    "allFailed": "Все запросы завершились ошибкой — целевой хост не принял ни одного соединения за время прогона.",
+    "exportJson": "Экспорт JSON",
+    "exportHtml": "Экспорт HTML",
+    "exportCsv": "Экспорт CSV",
+    "compareAction": "Сравнить",
+    "latencyDistribution": "РАСПРЕДЕЛЕНИЕ ЗАДЕРЖЕК",
+    "responseCodes": "КОДЫ ОТВЕТОВ",
+    "code": "КОД",
+    "count": "КОЛИЧЕСТВО",
+    "latencyTimeline": "ЗАДЕРЖКА P95 ВО ВРЕМЕНИ (МС)",
+    "meta": "{date: string} · {seconds: string} с",
+    "latencyValue": "{value: string} мс",
+    "latencyMin": "Мин",
+    "latencyMean": "Среднее",
+    "latencyMax": "Макс",
+    "compare": {
+      "breadcrumb": "Сравнение отчётов",
+      "title": "Сравнение",
+      "back": "К отчёту"
+    },
+    "html": {
+      "errors": "Ошибки",
+      "responseCodes": "Коды ответов",
+      "code": "Код",
+      "count": "Количество"
+    }
+  },
   "scenarios": {
     "new": "Новый сценарий",
     "unnamed": "Сценарий без названия",
@@ -64,37 +96,5 @@
     "connections": "СОЕДИНЕНИЯ",
     "throughputChart": "ПРОПУСКНАЯ СПОСОБНОСТЬ (RPS)",
     "latencyChart": "ЗАДЕРЖКА P95 (МС)"
-  },
-  "report": {
-    "breadcrumb": "Отчёт",
-    "allFailed": "Все запросы завершились ошибкой — целевой хост не принял ни одного соединения за время прогона.",
-    "exportJson": "Экспорт JSON",
-    "exportHtml": "Экспорт HTML",
-    "exportCsv": "Экспорт CSV",
-    "compareAction": "Сравнить",
-    "latencyDistribution": "РАСПРЕДЕЛЕНИЕ ЗАДЕРЖЕК",
-    "responseCodes": "КОДЫ ОТВЕТОВ",
-    "code": "КОД",
-    "count": "КОЛИЧЕСТВО",
-    "latencyTimeline": "ЗАДЕРЖКА P95 ВО ВРЕМЕНИ (МС)",
-    "meta": "{date: string} · {seconds: string} с",
-    "latencyValue": "{value: string} мс",
-    "latencyMin": "Мин",
-    "latencyMean": "Среднее",
-    "latencyMax": "Макс",
-    "compare": {
-      "breadcrumb": "Сравнение отчётов",
-      "title": "Сравнение",
-      "back": "К отчёту"
-    },
-    "html": {
-      "errors": "Ошибки",
-      "responseCodes": "Коды ответов",
-      "code": "Код",
-      "count": "Количество"
-    }
-  },
-  "diagnostics": {
-    "viewNotFound": "Представление для {typeName: string} не найдено"
   }
 }
