@@ -2,7 +2,7 @@
   <!-- https://learn.microsoft.com/en-us/nuget/consume-packages/central-package-management -->
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <AvaloniaVersion>12.0.5</AvaloniaVersion>
+    <AvaloniaVersion>12.1.0</AvaloniaVersion>
   </PropertyGroup>
   <ItemGroup>
     <!-- Avalonia packages -->
@@ -16,9 +16,10 @@
     <PackageVersion Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.1" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <!-- Plumix (мобильный UI: Flutter-подобные виджеты + Bloc) -->
-    <PackageVersion Include="Plumix" Version="0.1.0-alpha.6" />
-    <PackageVersion Include="Plumix.Material" Version="0.1.0-alpha.6" />
+    <PackageVersion Include="Plumix" Version="0.1.0-alpha.13" />
+    <PackageVersion Include="Plumix.Material" Version="0.1.0-alpha.13" />
     <PackageVersion Include="Plumix.Bloc" Version="0.1.0-alpha.1" />
+    <PackageVersion Include="Plumix.Slang" Version="0.1.0-alpha.13" />
     <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.15" />
     <!-- Core packages -->
     <PackageVersion Include="HdrHistogram" Version="2.5.0" />
@@ -26,7 +27,7 @@
     <!-- DI -->
     <PackageVersion Include="Pure.DI" Version="2.4.3" />
     <!-- Analyzers -->
-    <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15" />
+    <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="18.7.23" />
     <!-- Tests -->
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="xunit" Version="2.9.3" />

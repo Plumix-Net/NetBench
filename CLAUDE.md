@@ -69,6 +69,12 @@ NetBench/
 - **DI (desktop):** Pure.DI, конфигурация в `NetBench/Desktop/Composition/Composition.cs`. Новые ViewModel регистрируются там; для VM с runtime-аргументом — root вида `Func<TArg, TViewModel>`.
 - **Bindings:** compiled bindings включены по умолчанию (`AvaloniaUseCompiledBindingsByDefault`) — в axaml указывай `x:DataType`.
 - **Навигация (desktop):** через `INavigationService`.
+- **Локализация:** строки генерирует Slang.Net из `Localization/i18n/*.i18n.json`. На мобиле читать
+  их в виджетах только через `Translations<Strings>.Of(context)` (в обработчиках — `ReadOf`):
+  подписка на `TranslationProvider<Strings>` из `MobileShell` — это то, что перестраивает дерево
+  при смене локали. Прямой `Strings.Instance.Root` в `Build` не перерисуется; он допустим вне
+  дерева (кубиты, `MobileApp`). Мост `Strings : ITranslations<Strings>` — в `Mobile/Localization/`,
+  чтобы desktop-таргет не тянул `Plumix.Slang`.
 - **Сериализация:** только source-generated `System.Text.Json` (`JsonSerializerContext`) — рефлексия ломает trimming на мобильных таргетах.
 - **Пакеты:** версии только в `Directory.Packages.props` (CPM), в csproj — `PackageReference` без `Version`. Все Avalonia-пакеты — строго `$(AvaloniaVersion)`.
 - **Общие настройки проектов** (Nullable, LangVersion и т.п.) — только в `Directory.Build.props`, не дублировать в csproj.

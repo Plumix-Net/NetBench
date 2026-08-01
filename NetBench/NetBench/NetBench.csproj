@@ -56,8 +56,15 @@
 
   <!-- Мобильная презентация: Plumix -->
   <ItemGroup Condition="'$(IsMobileTarget)' == 'true'">
+    <PackageReference Include="Plumix.Bloc" />
+    <PackageReference Include="Plumix.Slang" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-android'">
     <PackageReference Include="Plumix" />
     <PackageReference Include="Plumix.Material" />
-    <PackageReference Include="Plumix.Bloc" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-ios'">
+    <PackageReference Include="Plumix" />
+    <PackageReference Include="Plumix.Material" />
   </ItemGroup>
 </Project>

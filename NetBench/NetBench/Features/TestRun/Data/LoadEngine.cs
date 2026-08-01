@@ -122,7 +122,7 @@ public sealed class LoadEngine : IAsyncDisposable
         var url = step.Path is "" or "/"
             ? target
             : target.TrimEnd('/') + step.Path;
-        var startNs = GetTimestampNs();
+        var startNs = MonotonicClock.NowNanoseconds();
 
         _aggregator.IncrementActiveConnections();
         try
@@ -156,14 +156,14 @@ public sealed class LoadEngine : IAsyncDisposable
                 }
             }
 
-            var endNs = GetTimestampNs();
+            var endNs = MonotonicClock.NowNanoseconds();
             var statusCode = (int)response.StatusCode;
             var isError = statusCode >= 400;
             return new RequestResult(startNs, endNs, statusCode, bytes, isError);
         }
         catch (Exception) when (!token.IsCancellationRequested)
         {
-            var endNs = GetTimestampNs();
+            var endNs = MonotonicClock.NowNanoseconds();
             return RequestResult.Error(startNs, endNs);
         }
         finally
@@ -197,9 +197,6 @@ public sealed class LoadEngine : IAsyncDisposable
             StatsUpdated?.Invoke(stats);
         }
     }
-
-    private static long GetTimestampNs() =>
-        Stopwatch.GetTimestamp() * 1_000_000_000L / Stopwatch.Frequency;
 
     public async ValueTask DisposeAsync()
     {

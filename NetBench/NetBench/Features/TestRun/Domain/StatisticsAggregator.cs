@@ -21,7 +21,7 @@ public sealed class StatisticsAggregator
 
     public StatisticsAggregator()
     {
-        _startTimestampNs = GetTimestampNs();
+        _startTimestampNs = MonotonicClock.NowNanoseconds();
     }
 
     public void Record(in RequestResult result)
@@ -65,7 +65,7 @@ public sealed class StatisticsAggregator
         var minNs = Interlocked.Read(ref _minLatencyNs);
         var maxNs = Interlocked.Read(ref _maxLatencyNs);
 
-        var elapsedNs = GetTimestampNs() - _startTimestampNs;
+        var elapsedNs = MonotonicClock.NowNanoseconds() - _startTimestampNs;
         var elapsedSec = elapsedNs / 1_000_000_000.0;
 
         double p50 = 0, p95 = 0, p99 = 0;
@@ -129,8 +129,6 @@ public sealed class StatisticsAggregator
         };
     }
 
-    private static long GetTimestampNs() =>
-        System.Diagnostics.Stopwatch.GetTimestamp() * 1_000_000_000L / System.Diagnostics.Stopwatch.Frequency;
 
     private static void InterlockedMin(ref long location, long value)
     {
