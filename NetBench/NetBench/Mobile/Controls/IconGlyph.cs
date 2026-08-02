@@ -15,6 +15,8 @@ public enum GlyphKind
     Moon,
     Plus,
     ChevronRight,
+    Gear,
+    Check,
 }
 
 /// <summary>Рисует иконку дизайн-макета указанного цвета и размера.</summary>
@@ -128,6 +130,41 @@ internal sealed class GlyphPainter : CustomPainter
                     ],
                     isFilled: false);
                 context.DrawGeometry(null, pen, chevron);
+                break;
+            }
+
+            case GlyphKind.Check:
+            {
+                var pen = StrokePen(brush, w * 2.0 / 14);
+                var check = new PolylineGeometry(
+                    [
+                        new Point(w * 0.16, h * 0.53),
+                        new Point(w * 0.40, h * 0.78),
+                        new Point(w * 0.84, h * 0.24),
+                    ],
+                    isFilled: false);
+                context.DrawGeometry(null, pen, check);
+                break;
+            }
+
+            case GlyphKind.Gear:
+            {
+                // Шестерёнка: кольцо из 8 зубцов-лучей плюс обод и втулка —
+                // рисуем штрихами, чтобы толщина совпадала с остальными глифами.
+                var center = new Point(w / 2, h / 2);
+                var pen = StrokePen(brush, w * 1.6 / 16);
+                for (var i = 0; i < 8; i++)
+                {
+                    var angle = i * Math.PI / 4;
+                    var (sin, cos) = Math.SinCos(angle);
+                    var inner = new Point(center.X + cos * w * 0.33, center.Y + sin * h * 0.33);
+                    var outer = new Point(center.X + cos * w * 0.47, center.Y + sin * h * 0.47);
+                    context.DrawLine(pen, inner, outer);
+                }
+
+                var rim = new EllipseGeometry(new Rect(w * 0.20, h * 0.20, w * 0.60, h * 0.60));
+                context.DrawGeometry(null, pen, rim);
+                context.DrawCircle(brush, null, center, w * 0.11);
                 break;
             }
 

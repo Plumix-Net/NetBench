@@ -4,6 +4,7 @@ using NetBench.Features.Scenarios.Domain;
 using NetBench.Features.TestRun.Domain;
 using NetBench.Localization;
 using NetBench.Mobile.Controls;
+using NetBench.Mobile.Navigation;
 using NetBench.Mobile.Theme;
 using Plumix;
 using Plumix.Bloc;
@@ -94,7 +95,7 @@ public sealed class MonitorScreen : StatelessWidget
 
         var report = state.Report;
         Navigator.Of(context).PushAndRemoveUntil(
-            new BuilderPageRoute(_ => new ResultScreen(report), settings: new RouteSettings("result")),
+            ThemedPageRoute.Of(_ => new ResultScreen(report), new RouteSettings("result")),
             static route => route.Settings.Name == "home");
     }
 

@@ -47,4 +47,36 @@ public class InMemoryReportStoreTests
         Assert.Equal(["b", "a"], all.Select(r => r.Scenario.Name).ToArray());
         Assert.Null(store.GetLatest(Guid.NewGuid()));
     }
+
+    [Fact]
+    public void GetHistoryKeepsEveryRunNewestFirst()
+    {
+        var store = new InMemoryReportStore();
+        var scenario = new LoadScenario { Name = "s" };
+        // Разовый прогон «быстрого теста»: своего сценария в репозитории нет,
+        // и без истории такой отчёт нигде не показать.
+        var quick = new LoadScenario { Name = "quick" };
+
+        store.Save(Report(scenario, DateTime.UtcNow.AddMinutes(-5)));
+        store.Save(Report(quick, DateTime.UtcNow.AddMinutes(-3)));
+        store.Save(Report(scenario, DateTime.UtcNow));
+
+        Assert.Equal(["s", "quick", "s"], store.GetHistory().Select(r => r.Scenario.Name).ToArray());
+        Assert.Equal(2, store.GetAll().Count);
+    }
+
+    [Fact]
+    public void GetHistoryDropsRunsBeyondTheLimit()
+    {
+        var store = new InMemoryReportStore();
+        var started = DateTime.UtcNow.AddHours(-2);
+
+        for (var i = 0; i <= InMemoryReportStore.HistoryLimit; i++)
+            store.Save(Report(new LoadScenario { Name = i.ToString() }, started.AddMinutes(i)));
+
+        var history = store.GetHistory();
+        Assert.Equal(InMemoryReportStore.HistoryLimit, history.Count);
+        Assert.Equal(InMemoryReportStore.HistoryLimit.ToString(), history[0].Scenario.Name);
+        Assert.Equal("1", history[^1].Scenario.Name);
+    }
 }

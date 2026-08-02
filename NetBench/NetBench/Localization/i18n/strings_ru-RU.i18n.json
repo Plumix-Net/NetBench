@@ -118,7 +118,18 @@
     "deleteScenarioTitle": "Удалить сценарий?",
     "deleteScenarioMessage": "«{name: string}» будет удалён безвозвратно.",
     "delete": "Удалить",
-    "scenarioDeleted": "Сценарий «{name: string}» удалён"
+    "scenarioDeleted": "Сценарий «{name: string}» удалён",
+    "recentSessions": "Последние сессии",
+    "sessionRps": "{rps: string} rps",
+    "sessionError": "{err: string}% ошибок"
+  },
+  "settings": {
+    "title": "Настройки",
+    "openSettings": "Открыть настройки",
+    "language": "Язык",
+    "appearance": "Оформление",
+    "themeDark": "Тёмная тема",
+    "themeLight": "Светлая тема"
   },
   "testRun": {
     "recording": "ЗАПИСЬ",

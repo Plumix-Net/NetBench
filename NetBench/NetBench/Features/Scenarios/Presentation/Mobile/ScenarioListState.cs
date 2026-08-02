@@ -15,10 +15,14 @@ public sealed record ScenarioListState(
     ScenarioListStatus Status,
     IReadOnlyList<LoadScenario> Scenarios,
     string? Error = null,
-    IReadOnlyDictionary<Guid, TestRunReport>? LastRuns = null)
+    IReadOnlyDictionary<Guid, TestRunReport>? LastRuns = null,
+    IReadOnlyList<TestRunReport>? Sessions = null)
 {
     public static ScenarioListState Initial { get; } = new(ScenarioListStatus.Loading, []);
 
     /// <summary>Последний отчёт сценария — для чипа статуса на карточке.</summary>
     public TestRunReport? LastRunOf(Guid scenarioId) => LastRuns?.GetValueOrDefault(scenarioId);
+
+    /// <summary>История прогонов, новые первыми — для секции «Последние сессии».</summary>
+    public IReadOnlyList<TestRunReport> RecentSessions => Sessions ?? [];
 }

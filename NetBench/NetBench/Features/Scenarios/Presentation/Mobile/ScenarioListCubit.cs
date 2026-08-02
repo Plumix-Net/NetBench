@@ -42,7 +42,11 @@ public sealed class ScenarioListCubit : Cubit<ScenarioListState>
         try
         {
             var scenarios = await _repository.LoadAllAsync(ct);
-            EmitSafe(new ScenarioListState(ScenarioListStatus.Ready, scenarios, LastRuns: SnapshotLastRuns()));
+            EmitSafe(new ScenarioListState(
+                ScenarioListStatus.Ready,
+                scenarios,
+                LastRuns: SnapshotLastRuns(),
+                Sessions: _reports.GetHistory()));
         }
         catch (Exception ex)
         {
@@ -80,7 +84,7 @@ public sealed class ScenarioListCubit : Cubit<ScenarioListState>
 
     // Отчёт сохраняется на UI-потоке (см. TestRunCubit), но не полагаемся на это
     private void OnReportsChanged() => Dispatcher.UIThread.Post(
-        () => EmitSafe(State with { LastRuns = SnapshotLastRuns() }));
+        () => EmitSafe(State with { LastRuns = SnapshotLastRuns(), Sessions = _reports.GetHistory() }));
 
     private Dictionary<Guid, TestRunReport> SnapshotLastRuns() =>
         _reports.GetAll().ToDictionary(report => report.Scenario.Id);

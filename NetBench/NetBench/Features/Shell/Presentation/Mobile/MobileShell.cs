@@ -4,9 +4,9 @@ using NetBench.Features.Scenarios.Presentation.Mobile;
 using NetBench.Features.TestRun.Data;
 using NetBench.Features.TestRun.Domain;
 using NetBench.Localization;
+using NetBench.Mobile.Navigation;
 using NetBench.Mobile.Theme;
 using Plumix.Bloc;
-using Plumix.Foundation;
 using Plumix.Material;
 using Plumix.Slang;
 using Plumix.Widgets;
@@ -34,14 +34,12 @@ internal sealed class MobileShellState : State
     {
         var palette = _isDark ? NetBenchPalette.Dark : NetBenchPalette.Light;
 
-        // TranslationProvider — снаружи KeyedSubtree: он держит подписку на смену культуры,
-        // и пересоздавать её на каждом переключении темы незачем. Смена локали перестраивает
-        // всех, кто читал строки через Translations<Strings>.Of(context).
+        // TranslationProvider держит подписку на смену культуры и перестраивает всех,
+        // кто читал строки через Translations<Strings>.Of(context).
+        // Пересоздание поддерева при смене темы (Plumix не перекрашивает уже размеченный
+        // текст) живёт не здесь, а внутри каждого роута — см. ThemedPageRoute:
+        // так стек навигации переживает переключение и тумблер доступен с любого экрана.
         return new TranslationProvider<Strings>(
-            child: new KeyedSubtree(
-            // KeyedSubtree: RenderParagraph в Plumix не перерисовывает текст при смене только цвета,
-            // поэтому при переключении темы пересоздаём всё поддерево (тумблер доступен только на домашнем экране).
-            key: new ValueKey<bool>(_isDark),
             child: new Theme(
             data: NetBenchTheme.CreateThemeData(palette),
             child: new NetBenchTheme(
@@ -62,8 +60,8 @@ internal sealed class MobileShellState : State
                                     return cubit;
                                 },
                                 child: new Navigator(
-                                    initialRoute: new BuilderPageRoute(
+                                    initialRoute: ThemedPageRoute.Of(
                                         static _ => new ScenarioListScreen(),
-                                        settings: new RouteSettings("home")))))))))));
+                                        new RouteSettings("home"))))))))));
     }
 }

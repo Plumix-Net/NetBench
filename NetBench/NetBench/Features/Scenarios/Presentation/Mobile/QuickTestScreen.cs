@@ -3,6 +3,7 @@ using NetBench.Features.Scenarios.Domain;
 using NetBench.Features.TestRun.Presentation.Mobile;
 using NetBench.Localization;
 using NetBench.Mobile.Controls;
+using NetBench.Mobile.Navigation;
 using NetBench.Mobile.Theme;
 using Plumix.Material;
 using Plumix.Rendering;
@@ -168,6 +169,6 @@ internal sealed class QuickTestScreenState : State, IDisposable
             Target = url,
         };
 
-        Navigator.Of(context).Push(new BuilderPageRoute(_ => new MonitorScreen(scenario)));
+        Navigator.Of(context).Push(ThemedPageRoute.Of(_ => new MonitorScreen(scenario)));
     }
 }

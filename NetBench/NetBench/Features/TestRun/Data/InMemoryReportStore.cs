@@ -5,7 +5,13 @@ namespace NetBench.Features.TestRun.Data;
 /// <summary>Отчёты живут в памяти на время сессии; персистентность пока не нужна.</summary>
 public sealed class InMemoryReportStore : IReportStore
 {
-    private readonly Dictionary<Guid, TestRunReport> _reports = [];
+    /// <summary>Глубина истории: список сессий дальше не листают, а отчёты держат таймлайн.</summary>
+    public const int HistoryLimit = 50;
+
+    private readonly Dictionary<Guid, TestRunReport> _latest = [];
+
+    // Новые первыми — так же отдаём наружу, лишних сортировок на UI не нужно.
+    private readonly List<TestRunReport> _history = [];
     private readonly Lock _lock = new();
 
     public event Action? Changed;
@@ -14,7 +20,11 @@ public sealed class InMemoryReportStore : IReportStore
     {
         lock (_lock)
         {
-            _reports[report.Scenario.Id] = report;
+            _latest[report.Scenario.Id] = report;
+
+            _history.Insert(0, report);
+            if (_history.Count > HistoryLimit)
+                _history.RemoveRange(HistoryLimit, _history.Count - HistoryLimit);
         }
 
         Changed?.Invoke();
@@ -24,7 +34,7 @@ public sealed class InMemoryReportStore : IReportStore
     {
         lock (_lock)
         {
-            return _reports.GetValueOrDefault(scenarioId);
+            return _latest.GetValueOrDefault(scenarioId);
         }
     }
 
@@ -32,7 +42,15 @@ public sealed class InMemoryReportStore : IReportStore
     {
         lock (_lock)
         {
-            return [.. _reports.Values.OrderByDescending(r => r.FinishedAt)];
+            return [.. _latest.Values.OrderByDescending(r => r.FinishedAt)];
+        }
+    }
+
+    public IReadOnlyList<TestRunReport> GetHistory()
+    {
+        lock (_lock)
+        {
+            return [.. _history];
         }
     }
 }

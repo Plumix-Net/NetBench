@@ -11,6 +11,13 @@ public interface IReportStore
     /// <summary>Последний отчёт сценария или null, если сценарий ещё не запускали.</summary>
     TestRunReport? GetLatest(Guid scenarioId);
 
-    /// <summary>Последние отчёты всех сценариев, новые первыми.</summary>
+    /// <summary>Последние отчёты всех сценариев, новые первыми — по одному на сценарий.</summary>
     IReadOnlyList<TestRunReport> GetAll();
+
+    /// <summary>
+    /// История прогонов, новые первыми: в отличие от <see cref="GetAll"/> повторные
+    /// прогоны одного сценария не схлопываются, а разовые прогоны (быстрый тест)
+    /// остаются видны, хотя их сценария нет в репозитории.
+    /// </summary>
+    IReadOnlyList<TestRunReport> GetHistory();
 }

@@ -1,9 +1,13 @@
+using System.Globalization;
 using Avalonia.Media;
+using NetBench.Features.Report.Presentation.Mobile;
 using NetBench.Features.Scenarios.Domain;
+using NetBench.Features.Settings.Presentation.Mobile;
 using NetBench.Features.TestRun.Domain;
 using NetBench.Features.TestRun.Presentation.Mobile;
 using NetBench.Localization;
 using NetBench.Mobile.Controls;
+using NetBench.Mobile.Navigation;
 using NetBench.Mobile.Theme;
 using Plumix.Bloc;
 using Plumix.Foundation;
@@ -87,7 +91,7 @@ public sealed class ScenarioListScreen : StatelessWidget
                     spacing: 8,
                     children:
                     [
-                        BuildLanguageToggle(context, palette),
+                        BuildSettingsButton(context, palette),
                         new Material(
                             color: palette.BgCard,
                             borderRadius: BorderRadius.Circular(9),
@@ -103,39 +107,23 @@ public sealed class ScenarioListScreen : StatelessWidget
             ]);
     }
 
-    /// <summary>
-    /// Циклический переключатель локали: TranslationProvider перестраивает всё,
-    /// что читало строки через контекст, — перезапуск не нужен.
-    /// </summary>
-    private static Material BuildLanguageToggle(BuildContext context, NetBenchPalette palette)
+    /// <summary>Шестерёнка настроек: язык и оформление — на отдельном экране.</summary>
+    private static Material BuildSettingsButton(BuildContext context, NetBenchPalette palette)
     {
         var radius = BorderRadius.Circular(9);
-        var supported = LocaleSettings<Strings>.SupportedCultures;
-        var current = Translations<Strings>.CultureOf(context);
-        var index = 0;
-        for (var i = 0; i < supported.Count; i++)
-        {
-            if (string.Equals(supported[i].Name, current.Name, StringComparison.OrdinalIgnoreCase))
-                index = i;
-        }
 
         return new Material(
             color: palette.BgCard,
             borderRadius: radius,
             child: new InkWell(
-                onTap: () => LocaleSettings<Strings>.SetLocale(supported[(index + 1) % supported.Count]),
+                onTap: () => Navigator.Of(context).Push(
+                    ThemedPageRoute.Of(static _ => new SettingsScreen(), new RouteSettings("settings"))),
                 borderRadius: radius,
                 child: new Container(
                     width: 36,
                     height: 36,
                     alignment: Alignment.Center,
-                    child: new Text(
-                        current.TwoLetterISOLanguageName.ToUpperInvariant(),
-                        fontSize: 12,
-                        fontWeight: FontWeight.Bold,
-                        color: palette.TextMid,
-                        letterSpacing: 0.5,
-                        fontFamily: NetBenchFonts.Ui))));
+                    child: new IconGlyph(GlyphKind.Gear, palette.TextMid, 17))));
     }
 
     private static Widget BuildBody(BuildContext context, ScenarioListState state)
@@ -159,6 +147,13 @@ public sealed class ScenarioListScreen : StatelessWidget
                     scenario,
                     state.LastRunOf(scenario.Id)))];
 
+        // История прогонов: сюда попадают и быстрые тесты, чьего сценария нет в списке.
+        if (state.RecentSessions.Count > 0)
+        {
+            children.Add(BuildSectionHead(palette, strings.Mobile.RecentSessions));
+            children.AddRange(state.RecentSessions.Select(report => BuildSessionRow(context, report)));
+        }
+
         return new RefreshIndicator(
             onRefresh: () => cubit.RefreshAsync(),
             color: palette.Rps,
@@ -179,6 +174,113 @@ public sealed class ScenarioListScreen : StatelessWidget
                     color: palette.TextMid,
                     textAlign: TextAlign.Center,
                     fontFamily: NetBenchFonts.Ui)));
+
+    private static Padding BuildSectionHead(NetBenchPalette palette, string title) =>
+        new Padding(
+            new Avalonia.Thickness(0, 14, 0, 12),
+            new Text(
+                title.ToUpperInvariant(),
+                fontSize: 12,
+                fontWeight: FontWeight.Bold,
+                color: palette.TextMid,
+                letterSpacing: 0.6,
+                fontFamily: NetBenchFonts.Ui));
+
+    /// <summary>
+    /// Строка истории: точка статуса, сценарий с хостом, RPS и время прогона.
+    /// Плотнее карточки сценария — сессий накапливается много, и это не точка входа,
+    /// а журнал; тап открывает сохранённый отчёт.
+    /// </summary>
+    private static Column BuildSessionRow(BuildContext context, TestRunReport report)
+    {
+        var palette = NetBenchTheme.PaletteOf(context);
+        var strings = Translations<Strings>.Of(context);
+        var errorPct = report.Summary.ErrorRate * 100;
+        var failed = errorPct >= 5;
+        var host = string.IsNullOrWhiteSpace(report.Scenario.Target)
+            ? strings.Scenarios.TargetNotSet
+            : StripScheme(report.Scenario.Target);
+
+        return new Column(
+            crossAxisAlignment: CrossAxisAlignment.Stretch,
+            children:
+            [
+                new InkWell(
+                    onTap: () => Navigator.Of(context).Push(
+                        ThemedPageRoute.Of(_ => new ResultScreen(report))),
+                    child: new Container(
+                        padding: new Avalonia.Thickness(0, 12),
+                        child: new Row(
+                            spacing: 10,
+                            crossAxisAlignment: CrossAxisAlignment.Center,
+                            children:
+                            [
+                                new Container(
+                                    width: 7,
+                                    height: 7,
+                                    decoration: new BoxDecoration(
+                                        Color: failed ? palette.Error : palette.Success,
+                                        Shape: BoxShape.Circle)),
+                                new Expanded(
+                                    new Column(
+                                        crossAxisAlignment: CrossAxisAlignment.Start,
+                                        mainAxisSize: MainAxisSize.Min,
+                                        children:
+                                        [
+                                            new Text(
+                                                DisplayName(strings, report.Scenario),
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.SemiBold,
+                                                color: palette.TextHi,
+                                                fontFamily: NetBenchFonts.Ui,
+                                                maxLines: 1),
+                                            new SizedBox(height: 2),
+                                            new Text(
+                                                host,
+                                                fontSize: 11.5,
+                                                color: palette.TextFaint,
+                                                fontFamily: NetBenchFonts.Mono,
+                                                maxLines: 1),
+                                        ])),
+                                new Column(
+                                    crossAxisAlignment: CrossAxisAlignment.End,
+                                    mainAxisSize: MainAxisSize.Min,
+                                    children:
+                                    [
+                                        new Text(
+                                            strings.Mobile.SessionRps(FormatRps(report.Summary.RequestsPerSecond)),
+                                            fontSize: 12.5,
+                                            fontWeight: FontWeight.SemiBold,
+                                            color: palette.Rps,
+                                            fontFamily: NetBenchFonts.Mono,
+                                            maxLines: 1),
+                                        new SizedBox(height: 2),
+                                        new Text(
+                                            FormatFinishedAt(report.FinishedAt),
+                                            fontSize: 11,
+                                            color: palette.TextFaint,
+                                            fontFamily: NetBenchFonts.Mono,
+                                            maxLines: 1),
+                                    ]),
+                                new IconGlyph(GlyphKind.ChevronRight, palette.TextFaint, 12),
+                            ]))),
+                new Container(height: 1, color: palette.Border),
+            ]);
+    }
+
+    /// <summary>
+    /// Сегодняшние прогоны — только время, остальные — с датой. Культура берётся
+    /// UI-шная: SetLocale по умолчанию меняет только её, а подпись должна следовать языку.
+    /// </summary>
+    private static string FormatFinishedAt(DateTime finishedAt)
+    {
+        var local = finishedAt.ToLocalTime();
+        var culture = CultureInfo.CurrentUICulture;
+
+        return local.Date == DateTime.Now.Date
+            ? local.ToString("HH:mm", culture)
+            : local.ToString("d MMM, HH:mm", culture);
+    }
 
     /// <summary>
     /// Карточка со свайпом влево: подтверждение и удаление сценария из репозитория.
@@ -322,7 +424,7 @@ public sealed class ScenarioListScreen : StatelessWidget
             return;
         }
 
-        Navigator.Of(context).Push(new BuilderPageRoute(_ => new MonitorScreen(scenario)));
+        Navigator.Of(context).Push(ThemedPageRoute.Of(_ => new MonitorScreen(scenario)));
     }
 
     private static Material BuildQuickTestButton(BuildContext context, NetBenchPalette palette, string label)
@@ -335,7 +437,7 @@ public sealed class ScenarioListScreen : StatelessWidget
             elevation: 6,
             shadowColor: palette.Rps,
             child: new InkWell(
-                onTap: () => Navigator.Of(context).Push(new BuilderPageRoute(static _ => new QuickTestScreen())),
+                onTap: () => Navigator.Of(context).Push(ThemedPageRoute.Of(static _ => new QuickTestScreen())),
                 borderRadius: radius,
                 child: new Container(
                     height: 54,

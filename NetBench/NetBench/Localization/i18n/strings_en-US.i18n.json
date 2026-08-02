@@ -116,7 +116,18 @@
     "deleteScenarioTitle": "Delete scenario?",
     "deleteScenarioMessage": "“{name: string}” will be deleted permanently.",
     "delete": "Delete",
-    "scenarioDeleted": "Scenario “{name: string}” deleted"
+    "scenarioDeleted": "Scenario “{name: string}” deleted",
+    "recentSessions": "Recent sessions",
+    "sessionRps": "{rps: string} rps",
+    "sessionError": "{err: string}% errors"
+  },
+  "settings": {
+    "title": "Settings",
+    "openSettings": "Open settings",
+    "language": "Language",
+    "appearance": "Appearance",
+    "themeDark": "Dark theme",
+    "themeLight": "Light theme"
   },
   "testRun": {
     "recording": "RECORDING",
