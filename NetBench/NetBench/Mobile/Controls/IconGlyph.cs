@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Media;
 using Plumix.Rendering;
 using Plumix.Widgets;
+using Color = Plumix.UI.Color;
 
 namespace NetBench.Mobile.Controls;
 
@@ -62,7 +63,7 @@ internal sealed class GlyphPainter : CustomPainter
         switch (_kind)
         {
             case GlyphKind.Play:
-                context.DrawPolygon(brush, null,
+                context.Canvas.DrawPolygon(brush, null,
                 [
                     new Point(0, 0),
                     new Point(w, h / 2),
@@ -71,14 +72,14 @@ internal sealed class GlyphPainter : CustomPainter
                 break;
 
             case GlyphKind.Stop:
-                context.DrawRectangle(brush, null, new Rect(0, 0, w, h));
+                context.Canvas.DrawRectangle(brush, null, new Rect(0, 0, w, h));
                 break;
 
             case GlyphKind.Plus:
             {
                 var pen = StrokePen(brush, w * 2 / 14);
-                context.DrawLine(pen, new Point(w / 2, 0), new Point(w / 2, h));
-                context.DrawLine(pen, new Point(0, h / 2), new Point(w, h / 2));
+                context.Canvas.DrawLine(pen, new Point(w / 2, 0), new Point(w / 2, h));
+                context.Canvas.DrawLine(pen, new Point(0, h / 2), new Point(w, h / 2));
                 break;
             }
 
@@ -87,9 +88,9 @@ internal sealed class GlyphPainter : CustomPainter
                 // Стрелка вверх над лотком — как в макете (viewBox 14x14)
                 var pen = StrokePen(brush, w * 1.6 / 14);
                 var u = w / 14;
-                context.DrawLine(pen, new Point(7 * u, 0.5 * u), new Point(7 * u, 9 * u));
-                context.DrawLine(pen, new Point(3 * u, 4 * u), new Point(7 * u, 0.5 * u));
-                context.DrawLine(pen, new Point(11 * u, 4 * u), new Point(7 * u, 0.5 * u));
+                context.Canvas.DrawLine(pen, new Point(7 * u, 0.5 * u), new Point(7 * u, 9 * u));
+                context.Canvas.DrawLine(pen, new Point(3 * u, 4 * u), new Point(7 * u, 0.5 * u));
+                context.Canvas.DrawLine(pen, new Point(11 * u, 4 * u), new Point(7 * u, 0.5 * u));
                 var tray = new PolylineGeometry(
                     [
                         new Point(1 * u, 9 * u),
@@ -98,14 +99,14 @@ internal sealed class GlyphPainter : CustomPainter
                         new Point(13 * u, 9 * u),
                     ],
                     isFilled: false);
-                context.DrawGeometry(null, pen, tray);
+                context.Canvas.DrawGeometry(null, pen, tray);
                 break;
             }
 
             case GlyphKind.Sun:
             {
                 var center = new Point(w / 2, h / 2);
-                context.DrawCircle(brush, null, center, w * 3.1 / 16);
+                context.Canvas.DrawCircle(brush, null, center, w * 3.1 / 16);
                 var pen = StrokePen(brush, w * 1.4 / 16);
                 for (var i = 0; i < 8; i++)
                 {
@@ -113,7 +114,7 @@ internal sealed class GlyphPainter : CustomPainter
                     var (sin, cos) = Math.SinCos(angle);
                     var inner = new Point(center.X + cos * w * 0.31, center.Y + sin * h * 0.31);
                     var outer = new Point(center.X + cos * w * 0.46, center.Y + sin * h * 0.46);
-                    context.DrawLine(pen, inner, outer);
+                    context.Canvas.DrawLine(pen, inner, outer);
                 }
 
                 break;
@@ -129,7 +130,7 @@ internal sealed class GlyphPainter : CustomPainter
                         new Point(w * 0.35, h * 0.85),
                     ],
                     isFilled: false);
-                context.DrawGeometry(null, pen, chevron);
+                context.Canvas.DrawGeometry(null, pen, chevron);
                 break;
             }
 
@@ -143,7 +144,7 @@ internal sealed class GlyphPainter : CustomPainter
                         new Point(w * 0.84, h * 0.24),
                     ],
                     isFilled: false);
-                context.DrawGeometry(null, pen, check);
+                context.Canvas.DrawGeometry(null, pen, check);
                 break;
             }
 
@@ -159,12 +160,12 @@ internal sealed class GlyphPainter : CustomPainter
                     var (sin, cos) = Math.SinCos(angle);
                     var inner = new Point(center.X + cos * w * 0.33, center.Y + sin * h * 0.33);
                     var outer = new Point(center.X + cos * w * 0.47, center.Y + sin * h * 0.47);
-                    context.DrawLine(pen, inner, outer);
+                    context.Canvas.DrawLine(pen, inner, outer);
                 }
 
                 var rim = new EllipseGeometry(new Rect(w * 0.20, h * 0.20, w * 0.60, h * 0.60));
-                context.DrawGeometry(null, pen, rim);
-                context.DrawCircle(brush, null, center, w * 0.11);
+                context.Canvas.DrawGeometry(null, pen, rim);
+                context.Canvas.DrawCircle(brush, null, center, w * 0.11);
                 break;
             }
 
@@ -174,7 +175,7 @@ internal sealed class GlyphPainter : CustomPainter
                 var full = new EllipseGeometry(new Rect(0, 0, w, h));
                 var bite = new EllipseGeometry(new Rect(w * 0.25, -h * 0.25, w, h));
                 var crescent = new CombinedGeometry(GeometryCombineMode.Exclude, full, bite);
-                context.DrawGeometry(brush, null, crescent);
+                context.Canvas.DrawGeometry(brush, null, crescent);
                 break;
             }
         }

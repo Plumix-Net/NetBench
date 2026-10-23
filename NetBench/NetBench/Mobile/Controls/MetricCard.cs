@@ -47,10 +47,11 @@ public sealed class MetricCard : StatelessWidget
         {
             new Text(
                 _value,
-                fontSize: 24,
-                fontWeight: FontWeight.ExtraBold,
-                color: toneColor,
-                fontFamily: NetBenchFonts.Mono,
+                style: new TextStyle(
+                    FontSize: 24,
+                    FontWeight: FontWeight.ExtraBold,
+                    Color: toneColor,
+                    FontFamily: NetBenchFonts.Mono),
                 maxLines: 1),
         };
         if (!string.IsNullOrEmpty(_unit))
@@ -59,10 +60,11 @@ public sealed class MetricCard : StatelessWidget
                 new Avalonia.Thickness(1, 0, 0, 2),
                 new Text(
                     _unit,
-                    fontSize: 15,
-                    fontWeight: FontWeight.Bold,
-                    color: toneColor,
-                    fontFamily: NetBenchFonts.Mono)));
+                    style: new TextStyle(
+                        FontSize: 15,
+                        FontWeight: FontWeight.Bold,
+                        Color: toneColor,
+                        FontFamily: NetBenchFonts.Mono))));
         }
 
         return new Container(
@@ -77,11 +79,12 @@ public sealed class MetricCard : StatelessWidget
                 [
                     new Text(
                         _label.ToUpperInvariant(),
-                        fontSize: 11,
-                        fontWeight: FontWeight.Bold,
-                        color: palette.TextMid,
-                        letterSpacing: 0.5,
-                        fontFamily: NetBenchFonts.Ui,
+                        style: new TextStyle(
+                            FontSize: 11,
+                            FontWeight: FontWeight.Bold,
+                            Color: palette.TextMid,
+                            LetterSpacing: 0.5,
+                            FontFamily: NetBenchFonts.Ui),
                         maxLines: 1),
                     new SizedBox(height: 6),
                     new Row(

@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Media;
 using Plumix.Rendering;
 using Plumix.Widgets;
+using Color = Plumix.UI.Color;
 
 namespace NetBench.Mobile.Controls;
 
@@ -73,7 +74,7 @@ internal sealed class SparklinePainter : CustomPainter
         points.CopyTo(fillPoints, 0);
         fillPoints[^2] = new Point(size.Width, size.Height);
         fillPoints[^1] = new Point(0, size.Height);
-        context.DrawPolygon(new SolidColorBrush(_fill), null, fillPoints);
+        context.Canvas.DrawPolygon(new SolidColorBrush(_fill), null, fillPoints);
 
         var pen = new Pen(
             new SolidColorBrush(_stroke),
@@ -81,7 +82,7 @@ internal sealed class SparklinePainter : CustomPainter
             lineCap: PenLineCap.Round,
             lineJoin: PenLineJoin.Round);
         for (var i = 1; i < points.Length; i++)
-            context.DrawLine(pen, points[i - 1], points[i]);
+            context.Canvas.DrawLine(pen, points[i - 1], points[i]);
     }
 
     public override bool ShouldRepaint(CustomPainter oldDelegate) =>

@@ -4,17 +4,16 @@ using NetBench.Features.Scenarios.Domain;
 using NetBench.Features.TestRun.Domain;
 using NetBench.Localization;
 using NetBench.Mobile.Controls;
-using NetBench.Mobile.Navigation;
 using NetBench.Mobile.Theme;
 using Plumix;
 using Plumix.Bloc;
-using Plumix.Foundation;
 using Plumix.Material;
 using Plumix.Rendering;
 using Plumix.Slang;
 using Plumix.Widgets;
 using AlertDialog = Plumix.Material.AlertDialog;
 using Colors = Plumix.Material.Colors;
+using Color = Plumix.UI.Color;
 
 namespace NetBench.Features.TestRun.Presentation.Mobile;
 
@@ -96,9 +95,9 @@ public sealed class MonitorScreen : StatelessWidget
             return;
 
         var report = state.Report;
-        Navigator.Of(context).PushAndRemoveUntil(
-            ThemedPageRoute.Of(_ => new ResultScreen(report), new RouteSettings("result")),
-            static route => route.Settings.Name == "home");
+        _ = Navigator.Of(context).PushAndRemoveUntil(
+            new MaterialPageRoute(_ => new ResultScreen(report), new RouteSettings("result")),
+            static route => route.IsFirst);
     }
 
     private static Column BuildBody(BuildContext context, TestRunState state)
@@ -127,9 +126,10 @@ public sealed class MonitorScreen : StatelessWidget
                     [
                         new Text(
                             strings.DisplayNameOf(scenario),
-                            fontSize: 13,
-                            color: palette.TextMid,
-                            fontFamily: NetBenchFonts.Ui,
+                            style: new TextStyle(
+                                FontSize: 13,
+                                Color: palette.TextMid,
+                                FontFamily: NetBenchFonts.Ui),
                             maxLines: 1),
                         new Row(
                             mainAxisSize: MainAxisSize.Min,
@@ -144,10 +144,11 @@ public sealed class MonitorScreen : StatelessWidget
                                         Shape: BoxShape.Circle)),
                                 new Text(
                                     strings.Mobile.Rec,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.Bold,
-                                    color: palette.Error,
-                                    fontFamily: NetBenchFonts.Ui),
+                                    style: new TextStyle(
+                                        FontSize: 12,
+                                        FontWeight: FontWeight.Bold,
+                                        Color: palette.Error,
+                                        FontFamily: NetBenchFonts.Ui)),
                             ]),
                     ]),
                 BuildMetricRow(
@@ -200,9 +201,6 @@ public sealed class MonitorScreen : StatelessWidget
     {
         // Снапшоты статистики приходят раз в ~250 мс — TweenAnimationBuilder
         // «докручивает» число между ними, чтобы счётчик не прыгал ступеньками.
-        // Ключ от цвета: Plumix не перекрашивает Text, у которого сменился только цвет
-        // (доля ошибок переходит порог 5%, а «%» остаётся прежним) — пересоздаём текст.
-        var colorKey = new ValueKey<Color>(valueColor);
         var valueRow = new List<Widget>
         {
             new TweenAnimationBuilder<double>(
@@ -211,12 +209,12 @@ public sealed class MonitorScreen : StatelessWidget
                 curve: Curves.Linear,
                 builder: (_, animated, _) => new Text(
                     animated.ToString(format),
-                    key: colorKey,
-                    fontSize: 52,
-                    fontWeight: FontWeight.ExtraBold,
-                    color: valueColor,
-                    fontFamily: NetBenchFonts.Mono,
-                    height: 1.1,
+                    style: new TextStyle(
+                        FontSize: 52,
+                        FontWeight: FontWeight.ExtraBold,
+                        Color: valueColor,
+                        FontFamily: NetBenchFonts.Mono,
+                        Height: 1.1),
                     maxLines: 1)),
         };
         if (!string.IsNullOrEmpty(unit))
@@ -225,11 +223,11 @@ public sealed class MonitorScreen : StatelessWidget
                 new Avalonia.Thickness(0, 0, 0, 9),
                 new Text(
                     unit,
-                    key: colorKey,
-                    fontSize: 20,
-                    fontWeight: FontWeight.ExtraBold,
-                    color: valueColor,
-                    fontFamily: NetBenchFonts.Mono)));
+                    style: new TextStyle(
+                        FontSize: 20,
+                        FontWeight: FontWeight.ExtraBold,
+                        Color: valueColor,
+                        FontFamily: NetBenchFonts.Mono))));
         }
 
         return new Padding(
@@ -248,11 +246,12 @@ public sealed class MonitorScreen : StatelessWidget
                                 decoration: new BoxDecoration(Color: dotColor, Shape: BoxShape.Circle)),
                             new Text(
                                 label.ToUpperInvariant(),
-                                fontSize: 12,
-                                fontWeight: FontWeight.SemiBold,
-                                color: palette.TextMid,
-                                letterSpacing: 0.6,
-                                fontFamily: NetBenchFonts.Ui),
+                                style: new TextStyle(
+                                    FontSize: 12,
+                                    FontWeight: FontWeight.SemiBold,
+                                    Color: palette.TextMid,
+                                    LetterSpacing: 0.6,
+                                    FontFamily: NetBenchFonts.Ui)),
                         ]),
                     new SizedBox(height: 2),
                     new Row(
@@ -283,8 +282,8 @@ public sealed class MonitorScreen : StatelessWidget
                     mainAxisAlignment: MainAxisAlignment.SpaceBetween,
                     children:
                     [
-                        new Text(elapsedLabel, fontSize: 12.5, color: palette.TextMid, fontFamily: NetBenchFonts.Mono),
-                        new Text(totalLabel, fontSize: 12.5, color: palette.TextMid, fontFamily: NetBenchFonts.Mono),
+                        new Text(elapsedLabel, style: new TextStyle(FontSize: 12.5, Color: palette.TextMid, FontFamily: NetBenchFonts.Mono)),
+                        new Text(totalLabel, style: new TextStyle(FontSize: 12.5, Color: palette.TextMid, FontFamily: NetBenchFonts.Mono)),
                     ]),
             ]);
     }
@@ -310,10 +309,11 @@ public sealed class MonitorScreen : StatelessWidget
                             new IconGlyph(GlyphKind.Stop, Colors.White, 14),
                             new Text(
                                 label,
-                                fontSize: 17,
-                                fontWeight: FontWeight.ExtraBold,
-                                color: Colors.White,
-                                fontFamily: NetBenchFonts.Ui),
+                                style: new TextStyle(
+                                    FontSize: 17,
+                                    FontWeight: FontWeight.ExtraBold,
+                                    Color: Colors.White,
+                                    FontFamily: NetBenchFonts.Ui)),
                         ]))));
     }
 

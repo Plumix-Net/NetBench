@@ -1,6 +1,7 @@
 using Avalonia.Media;
 using Plumix.Material;
 using Plumix.Widgets;
+using Color = Plumix.UI.Color;
 
 namespace NetBench.Mobile.Theme;
 
@@ -45,52 +46,52 @@ public sealed record NetBenchPalette
     public static NetBenchPalette Dark { get; } = new()
     {
         IsDark = true,
-        BgBase = Color.Parse("#101014"),
-        BgSunken = Color.Parse("#0A0A0C"),
-        BgPanel = Color.Parse("#16161A"),
-        BgCard = Color.Parse("#1E1E24"),
-        BgCardHover = Color.Parse("#25252C"),
-        Border = Color.Parse("#232329"),
-        BorderStrong = Color.Parse("#2A2A31"),
-        TextHi = Color.Parse("#FFFFFF"),
-        Text = Color.Parse("#EDEDF0"),
-        TextMid = Color.Parse("#8A8A94"),
-        TextDim = Color.Parse("#6A6A74"),
-        TextFaint = Color.Parse("#5A5A64"),
-        Rps = Color.Parse("#1E90FF"),
-        Latency = Color.Parse("#FFA500"),
-        Error = Color.Parse("#FF4D4F"),
-        Success = Color.Parse("#52C41A"),
-        RpsTint = Color.FromArgb(36, 0x1E, 0x90, 0xFF),
-        LatencyTint = Color.FromArgb(36, 0xFF, 0xA5, 0x00),
-        ErrorTint = Color.FromArgb(36, 0xFF, 0x4D, 0x4F),
-        SuccessTint = Color.FromArgb(36, 0x52, 0xC4, 0x1A),
+        BgBase = new(0xFF101014),
+        BgSunken = new(0xFF0A0A0C),
+        BgPanel = new(0xFF16161A),
+        BgCard = new(0xFF1E1E24),
+        BgCardHover = new(0xFF25252C),
+        Border = new(0xFF232329),
+        BorderStrong = new(0xFF2A2A31),
+        TextHi = new(0xFFFFFFFF),
+        Text = new(0xFFEDEDF0),
+        TextMid = new(0xFF8A8A94),
+        TextDim = new(0xFF6A6A74),
+        TextFaint = new(0xFF5A5A64),
+        Rps = new(0xFF1E90FF),
+        Latency = new(0xFFFFA500),
+        Error = new(0xFFFF4D4F),
+        Success = new(0xFF52C41A),
+        RpsTint = Color.FromARGB(36, 0x1E, 0x90, 0xFF),
+        LatencyTint = Color.FromARGB(36, 0xFF, 0xA5, 0x00),
+        ErrorTint = Color.FromARGB(36, 0xFF, 0x4D, 0x4F),
+        SuccessTint = Color.FromARGB(36, 0x52, 0xC4, 0x1A),
     };
 
     public static NetBenchPalette Light { get; } = new()
     {
         IsDark = false,
-        BgBase = Color.Parse("#F5F6F8"),
-        BgSunken = Color.Parse("#E7E9ED"),
-        BgPanel = Color.Parse("#FFFFFF"),
-        BgCard = Color.Parse("#FFFFFF"),
-        BgCardHover = Color.Parse("#EEF0F3"),
-        Border = Color.Parse("#E3E5EA"),
-        BorderStrong = Color.Parse("#D2D6DD"),
-        TextHi = Color.Parse("#0C0D10"),
-        Text = Color.Parse("#22242A"),
-        TextMid = Color.Parse("#5C616C"),
-        TextDim = Color.Parse("#878C97"),
-        TextFaint = Color.Parse("#AEB2BC"),
+        BgBase = new(0xFFF5F6F8),
+        BgSunken = new(0xFFE7E9ED),
+        BgPanel = new(0xFFFFFFFF),
+        BgCard = new(0xFFFFFFFF),
+        BgCardHover = new(0xFFEEF0F3),
+        Border = new(0xFFE3E5EA),
+        BorderStrong = new(0xFFD2D6DD),
+        TextHi = new(0xFF0C0D10),
+        Text = new(0xFF22242A),
+        TextMid = new(0xFF5C616C),
+        TextDim = new(0xFF878C97),
+        TextFaint = new(0xFFAEB2BC),
         // Акценты затемнены для AA-контраста на светлых поверхностях
-        Rps = Color.Parse("#1370D6"),
-        Latency = Color.Parse("#D9820A"),
-        Error = Color.Parse("#E23A3C"),
-        Success = Color.Parse("#3E9C12"),
-        RpsTint = Color.FromArgb(31, 0x13, 0x70, 0xD6),
-        LatencyTint = Color.FromArgb(41, 0xD9, 0x82, 0x0A),
-        ErrorTint = Color.FromArgb(31, 0xE2, 0x3A, 0x3C),
-        SuccessTint = Color.FromArgb(36, 0x3E, 0x9C, 0x12),
+        Rps = new(0xFF1370D6),
+        Latency = new(0xFFD9820A),
+        Error = new(0xFFE23A3C),
+        Success = new(0xFF3E9C12),
+        RpsTint = Color.FromARGB(31, 0x13, 0x70, 0xD6),
+        LatencyTint = Color.FromARGB(41, 0xD9, 0x82, 0x0A),
+        ErrorTint = Color.FromARGB(31, 0xE2, 0x3A, 0x3C),
+        SuccessTint = Color.FromARGB(36, 0x3E, 0x9C, 0x12),
     };
 }
 
@@ -114,44 +115,47 @@ public sealed class NetBenchTheme : InheritedWidget
         NetBenchPalette palette,
         Action toggleTheme,
         Widget child,
-        Plumix.Foundation.Key? key = null) : base(key)
+        Plumix.Foundation.Key? key = null) : base(child, key)
     {
         Palette = palette;
         ToggleTheme = toggleTheme;
-        Child = child;
     }
 
     public NetBenchPalette Palette { get; }
 
     public Action ToggleTheme { get; }
 
-    public Widget Child { get; }
-
-    public override Widget Build(BuildContext context) => Child;
-
-    protected override bool UpdateShouldNotify(InheritedWidget oldWidget) =>
+    public override bool UpdateShouldNotify(InheritedWidget oldWidget) =>
         !Equals(((NetBenchTheme)oldWidget).Palette, Palette);
 
     public static NetBenchPalette PaletteOf(BuildContext context) => Of(context).Palette;
 
     public static NetBenchTheme Of(BuildContext context) =>
-        context.DependOnInherited<NetBenchTheme>()
+        context.DependOnInheritedWidgetOfExactType<NetBenchTheme>()
         ?? throw new InvalidOperationException("NetBenchTheme не найдена в дереве виджетов.");
 
     /// <summary>Material-тема из палитры — для стандартных виджетов (SnackBar, поля ввода и т.п.).</summary>
-    public static ThemeData CreateThemeData(NetBenchPalette palette) => new(
-        brightness: palette.IsDark ? Brightness.Dark : Brightness.Light,
-        scaffoldBackgroundColor: palette.BgBase,
-        canvasColor: palette.BgBase,
-        primaryColor: palette.Rps,
-        surfaceColor: palette.BgCard,
-        onSurfaceColor: palette.Text,
-        onSurfaceVariantColor: palette.TextMid,
-        outlineColor: palette.BorderStrong,
-        outlineVariantColor: palette.Border,
-        dividerColor: palette.Border,
-        cardColor: palette.BgCard,
-        errorColor: palette.Error,
-        surfaceContainerLowColor: palette.BgPanel,
-        iconTheme: new IconThemeData(Color: palette.Text, Size: 24));
+    public static ThemeData CreateThemeData(NetBenchPalette palette)
+    {
+        // Базовая схема M3 под яркость, поверх — только роли, для которых есть токены дизайна.
+        var colorScheme = (palette.IsDark ? ColorScheme.Dark() : ColorScheme.Light()) with
+        {
+            Primary = palette.Rps,
+            Surface = palette.BgCard,
+            OnSurface = palette.Text,
+            OnSurfaceVariant = palette.TextMid,
+            Outline = palette.BorderStrong,
+            OutlineVariant = palette.Border,
+            Error = palette.Error,
+            SurfaceContainerLow = palette.BgPanel,
+        };
+
+        return new ThemeData(
+            colorScheme: colorScheme,
+            scaffoldBackgroundColor: palette.BgBase,
+            canvasColor: palette.BgBase,
+            dividerColor: palette.Border,
+            cardColor: palette.BgCard,
+            iconTheme: new IconThemeData(Color: palette.Text, Size: 24));
+    }
 }

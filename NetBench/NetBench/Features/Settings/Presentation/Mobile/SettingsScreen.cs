@@ -66,10 +66,11 @@ public sealed class SettingsScreen : StatelessWidget
                             padding: default(Avalonia.Thickness))),
                     new Text(
                         title,
-                        fontSize: 20,
-                        fontWeight: FontWeight.ExtraBold,
-                        color: palette.TextHi,
-                        fontFamily: NetBenchFonts.Ui),
+                        style: new TextStyle(
+                            FontSize: 20,
+                            FontWeight: FontWeight.ExtraBold,
+                            Color: palette.TextHi,
+                            FontFamily: NetBenchFonts.Ui)),
                 ]));
 
     private static Padding BuildSectionHead(NetBenchPalette palette, string title) =>
@@ -77,11 +78,12 @@ public sealed class SettingsScreen : StatelessWidget
             new Avalonia.Thickness(0, 26, 0, 12),
             new Text(
                 title.ToUpperInvariant(),
-                fontSize: 12,
-                fontWeight: FontWeight.Bold,
-                color: palette.TextMid,
-                letterSpacing: 0.6,
-                fontFamily: NetBenchFonts.Ui));
+                style: new TextStyle(
+                    FontSize: 12,
+                    FontWeight: FontWeight.Bold,
+                    Color: palette.TextMid,
+                    LetterSpacing: 0.6,
+                    FontFamily: NetBenchFonts.Ui)));
 
     private static Material BuildLanguageGroup(BuildContext context, NetBenchPalette palette)
     {
@@ -154,10 +156,11 @@ public sealed class SettingsScreen : StatelessWidget
             new Expanded(
                 new Text(
                     label,
-                    fontSize: 15,
-                    fontWeight: selected ? FontWeight.SemiBold : FontWeight.Normal,
-                    color: selected ? palette.TextHi : palette.Text,
-                    fontFamily: NetBenchFonts.Ui,
+                    style: new TextStyle(
+                        FontSize: 15,
+                        FontWeight: selected ? FontWeight.SemiBold : FontWeight.Normal,
+                        Color: selected ? palette.TextHi : palette.Text,
+                        FontFamily: NetBenchFonts.Ui),
                     maxLines: 1)),
         };
 
@@ -165,9 +168,10 @@ public sealed class SettingsScreen : StatelessWidget
         {
             children.Add(new Text(
                 trailing,
-                fontSize: 12.5,
-                color: palette.TextFaint,
-                fontFamily: NetBenchFonts.Mono));
+                style: new TextStyle(
+                    FontSize: 12.5,
+                    Color: palette.TextFaint,
+                    FontFamily: NetBenchFonts.Mono)));
         }
 
         // Место под галочку занято всегда — иначе строки дёргаются при смене выбора.
@@ -195,16 +199,18 @@ public sealed class SettingsScreen : StatelessWidget
             [
                 new Text(
                     strings.App.Title,
-                    fontSize: 13,
-                    fontWeight: FontWeight.Bold,
-                    color: palette.TextDim,
-                    fontFamily: NetBenchFonts.Ui),
+                    style: new TextStyle(
+                        FontSize: 13,
+                        FontWeight: FontWeight.Bold,
+                        Color: palette.TextDim,
+                        FontFamily: NetBenchFonts.Ui)),
                 new SizedBox(height: 2),
                 new Text(
                     strings.App.Tagline,
-                    fontSize: 12,
-                    color: palette.TextFaint,
-                    fontFamily: NetBenchFonts.Ui),
+                    style: new TextStyle(
+                        FontSize: 12,
+                        Color: palette.TextFaint,
+                        FontFamily: NetBenchFonts.Ui)),
             ]);
 
     /// <summary>«ru-RU» → «Русский»: родное имя языка без страны, с заглавной буквы.</summary>

@@ -9,6 +9,7 @@ using Plumix.Rendering;
 using Plumix.Slang;
 using Plumix.Widgets;
 using Colors = Plumix.Material.Colors;
+using Color = Plumix.UI.Color;
 
 namespace NetBench.Features.Report.Presentation.Mobile;
 
@@ -74,10 +75,11 @@ public sealed class ResultScreen : StatelessWidget
                             padding: default(Avalonia.Thickness))),
                     new Text(
                         title,
-                        fontSize: 20,
-                        fontWeight: FontWeight.ExtraBold,
-                        color: palette.TextHi,
-                        fontFamily: NetBenchFonts.Ui),
+                        style: new TextStyle(
+                            FontSize: 20,
+                            FontWeight: FontWeight.ExtraBold,
+                            Color: palette.TextHi,
+                            FontFamily: NetBenchFonts.Ui)),
                 ]));
     }
 
@@ -100,10 +102,11 @@ public sealed class ResultScreen : StatelessWidget
                 [
                     new Text(
                         strings.DisplayNameOf(scenario),
-                        fontSize: 19,
-                        fontWeight: FontWeight.ExtraBold,
-                        color: palette.TextHi,
-                        fontFamily: NetBenchFonts.Ui,
+                        style: new TextStyle(
+                            FontSize: 19,
+                            FontWeight: FontWeight.ExtraBold,
+                            Color: palette.TextHi,
+                            FontFamily: NetBenchFonts.Ui),
                         maxLines: 1),
                     new SizedBox(height: 3),
                     // SelectableText: длинный URL можно выделить и скопировать по частям
@@ -117,9 +120,10 @@ public sealed class ResultScreen : StatelessWidget
                     new SizedBox(height: 10),
                     new Text(
                         meta,
-                        fontSize: 11.5,
-                        color: palette.TextFaint,
-                        fontFamily: NetBenchFonts.Mono,
+                        style: new TextStyle(
+                            FontSize: 11.5,
+                            Color: palette.TextFaint,
+                            FontFamily: NetBenchFonts.Mono),
                         maxLines: 1),
                 ]));
     }
@@ -160,11 +164,12 @@ public sealed class ResultScreen : StatelessWidget
             new Avalonia.Thickness(0, 26, 0, 12),
             new Text(
                 title.ToUpperInvariant(),
-                fontSize: 12,
-                fontWeight: FontWeight.Bold,
-                color: palette.TextMid,
-                letterSpacing: 0.6,
-                fontFamily: NetBenchFonts.Ui));
+                style: new TextStyle(
+                    FontSize: 12,
+                    FontWeight: FontWeight.Bold,
+                    Color: palette.TextMid,
+                    LetterSpacing: 0.6,
+                    FontFamily: NetBenchFonts.Ui)));
     }
 
     private Column BuildLatencyRows(Strings strings)
@@ -218,22 +223,25 @@ public sealed class ResultScreen : StatelessWidget
                             width: 44,
                             child: new Text(
                                 codeLabel,
-                                fontSize: 14,
-                                fontWeight: FontWeight.Bold,
-                                color: color,
-                                fontFamily: NetBenchFonts.Mono)),
+                                style: new TextStyle(
+                                    FontSize: 14,
+                                    FontWeight: FontWeight.Bold,
+                                    Color: color,
+                                    FontFamily: NetBenchFonts.Mono))),
                         new Expanded(
                             new Text(
                                 strings.Mobile.StatusRequests(bucket.Count.ToString("N0")),
-                                fontSize: 13,
-                                color: palette.TextMid,
-                                fontFamily: NetBenchFonts.Mono,
+                                style: new TextStyle(
+                                    FontSize: 13,
+                                    Color: palette.TextMid,
+                                    FontFamily: NetBenchFonts.Mono),
                                 maxLines: 1)),
                         new Text(
                             $"{pct.ToString("F1")}{strings.Common.Percent}",
-                            fontSize: 13,
-                            color: palette.TextMid,
-                            fontFamily: NetBenchFonts.Mono),
+                            style: new TextStyle(
+                                FontSize: 13,
+                                Color: palette.TextMid,
+                                FontFamily: NetBenchFonts.Mono)),
                     ]));
             yield return new Container(height: 1, color: palette.Border);
         }
@@ -273,10 +281,11 @@ public sealed class ResultScreen : StatelessWidget
                             new IconGlyph(GlyphKind.Share, Colors.White, 14),
                             new Text(
                                 strings.Mobile.ShareReport,
-                                fontSize: 15,
-                                fontWeight: FontWeight.Bold,
-                                color: Colors.White,
-                                fontFamily: NetBenchFonts.Ui),
+                                style: new TextStyle(
+                                    FontSize: 15,
+                                    FontWeight: FontWeight.Bold,
+                                    Color: Colors.White,
+                                    FontFamily: NetBenchFonts.Ui)),
                         ]))));
     }
 

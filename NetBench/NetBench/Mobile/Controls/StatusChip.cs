@@ -37,10 +37,11 @@ public sealed class StatusChip : StatelessWidget
                 BorderRadius: BorderRadius.Circular(100)),
             child: new Text(
                 _text,
-                fontSize: 11.5,
-                fontWeight: FontWeight.SemiBold,
-                color: foreground,
-                fontFamily: NetBenchFonts.Ui,
+                style: new TextStyle(
+                    FontSize: 11.5,
+                    FontWeight: FontWeight.SemiBold,
+                    Color: foreground,
+                    FontFamily: NetBenchFonts.Ui),
                 maxLines: 1));
     }
 }

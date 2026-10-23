@@ -3,7 +3,6 @@ using NetBench.Features.Scenarios.Domain;
 using NetBench.Features.TestRun.Presentation.Mobile;
 using NetBench.Localization;
 using NetBench.Mobile.Controls;
-using NetBench.Mobile.Navigation;
 using NetBench.Mobile.Theme;
 using Plumix.Material;
 using Plumix.Rendering;
@@ -60,11 +59,12 @@ internal sealed class QuickTestScreenState : State, IDisposable
                             new SizedBox(height: 28),
                             new Text(
                                 strings.Mobile.TargetUrl,
-                                fontSize: 12,
-                                fontWeight: FontWeight.SemiBold,
-                                color: palette.TextMid,
-                                letterSpacing: 0.5,
-                                fontFamily: NetBenchFonts.Ui),
+                                style: new TextStyle(
+                                    FontSize: 12,
+                                    FontWeight: FontWeight.SemiBold,
+                                    Color: palette.TextMid,
+                                    LetterSpacing: 0.5,
+                                    FontFamily: NetBenchFonts.Ui)),
                             new SizedBox(height: 8),
                             BuildUrlField(context, palette, strings.Scenarios.Editor.TargetPlaceholder, error),
                             new Spacer(),
@@ -89,73 +89,52 @@ internal sealed class QuickTestScreenState : State, IDisposable
                         padding: default(Avalonia.Thickness))),
                 new Text(
                     title,
-                    fontSize: 20,
-                    fontWeight: FontWeight.ExtraBold,
-                    color: palette.TextHi,
-                    fontFamily: NetBenchFonts.Ui),
+                    style: new TextStyle(
+                        FontSize: 20,
+                        FontWeight: FontWeight.ExtraBold,
+                        Color: palette.TextHi,
+                        FontFamily: NetBenchFonts.Ui)),
             ]);
     }
 
     /// <summary>
     /// Плейсхолдер отдан InputDecoration.hintText — ручной Stack с текстом больше не нужен.
     /// </summary>
-    /// <remarks>
-    /// Avalonia называет Backspace <c>Key.Back</c>, и Plumix-хост принимает Backspace, который
-    /// никто не обработал, за системный «назад». А Plumix-поле обрабатывает только KeyDown,
-    /// тогда как на Android повторные DEL от клавиатуры приходят как KeyRepeat (KeyUp первого
-    /// нажатия теряется) — второе стирание подряд закрывало экран. Предок-Focus добивает
-    /// такие Backspace сам и не отпускает их к хосту.
-    /// </remarks>
-    private Focus BuildUrlField(BuildContext context, NetBenchPalette palette, string placeholder, string? error)
+    private TextField BuildUrlField(BuildContext context, NetBenchPalette palette, string placeholder, string? error)
     {
         var monoStyle = new TextStyle(
             FontFamily: NetBenchFonts.Mono,
             FontSize: 15,
             Color: palette.TextHi);
 
-        return new Focus(
-            canRequestFocus: false,
-            skipTraversal: true,
-            onKeyEvent: HandleLeakedBackspace,
-            child: new TextField(
-                controller: _controller,
-                autofocus: true,
-                keyboardType: TextInputType.Url,
-                textInputAction: TextInputAction.Go,
-                autocorrect: false,
-                enableSuggestions: false,
-                onSubmitted: _ => StartRun(context),
-                style: monoStyle,
-                decoration: new InputDecoration(
-                    hintText: placeholder,
-                    hintStyle: monoStyle with { Color = palette.TextFaint },
-                    hintMaxLines: 1,
-                    errorText: error,
-                    errorStyle: new TextStyle(FontFamily: NetBenchFonts.Ui, FontSize: 12, Color: palette.Error),
-                    filled: true,
-                    fillColor: palette.BgCard,
-                    isDense: true,
-                    contentPadding: new Avalonia.Thickness(16, 14),
-                    border: new OutlineInputBorder(
-                        borderRadius: BorderRadius.Circular(10),
-                        borderSide: new BorderSide(Colors.Transparent, style: BorderStyle.None)),
-                    errorBorder: new OutlineInputBorder(
-                        borderRadius: BorderRadius.Circular(10),
-                        borderSide: new BorderSide(palette.Error)),
-                    focusedErrorBorder: new OutlineInputBorder(
-                        borderRadius: BorderRadius.Circular(10),
-                        borderSide: new BorderSide(palette.Error, width: 1.5)))));
-    }
-
-    /// <summary>Сюда доходит только то, что поле не обработало само.</summary>
-    private KeyEventResult HandleLeakedBackspace(FocusNode node, KeyEvent keyEvent)
-    {
-        if (keyEvent is KeyUpEvent || keyEvent.LogicalKey != LogicalKeyboardKey.Backspace)
-            return KeyEventResult.Ignored;
-
-        // В пустом поле DeleteBackward просто ничего не сделает — но и «назад» не случится.
-        _controller.DeleteBackward();
-        return KeyEventResult.Handled;
+        return new TextField(
+            controller: _controller,
+            autofocus: true,
+            keyboardType: TextInputType.Url,
+            textInputAction: TextInputActionType.Go,
+            autocorrect: false,
+            enableSuggestions: false,
+            onSubmitted: _ => StartRun(context),
+            style: monoStyle,
+            decoration: new InputDecoration(
+                hintText: placeholder,
+                hintStyle: monoStyle.CopyWith(color: palette.TextFaint),
+                hintMaxLines: 1,
+                errorText: error,
+                errorStyle: new TextStyle(FontFamily: NetBenchFonts.Ui, FontSize: 12, Color: palette.Error),
+                filled: true,
+                fillColor: palette.BgCard,
+                isDense: true,
+                contentPadding: new Avalonia.Thickness(16, 14),
+                border: new OutlineInputBorder(
+                    borderRadius: BorderRadius.Circular(10),
+                    borderSide: new BorderSide(Colors.Transparent, style: BorderStyle.None)),
+                errorBorder: new OutlineInputBorder(
+                    borderRadius: BorderRadius.Circular(10),
+                    borderSide: new BorderSide(palette.Error)),
+                focusedErrorBorder: new OutlineInputBorder(
+                    borderRadius: BorderRadius.Circular(10),
+                    borderSide: new BorderSide(palette.Error, width: 1.5))));
     }
 
     private Material BuildRunButton(BuildContext context, NetBenchPalette palette, string label, bool enabled)
@@ -183,10 +162,11 @@ internal sealed class QuickTestScreenState : State, IDisposable
                             new IconGlyph(GlyphKind.Play, foreground, 14),
                             new Text(
                                 label,
-                                fontSize: 17,
-                                fontWeight: FontWeight.ExtraBold,
-                                color: foreground,
-                                fontFamily: NetBenchFonts.Ui),
+                                style: new TextStyle(
+                                    FontSize: 17,
+                                    FontWeight: FontWeight.ExtraBold,
+                                    Color: foreground,
+                                    FontFamily: NetBenchFonts.Ui)),
                         ]))));
     }
 
@@ -202,6 +182,6 @@ internal sealed class QuickTestScreenState : State, IDisposable
             Target = url,
         };
 
-        Navigator.Of(context).Push(ThemedPageRoute.Of(_ => new MonitorScreen(scenario)));
+        _ = Navigator.Of(context).Push(new MaterialPageRoute(_ => new MonitorScreen(scenario)));
     }
 }

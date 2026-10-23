@@ -32,14 +32,15 @@ public sealed class LatencyBar : StatelessWidget
                     width: 44,
                     child: new Text(
                         _label,
-                        fontSize: 12,
-                        color: palette.TextMid,
-                        fontFamily: NetBenchFonts.Ui,
+                        style: new TextStyle(
+                            FontSize: 12,
+                            Color: palette.TextMid,
+                            FontFamily: NetBenchFonts.Ui),
                         maxLines: 1)),
                 new Expanded(
                     new ClipRRect(
-                        BorderRadius.Circular(100),
-                        new Container(
+                        borderRadius: BorderRadius.Circular(100),
+                        child: new Container(
                             height: 8,
                             color: palette.Border,
                             child: new Align(
@@ -56,9 +57,10 @@ public sealed class LatencyBar : StatelessWidget
                     width: 56,
                     child: new Text(
                         _display,
-                        fontSize: 12.5,
-                        color: palette.Text,
-                        fontFamily: NetBenchFonts.Mono,
+                        style: new TextStyle(
+                            FontSize: 12.5,
+                            Color: palette.Text,
+                            FontFamily: NetBenchFonts.Mono),
                         textAlign: TextAlign.Right,
                         maxLines: 1)),
             ]);

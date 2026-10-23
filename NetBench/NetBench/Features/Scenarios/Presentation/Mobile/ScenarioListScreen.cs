@@ -7,7 +7,6 @@ using NetBench.Features.TestRun.Domain;
 using NetBench.Features.TestRun.Presentation.Mobile;
 using NetBench.Localization;
 using NetBench.Mobile.Controls;
-using NetBench.Mobile.Navigation;
 using NetBench.Mobile.Theme;
 using Plumix.Bloc;
 using Plumix.Foundation;
@@ -75,17 +74,19 @@ public sealed class ScenarioListScreen : StatelessWidget
                     [
                         new Text(
                             title,
-                            fontSize: 26,
-                            fontWeight: FontWeight.ExtraBold,
-                            color: palette.TextHi,
-                            letterSpacing: -0.5,
-                            fontFamily: NetBenchFonts.Ui),
+                            style: new TextStyle(
+                                FontSize: 26,
+                                FontWeight: FontWeight.ExtraBold,
+                                Color: palette.TextHi,
+                                LetterSpacing: -0.5,
+                                FontFamily: NetBenchFonts.Ui)),
                         new SizedBox(height: 2),
                         new Text(
                             subtitle,
-                            fontSize: 13,
-                            color: palette.TextMid,
-                            fontFamily: NetBenchFonts.Ui),
+                            style: new TextStyle(
+                                FontSize: 13,
+                                Color: palette.TextMid,
+                                FontFamily: NetBenchFonts.Ui)),
                     ]),
                 new Row(
                     mainAxisSize: MainAxisSize.Min,
@@ -117,8 +118,8 @@ public sealed class ScenarioListScreen : StatelessWidget
             color: palette.BgCard,
             borderRadius: radius,
             child: new InkWell(
-                onTap: () => Navigator.Of(context).Push(
-                    ThemedPageRoute.Of(static _ => new SettingsScreen(), new RouteSettings("settings"))),
+                onTap: () => _ = Navigator.Of(context).Push(
+                    new MaterialPageRoute(static _ => new SettingsScreen(), new RouteSettings("settings"))),
                 borderRadius: radius,
                 child: new Container(
                     width: 36,
@@ -171,21 +172,23 @@ public sealed class ScenarioListScreen : StatelessWidget
             child: new Center(
                 child: new Text(
                     message,
-                    fontSize: 13.5,
-                    color: palette.TextMid,
-                    textAlign: TextAlign.Center,
-                    fontFamily: NetBenchFonts.Ui)));
+                    style: new TextStyle(
+                        FontSize: 13.5,
+                        Color: palette.TextMid,
+                        FontFamily: NetBenchFonts.Ui),
+                    textAlign: TextAlign.Center)));
 
     private static Padding BuildSectionHead(NetBenchPalette palette, string title) =>
         new Padding(
             new Avalonia.Thickness(0, 14, 0, 12),
             new Text(
                 title.ToUpperInvariant(),
-                fontSize: 12,
-                fontWeight: FontWeight.Bold,
-                color: palette.TextMid,
-                letterSpacing: 0.6,
-                fontFamily: NetBenchFonts.Ui));
+                style: new TextStyle(
+                    FontSize: 12,
+                    FontWeight: FontWeight.Bold,
+                    Color: palette.TextMid,
+                    LetterSpacing: 0.6,
+                    FontFamily: NetBenchFonts.Ui)));
 
     /// <summary>
     /// Строка истории: точка статуса, сценарий с хостом, RPS и время прогона.
@@ -207,8 +210,8 @@ public sealed class ScenarioListScreen : StatelessWidget
             children:
             [
                 new InkWell(
-                    onTap: () => Navigator.Of(context).Push(
-                        ThemedPageRoute.Of(_ => new ResultScreen(report))),
+                    onTap: () => _ = Navigator.Of(context).Push(
+                        new MaterialPageRoute(_ => new ResultScreen(report))),
                     child: new Container(
                         padding: new Avalonia.Thickness(0, 12),
                         child: new Row(
@@ -230,17 +233,19 @@ public sealed class ScenarioListScreen : StatelessWidget
                                         [
                                             new Text(
                                                 strings.DisplayNameOf(report.Scenario),
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.SemiBold,
-                                                color: palette.TextHi,
-                                                fontFamily: NetBenchFonts.Ui,
+                                                style: new TextStyle(
+                                                    FontSize: 14,
+                                                    FontWeight: FontWeight.SemiBold,
+                                                    Color: palette.TextHi,
+                                                    FontFamily: NetBenchFonts.Ui),
                                                 maxLines: 1),
                                             new SizedBox(height: 2),
                                             new Text(
                                                 host,
-                                                fontSize: 11.5,
-                                                color: palette.TextFaint,
-                                                fontFamily: NetBenchFonts.Mono,
+                                                style: new TextStyle(
+                                                    FontSize: 11.5,
+                                                    Color: palette.TextFaint,
+                                                    FontFamily: NetBenchFonts.Mono),
                                                 maxLines: 1),
                                         ])),
                                 new Column(
@@ -250,17 +255,19 @@ public sealed class ScenarioListScreen : StatelessWidget
                                     [
                                         new Text(
                                             strings.Mobile.SessionRps(FormatRps(report.Summary.RequestsPerSecond)),
-                                            fontSize: 12.5,
-                                            fontWeight: FontWeight.SemiBold,
-                                            color: palette.Rps,
-                                            fontFamily: NetBenchFonts.Mono,
+                                            style: new TextStyle(
+                                                FontSize: 12.5,
+                                                FontWeight: FontWeight.SemiBold,
+                                                Color: palette.Rps,
+                                                FontFamily: NetBenchFonts.Mono),
                                             maxLines: 1),
                                         new SizedBox(height: 2),
                                         new Text(
                                             FormatFinishedAt(report.FinishedAt),
-                                            fontSize: 11,
-                                            color: palette.TextFaint,
-                                            fontFamily: NetBenchFonts.Mono,
+                                            style: new TextStyle(
+                                                FontSize: 11,
+                                                Color: palette.TextFaint,
+                                                FontFamily: NetBenchFonts.Mono),
                                             maxLines: 1),
                                     ]),
                                 new IconGlyph(GlyphKind.ChevronRight, palette.TextFaint, 12),
@@ -351,11 +358,12 @@ public sealed class ScenarioListScreen : StatelessWidget
                 BorderRadius: BorderRadius.Circular(10)),
             child: new Text(
                 label.ToUpperInvariant(),
-                fontSize: 13,
-                fontWeight: FontWeight.Bold,
-                color: Colors.White,
-                letterSpacing: 0.6,
-                fontFamily: NetBenchFonts.Ui));
+                style: new TextStyle(
+                    FontSize: 13,
+                    FontWeight: FontWeight.Bold,
+                    Color: Colors.White,
+                    LetterSpacing: 0.6,
+                    FontFamily: NetBenchFonts.Ui)));
 
     private static Padding BuildCard(BuildContext context, LoadScenario scenario, TestRunReport? lastRun)
     {
@@ -370,9 +378,10 @@ public sealed class ScenarioListScreen : StatelessWidget
         Widget status = lastRun is null
             ? new Text(
                 strings.Mobile.NoRunsChip,
-                fontSize: 11.5,
-                color: palette.TextFaint,
-                fontFamily: NetBenchFonts.Ui)
+                style: new TextStyle(
+                    FontSize: 11.5,
+                    Color: palette.TextFaint,
+                    FontFamily: NetBenchFonts.Ui))
             : new StatusChip(
                 strings.Mobile.LastRunChip(
                     (lastRun.Summary.ErrorRate * 100).ToString("F1"),
@@ -398,17 +407,19 @@ public sealed class ScenarioListScreen : StatelessWidget
                             [
                                 new Text(
                                     name,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.Bold,
-                                    color: palette.TextHi,
-                                    fontFamily: NetBenchFonts.Ui,
+                                    style: new TextStyle(
+                                        FontSize: 16,
+                                        FontWeight: FontWeight.Bold,
+                                        Color: palette.TextHi,
+                                        FontFamily: NetBenchFonts.Ui),
                                     maxLines: 1),
                                 new SizedBox(height: 3),
                                 new Text(
                                     host,
-                                    fontSize: 12.5,
-                                    color: palette.TextMid,
-                                    fontFamily: NetBenchFonts.Mono,
+                                    style: new TextStyle(
+                                        FontSize: 12.5,
+                                        Color: palette.TextMid,
+                                        FontFamily: NetBenchFonts.Mono),
                                     maxLines: 1),
                                 new SizedBox(height: 12),
                                 new Row(
@@ -435,7 +446,7 @@ public sealed class ScenarioListScreen : StatelessWidget
             return;
         }
 
-        Navigator.Of(context).Push(ThemedPageRoute.Of(_ => new MonitorScreen(scenario)));
+        _ = Navigator.Of(context).Push(new MaterialPageRoute(_ => new MonitorScreen(scenario)));
     }
 
     private static Material BuildQuickTestButton(BuildContext context, NetBenchPalette palette, string label)
@@ -448,7 +459,7 @@ public sealed class ScenarioListScreen : StatelessWidget
             elevation: 6,
             shadowColor: palette.Rps,
             child: new InkWell(
-                onTap: () => Navigator.Of(context).Push(ThemedPageRoute.Of(static _ => new QuickTestScreen())),
+                onTap: () => _ = Navigator.Of(context).Push(new MaterialPageRoute(static _ => new QuickTestScreen())),
                 borderRadius: radius,
                 child: new Container(
                     height: 54,
@@ -461,10 +472,11 @@ public sealed class ScenarioListScreen : StatelessWidget
                             new IconGlyph(GlyphKind.Plus, Colors.White, 14),
                             new Text(
                                 label,
-                                fontSize: 15,
-                                fontWeight: FontWeight.Bold,
-                                color: Colors.White,
-                                fontFamily: NetBenchFonts.Ui),
+                                style: new TextStyle(
+                                    FontSize: 15,
+                                    FontWeight: FontWeight.Bold,
+                                    Color: Colors.White,
+                                    FontFamily: NetBenchFonts.Ui)),
                         ]))));
     }
 
