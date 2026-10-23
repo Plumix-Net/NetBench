@@ -16,9 +16,9 @@
     <PackageVersion Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.1" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <!-- Plumix (мобильный UI: Flutter-подобные виджеты + Bloc) -->
-    <PackageVersion Include="Plumix" Version="0.1.0-alpha.13" />
-    <PackageVersion Include="Plumix.Material" Version="0.1.0-alpha.13" />
-    <PackageVersion Include="Plumix.Bloc" Version="0.1.0-alpha.1" />
+    <PackageVersion Include="Plumix" Version="0.2.0-alpha.2" />
+    <PackageVersion Include="Plumix.Material" Version="0.2.0-alpha.2" />
+    <PackageVersion Include="Plumix.Bloc" Version="0.1.0-alpha.13" />
     <PackageVersion Include="Plumix.Slang" Version="0.1.0-alpha.13" />
     <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.15" />
     <!-- Core packages -->

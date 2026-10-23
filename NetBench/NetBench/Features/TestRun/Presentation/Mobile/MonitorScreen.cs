@@ -8,11 +8,13 @@ using NetBench.Mobile.Navigation;
 using NetBench.Mobile.Theme;
 using Plumix;
 using Plumix.Bloc;
+using Plumix.Foundation;
 using Plumix.Material;
 using Plumix.Rendering;
 using Plumix.Slang;
 using Plumix.Widgets;
 using AlertDialog = Plumix.Material.AlertDialog;
+using Colors = Plumix.Material.Colors;
 
 namespace NetBench.Features.TestRun.Presentation.Mobile;
 
@@ -124,7 +126,7 @@ public sealed class MonitorScreen : StatelessWidget
                     children:
                     [
                         new Text(
-                            scenario.Name,
+                            strings.DisplayNameOf(scenario),
                             fontSize: 13,
                             color: palette.TextMid,
                             fontFamily: NetBenchFonts.Ui,
@@ -198,6 +200,9 @@ public sealed class MonitorScreen : StatelessWidget
     {
         // Снапшоты статистики приходят раз в ~250 мс — TweenAnimationBuilder
         // «докручивает» число между ними, чтобы счётчик не прыгал ступеньками.
+        // Ключ от цвета: Plumix не перекрашивает Text, у которого сменился только цвет
+        // (доля ошибок переходит порог 5%, а «%» остаётся прежним) — пересоздаём текст.
+        var colorKey = new ValueKey<Color>(valueColor);
         var valueRow = new List<Widget>
         {
             new TweenAnimationBuilder<double>(
@@ -206,6 +211,7 @@ public sealed class MonitorScreen : StatelessWidget
                 curve: Curves.Linear,
                 builder: (_, animated, _) => new Text(
                     animated.ToString(format),
+                    key: colorKey,
                     fontSize: 52,
                     fontWeight: FontWeight.ExtraBold,
                     color: valueColor,
@@ -219,6 +225,7 @@ public sealed class MonitorScreen : StatelessWidget
                 new Avalonia.Thickness(0, 0, 0, 9),
                 new Text(
                     unit,
+                    key: colorKey,
                     fontSize: 20,
                     fontWeight: FontWeight.ExtraBold,
                     color: valueColor,

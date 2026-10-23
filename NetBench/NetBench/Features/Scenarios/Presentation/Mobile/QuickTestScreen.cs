@@ -8,7 +8,9 @@ using NetBench.Mobile.Theme;
 using Plumix.Material;
 using Plumix.Rendering;
 using Plumix.Slang;
+using Plumix.UI;
 using Plumix.Widgets;
+using Colors = Plumix.Material.Colors;
 
 namespace NetBench.Features.Scenarios.Presentation.Mobile;
 
@@ -41,8 +43,10 @@ internal sealed class QuickTestScreenState : State, IDisposable
     {
         var palette = NetBenchTheme.PaletteOf(context);
         var strings = Translations<Strings>.Of(context);
-        var url = _controller.Text.Trim();
-        var enabled = url.Length > 0;
+        var input = _controller.Text.Trim();
+        var enabled = TargetUrl.TryNormalize(input, out _);
+        // Ошибку показываем только для непустого ввода: пустое поле — не ошибка, а ещё не начатый ввод.
+        var error = input.Length > 0 && !enabled ? strings.Mobile.InvalidUrl : null;
 
         return new Scaffold(
             body: new SafeArea(
@@ -62,7 +66,7 @@ internal sealed class QuickTestScreenState : State, IDisposable
                                 letterSpacing: 0.5,
                                 fontFamily: NetBenchFonts.Ui),
                             new SizedBox(height: 8),
-                            BuildUrlField(palette, strings.Scenarios.Editor.TargetPlaceholder),
+                            BuildUrlField(context, palette, strings.Scenarios.Editor.TargetPlaceholder, error),
                             new Spacer(),
                             BuildRunButton(context, palette, strings.Mobile.Run, enabled),
                             new SizedBox(height: 40),
@@ -95,28 +99,63 @@ internal sealed class QuickTestScreenState : State, IDisposable
     /// <summary>
     /// Плейсхолдер отдан InputDecoration.hintText — ручной Stack с текстом больше не нужен.
     /// </summary>
-    private TextField BuildUrlField(NetBenchPalette palette, string placeholder)
+    /// <remarks>
+    /// Avalonia называет Backspace <c>Key.Back</c>, и Plumix-хост принимает Backspace, который
+    /// никто не обработал, за системный «назад». А Plumix-поле обрабатывает только KeyDown,
+    /// тогда как на Android повторные DEL от клавиатуры приходят как KeyRepeat (KeyUp первого
+    /// нажатия теряется) — второе стирание подряд закрывало экран. Предок-Focus добивает
+    /// такие Backspace сам и не отпускает их к хосту.
+    /// </remarks>
+    private Focus BuildUrlField(BuildContext context, NetBenchPalette palette, string placeholder, string? error)
     {
         var monoStyle = new TextStyle(
             FontFamily: NetBenchFonts.Mono,
             FontSize: 15,
             Color: palette.TextHi);
 
-        return new TextField(
-            controller: _controller,
-            autofocus: true,
-            style: monoStyle,
-            decoration: new InputDecoration(
-                hintText: placeholder,
-                hintStyle: monoStyle with { Color = palette.TextFaint },
-                hintMaxLines: 1,
-                filled: true,
-                fillColor: palette.BgCard,
-                isDense: true,
-                contentPadding: new Avalonia.Thickness(16, 14),
-                border: new OutlineInputBorder(
-                    borderRadius: BorderRadius.Circular(10),
-                    borderSide: new BorderSide(Colors.Transparent, style: BorderStyle.None))));
+        return new Focus(
+            canRequestFocus: false,
+            skipTraversal: true,
+            onKeyEvent: HandleLeakedBackspace,
+            child: new TextField(
+                controller: _controller,
+                autofocus: true,
+                keyboardType: TextInputType.Url,
+                textInputAction: TextInputAction.Go,
+                autocorrect: false,
+                enableSuggestions: false,
+                onSubmitted: _ => StartRun(context),
+                style: monoStyle,
+                decoration: new InputDecoration(
+                    hintText: placeholder,
+                    hintStyle: monoStyle with { Color = palette.TextFaint },
+                    hintMaxLines: 1,
+                    errorText: error,
+                    errorStyle: new TextStyle(FontFamily: NetBenchFonts.Ui, FontSize: 12, Color: palette.Error),
+                    filled: true,
+                    fillColor: palette.BgCard,
+                    isDense: true,
+                    contentPadding: new Avalonia.Thickness(16, 14),
+                    border: new OutlineInputBorder(
+                        borderRadius: BorderRadius.Circular(10),
+                        borderSide: new BorderSide(Colors.Transparent, style: BorderStyle.None)),
+                    errorBorder: new OutlineInputBorder(
+                        borderRadius: BorderRadius.Circular(10),
+                        borderSide: new BorderSide(palette.Error)),
+                    focusedErrorBorder: new OutlineInputBorder(
+                        borderRadius: BorderRadius.Circular(10),
+                        borderSide: new BorderSide(palette.Error, width: 1.5)))));
+    }
+
+    /// <summary>Сюда доходит только то, что поле не обработало само.</summary>
+    private KeyEventResult HandleLeakedBackspace(FocusNode node, KeyEvent keyEvent)
+    {
+        if (keyEvent is KeyUpEvent || keyEvent.LogicalKey != LogicalKeyboardKey.Backspace)
+            return KeyEventResult.Ignored;
+
+        // В пустом поле DeleteBackward просто ничего не сделает — но и «назад» не случится.
+        _controller.DeleteBackward();
+        return KeyEventResult.Handled;
     }
 
     private Material BuildRunButton(BuildContext context, NetBenchPalette palette, string label, bool enabled)
@@ -153,15 +192,9 @@ internal sealed class QuickTestScreenState : State, IDisposable
 
     private void StartRun(BuildContext context)
     {
-        var url = _controller.Text.Trim();
-        if (url.Length == 0)
+        // Кнопка с невалидным URL неактивна, но «Go» на клавиатуре приходит в обход неё.
+        if (!TargetUrl.TryNormalize(_controller.Text, out var url))
             return;
-
-        if (!url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
-            !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-        {
-            url = "https://" + url;
-        }
 
         var scenario = new LoadScenario
         {

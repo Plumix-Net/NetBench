@@ -17,6 +17,7 @@ using Plumix.Slang;
 using Plumix.UI;
 using Plumix.Widgets;
 using AlertDialog = Plumix.Material.AlertDialog;
+using Colors = Plumix.Material.Colors;
 using DismissDirection = Plumix.Widgets.DismissDirection;
 
 namespace NetBench.Features.Scenarios.Presentation.Mobile;
@@ -228,7 +229,7 @@ public sealed class ScenarioListScreen : StatelessWidget
                                         children:
                                         [
                                             new Text(
-                                                DisplayName(strings, report.Scenario),
+                                                strings.DisplayNameOf(report.Scenario),
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.SemiBold,
                                                 color: palette.TextHi,
@@ -293,21 +294,31 @@ public sealed class ScenarioListScreen : StatelessWidget
     {
         var palette = NetBenchTheme.PaletteOf(context);
         var strings = Translations<Strings>.Of(context);
-        var cubit = context.Read<ScenarioListCubit>();
-        var name = DisplayName(strings, scenario);
+        var name = strings.DisplayNameOf(scenario);
 
         return new Dismissible(
             key: new ValueKey<Guid>(scenario.Id),
             direction: DismissDirection.EndToStart,
             background: BuildDeleteBackground(palette, strings.Mobile.Delete),
             confirmDismiss: _ => ConfirmDeleteAsync(context, name),
-            onDismissed: direction =>
-            {
-                _ = cubit.DeleteScenarioAsync(scenario);
-                ScaffoldMessenger.Of(context).ShowSnackBar(
-                    new SnackBar(content: new Text(strings.Mobile.ScenarioDeleted(name))));
-            },
+            onDismissed: direction => _ = DeleteScenarioAsync(context, scenario, name),
             child: BuildCard(context, scenario, lastRun));
+    }
+
+    /// <summary>
+    /// Кубит убирает карточку синхронно, а снекбар ждёт записи на диск: «удалён» говорим,
+    /// только если файл действительно удалён, иначе карточка вернулась — сообщаем об ошибке.
+    /// </summary>
+    private static async Task DeleteScenarioAsync(BuildContext context, LoadScenario scenario, string name)
+    {
+        // Всё из контекста берём до await — после него элемент списка уже размонтирован.
+        var messenger = ScaffoldMessenger.Of(context);
+        var strings = Translations<Strings>.ReadOf(context);
+        var deleted = await context.Read<ScenarioListCubit>().DeleteScenarioAsync(scenario);
+
+        messenger.ShowSnackBar(new SnackBar(content: new Text(deleted
+            ? strings.Mobile.ScenarioDeleted(name)
+            : strings.Mobile.ScenarioDeleteFailed(name))));
     }
 
     private static async Task<bool?> ConfirmDeleteAsync(BuildContext context, string name)
@@ -351,7 +362,7 @@ public sealed class ScenarioListScreen : StatelessWidget
         var palette = NetBenchTheme.PaletteOf(context);
         var strings = Translations<Strings>.Of(context);
 
-        var name = DisplayName(strings, scenario);
+        var name = strings.DisplayNameOf(scenario);
         var host = string.IsNullOrWhiteSpace(scenario.Target)
             ? strings.Scenarios.TargetNotSet
             : StripScheme(scenario.Target);
@@ -410,17 +421,17 @@ public sealed class ScenarioListScreen : StatelessWidget
                             ])))));
     }
 
-    private static string DisplayName(Strings strings, LoadScenario scenario) =>
-        string.IsNullOrWhiteSpace(scenario.Name)
-            ? strings.Scenarios.Unnamed
-            : scenario.Name;
-
     private static void OpenScenario(BuildContext context, LoadScenario scenario)
     {
-        if (string.IsNullOrWhiteSpace(scenario.Target))
+        // Сценарии приходят и с desktop-редактора, где Target не валидируется:
+        // с битым адресом прогон отработал бы всю длительность одними ошибками.
+        if (!TargetUrl.IsValid(scenario.Target))
         {
-            ScaffoldMessenger.Of(context).ShowSnackBar(
-                new SnackBar(content: new Text(Translations<Strings>.ReadOf(context).Shell.TargetRequired)));
+            var strings = Translations<Strings>.ReadOf(context);
+            var message = string.IsNullOrWhiteSpace(scenario.Target)
+                ? strings.Shell.TargetRequired
+                : strings.Mobile.InvalidUrl;
+            ScaffoldMessenger.Of(context).ShowSnackBar(new SnackBar(content: new Text(message)));
             return;
         }
 

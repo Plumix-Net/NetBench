@@ -67,13 +67,29 @@ public sealed class ScenarioListCubit : Cubit<ScenarioListState>
         });
     }
 
-    public async Task DeleteScenarioAsync(LoadScenario scenario, CancellationToken ct = default)
+    /// <summary>
+    /// Убирает карточку из состояния сразу, до записи на диск: Dismissible уже отыграл
+    /// анимацию и ждёт, что его выкинут из дерева в этом же кадре. Если удалить файл
+    /// не вышло — перечитываем репозиторий, и карточка возвращается.
+    /// </summary>
+    /// <returns><c>false</c>, если сценарий удалить не удалось.</returns>
+    public async Task<bool> DeleteScenarioAsync(LoadScenario scenario, CancellationToken ct = default)
     {
-        await _repository.DeleteAsync(scenario.Id, ct);
         EmitSafe(State with
         {
             Scenarios = State.Scenarios.Where(s => s.Id != scenario.Id).ToList(),
         });
+
+        try
+        {
+            await _repository.DeleteAsync(scenario.Id, ct);
+            return true;
+        }
+        catch (Exception) when (!ct.IsCancellationRequested)
+        {
+            await RefreshAsync(CancellationToken.None);
+            return false;
+        }
     }
 
     public override void Close()

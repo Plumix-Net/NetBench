@@ -93,6 +93,7 @@
     "noRunsChip": "not run yet",
     "lastRunChip": "{err: string}% err · {rps: string} rps",
     "targetUrl": "TARGET URL",
+    "invalidUrl": "Invalid URL — an http(s) address with a host is required",
     "run": "RUN",
     "stop": "STOP",
     "rec": "REC",
@@ -117,6 +118,7 @@
     "deleteScenarioMessage": "“{name: string}” will be deleted permanently.",
     "delete": "Delete",
     "scenarioDeleted": "Scenario “{name: string}” deleted",
+    "scenarioDeleteFailed": "Couldn’t delete “{name: string}”",
     "recentSessions": "Recent sessions",
     "sessionRps": "{rps: string} rps",
     "sessionError": "{err: string}% errors"

@@ -1,5 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="auto">
 	<uses-permission android:name="android.permission.INTERNET" />
-	<application android:label="NetBench" android:icon="@drawable/Icon" />
+	<!-- Нагрузочный тест часто бьёт в локальный/стейджинговый стенд по http:// —
+	     без cleartext Android молча режет такие запросы, и прогон даёт 100% ошибок. -->
+	<application android:label="NetBench" android:icon="@drawable/Icon" android:usesCleartextTraffic="true" />
 </manifest>

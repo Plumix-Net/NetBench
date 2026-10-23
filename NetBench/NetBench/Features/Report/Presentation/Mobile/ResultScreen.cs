@@ -8,6 +8,7 @@ using Plumix.Material;
 using Plumix.Rendering;
 using Plumix.Slang;
 using Plumix.Widgets;
+using Colors = Plumix.Material.Colors;
 
 namespace NetBench.Features.Report.Presentation.Mobile;
 
@@ -98,7 +99,7 @@ public sealed class ResultScreen : StatelessWidget
                 children:
                 [
                     new Text(
-                        scenario.Name,
+                        strings.DisplayNameOf(scenario),
                         fontSize: 19,
                         fontWeight: FontWeight.ExtraBold,
                         color: palette.TextHi,
@@ -283,7 +284,7 @@ public sealed class ResultScreen : StatelessWidget
     {
         var summary = _report.Summary;
         return $"""
-            {strings.App.Title} — {_report.Scenario.Name}
+            {strings.App.Title} — {strings.DisplayNameOf(_report.Scenario)}
             {_report.Scenario.Target}
             {strings.Mobile.AvgRps}: {summary.RequestsPerSecond:N0}
             {strings.Mobile.TotalRequests}: {summary.TotalRequests:N0}

@@ -95,6 +95,7 @@
     "noRunsChip": "ещё не запускался",
     "lastRunChip": "{err: string}% err · {rps: string} rps",
     "targetUrl": "TARGET URL",
+    "invalidUrl": "Некорректный URL — нужен http(s)-адрес с хостом",
     "run": "ЗАПУСК",
     "stop": "СТОП",
     "rec": "ЗАПИСЬ",
@@ -119,6 +120,7 @@
     "deleteScenarioMessage": "«{name: string}» будет удалён безвозвратно.",
     "delete": "Удалить",
     "scenarioDeleted": "Сценарий «{name: string}» удалён",
+    "scenarioDeleteFailed": "Не удалось удалить «{name: string}»",
     "recentSessions": "Последние сессии",
     "sessionRps": "{rps: string} rps",
     "sessionError": "{err: string}% ошибок"
