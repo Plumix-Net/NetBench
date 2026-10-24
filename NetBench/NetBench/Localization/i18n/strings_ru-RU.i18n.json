@@ -93,7 +93,7 @@
     "homeSubtitle": "Дежурный мониторинг",
     "quickTest": "Быстрый тест",
     "noRunsChip": "ещё не запускался",
-    "lastRunChip": "{err: string}% err · {rps: string} rps",
+    "lastRunChip": "{err: string}% ошибок · {rps: string} rps",
     "targetUrl": "TARGET URL",
     "invalidUrl": "Некорректный URL — нужен http(s)-адрес с хостом",
     "run": "ЗАПУСК",
@@ -123,7 +123,11 @@
     "scenarioDeleteFailed": "Не удалось удалить «{name: string}»",
     "recentSessions": "Последние сессии",
     "sessionRps": "{rps: string} rps",
-    "sessionError": "{err: string}% ошибок"
+    "sessionError": "{err: string}% ошибок",
+    "back": "Назад",
+    "toggleTheme": "Сменить тему",
+    "emptyHint": "Сохранённых сценариев пока нет. Начните с быстрого теста: введите URL и запустите.",
+    "willRequest": "Будет запрошен {url: string}"
   },
   "settings": {
     "title": "Настройки",
@@ -131,7 +135,9 @@
     "language": "Язык",
     "appearance": "Оформление",
     "themeDark": "Тёмная тема",
-    "themeLight": "Светлая тема"
+    "themeLight": "Светлая тема",
+    "themeSystem": "Как в системе",
+    "languageSystem": "Как в системе"
   },
   "testRun": {
     "recording": "ЗАПИСЬ",

@@ -6,7 +6,7 @@ namespace NetBench.Android;
 // PlumixMainActivity передаёт фреймворку жизненный цикл, восстановление и системный «назад»
 // (включая predictive back на Android 14+) — своих мостов в голове не нужно.
 [Activity(
-    Label = "NetBench.Android",
+    Label = "NetBench",
     Theme = "@style/MyTheme.NoActionBar",
     Icon = "@drawable/icon",
     MainLauncher = true,

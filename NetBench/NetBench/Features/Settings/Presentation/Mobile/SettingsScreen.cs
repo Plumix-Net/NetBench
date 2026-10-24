@@ -1,8 +1,10 @@
 using System.Globalization;
 using Avalonia.Media;
+using NetBench.Features.Settings.Domain;
 using NetBench.Localization;
 using NetBench.Mobile.Controls;
 using NetBench.Mobile.Theme;
+using Plumix.Bloc;
 using Plumix.Material;
 using Plumix.Rendering;
 using Plumix.Slang;
@@ -14,7 +16,8 @@ namespace NetBench.Features.Settings.Presentation.Mobile;
 /// <summary>
 /// Настройки приложения: язык интерфейса и оформление.
 /// Обе настройки применяются сразу — язык через <see cref="LocaleSettings{T}"/>
-/// (перестраивает всех, кто читал строки из контекста), тема через <see cref="NetBenchTheme"/>.
+/// (перестраивает всех, кто читал строки из контекста), тема через <see cref="NetBenchTheme"/> —
+/// и сохраняются в <see cref="IAppSettingsStore"/>, чтобы пережить перезапуск.
 /// </summary>
 public sealed class SettingsScreen : StatelessWidget
 {
@@ -39,7 +42,7 @@ public sealed class SettingsScreen : StatelessWidget
                                         children:
                                         [
                                             BuildSectionHead(palette, strings.Settings.Language),
-                                            BuildLanguageGroup(context, palette),
+                                            BuildLanguageGroup(palette, strings),
                                             BuildSectionHead(palette, strings.Settings.Appearance),
                                             BuildThemeGroup(context, palette, strings),
                                             new SizedBox(height: 28),
@@ -56,14 +59,12 @@ public sealed class SettingsScreen : StatelessWidget
                 spacing: 12,
                 children:
                 [
-                    new Material(
-                        color: palette.BgCard,
-                        borderRadius: BorderRadius.Circular(8),
-                        child: new IconButton(
-                            icon: new Icon(Icons.ArrowBackIosNewRounded, size: 16, color: palette.Text),
-                            onPressed: () => Navigator.Pop(context),
-                            constraints: BoxConstraints.Tight(new Avalonia.Size(34, 34)),
-                            padding: default(Avalonia.Thickness))),
+                    new ToolButton(
+                        icon: new Icon(Icons.ArrowBackIosNewRounded, size: 16, color: palette.Text),
+                        onPressed: () => Navigator.Pop(context),
+                        tooltip: Translations<Strings>.Of(context).Mobile.Back,
+                        size: 34,
+                        radius: 8),
                     new Text(
                         title,
                         style: new TextStyle(
@@ -85,41 +86,69 @@ public sealed class SettingsScreen : StatelessWidget
                     LetterSpacing: 0.6,
                     FontFamily: NetBenchFonts.Ui)));
 
-    private static Material BuildLanguageGroup(BuildContext context, NetBenchPalette palette)
-    {
-        var supported = LocaleSettings<Strings>.SupportedCultures;
-        var current = Translations<Strings>.CultureOf(context);
+    /// <summary>
+    /// StatefulBuilder: «как в системе» может разрешиться в ту же культуру, что уже активна, —
+    /// тогда TranslationProvider ничего не перестроит, и галочку переставляем сами.
+    /// </summary>
+    private static StatefulBuilder BuildLanguageGroup(NetBenchPalette palette, Strings strings) =>
+        new((context, setState) =>
+        {
+            var store = RepositoryProvider<IAppSettingsStore>.Of(context);
+            var saved = store.Current.Culture;
+            var current = Translations<Strings>.CultureOf(context);
 
-        return BuildGroup(
-            palette,
-            [
-                .. supported.Select(Widget (culture) => BuildOptionRow(
-                    palette,
-                    DisplayName(culture),
-                    culture.TwoLetterISOLanguageName.ToUpperInvariant(),
-                    selected: string.Equals(culture.Name, current.Name, StringComparison.OrdinalIgnoreCase),
-                    onTap: () => LocaleSettings<Strings>.SetLocale(culture))),
-            ]);
-    }
+            void Select(string? culture)
+            {
+                setState(() => store.Save(store.Current with { Culture = culture }));
+                if (culture is null)
+                    LocaleSettings<Strings>.UseDeviceLocale();
+                else
+                    LocaleSettings<Strings>.SetLocaleRaw(culture);
+            }
+
+            return BuildGroup(
+                palette,
+                [
+                    BuildOptionRow(
+                        palette,
+                        strings.Settings.LanguageSystem,
+                        trailing: null,
+                        selected: saved is null,
+                        onTap: saved is null ? null : () => Select(null)),
+                    .. LocaleSettings<Strings>.SupportedCultures.Select(Widget (culture) =>
+                    {
+                        // Выбранной считаем только явно сохранённую культуру: «как в системе» тоже
+                        // разрешается в одну из них, но это другой выбор.
+                        var selected = saved is not null
+                            && string.Equals(culture.Name, current.Name, StringComparison.OrdinalIgnoreCase);
+                        return BuildOptionRow(
+                            palette,
+                            DisplayName(culture),
+                            culture.TwoLetterISOLanguageName.ToUpperInvariant(),
+                            selected,
+                            onTap: selected ? null : () => Select(culture.Name));
+                    }),
+                ]);
+        });
 
     private static Material BuildThemeGroup(BuildContext context, NetBenchPalette palette, Strings strings)
     {
         var theme = NetBenchTheme.Of(context);
 
-        // ToggleTheme — единственная точка смены темы, поэтому дёргаем её только
-        // когда выбранная строка отличается от текущей: повторный тап ничего не делает.
-        Widget Row(string label, bool isDark) => BuildOptionRow(
+        // Повторный тап по выбранной строке ничего не делает.
+        Widget Row(string label, ThemePreference preference) => BuildOptionRow(
             palette,
             label,
             trailing: null,
-            selected: palette.IsDark == isDark,
-            onTap: palette.IsDark == isDark ? null : theme.ToggleTheme);
+            selected: theme.Preference == preference,
+            onTap: theme.Preference == preference ? null : () => theme.SetPreference(preference));
 
         return BuildGroup(
             palette,
             [
-                Row(strings.Settings.ThemeDark, isDark: true),
-                Row(strings.Settings.ThemeLight, isDark: false),
+                Row(strings.Settings.ThemeSystem, ThemePreference.System),
+                Row(strings.Settings.ThemeDark, ThemePreference.Dark),
+                Row(strings.Settings.ThemeLight, ThemePreference.Light),
             ]);
     }
 

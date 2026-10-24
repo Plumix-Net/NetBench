@@ -10,6 +10,7 @@ using Plumix.Bloc;
 using Plumix.Material;
 using Plumix.Rendering;
 using Plumix.Slang;
+using Plumix.UI;
 using Plumix.Widgets;
 using AlertDialog = Plumix.Material.AlertDialog;
 using Colors = Plumix.Material.Colors;
@@ -66,7 +67,7 @@ public sealed class MonitorScreen : StatelessWidget
 
     private static async Task ConfirmAbortAsync(BuildContext context)
     {
-        var strings = Translations<Strings>.Of(context);
+        var strings = Translations<Strings>.ReadOf(context);
         var cubit = context.Read<TestRunCubit>();
 
         var confirmed = await MaterialDialogs.ShowDialog<bool>(
@@ -121,16 +122,19 @@ public sealed class MonitorScreen : StatelessWidget
             children:
             [
                 new Row(
-                    mainAxisAlignment: MainAxisAlignment.SpaceBetween,
+                    spacing: 12,
                     children:
                     [
-                        new Text(
-                            strings.DisplayNameOf(scenario),
-                            style: new TextStyle(
-                                FontSize: 13,
-                                Color: palette.TextMid,
-                                FontFamily: NetBenchFonts.Ui),
-                            maxLines: 1),
+                        // Expanded: длинное имя сценария обрезается, а не выталкивает «ЗАПИСЬ» за экран
+                        new Expanded(
+                            new Text(
+                                strings.DisplayNameOf(scenario),
+                                style: new TextStyle(
+                                    FontSize: 13,
+                                    Color: palette.TextMid,
+                                    FontFamily: NetBenchFonts.Ui),
+                                maxLines: 1,
+                                overflow: TextOverflow.Ellipsis)),
                         new Row(
                             mainAxisSize: MainAxisSize.Min,
                             spacing: 6,

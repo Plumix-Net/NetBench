@@ -1,4 +1,3 @@
-using System.Globalization;
 using Avalonia.Media;
 using NetBench.Features.Report.Presentation.Mobile;
 using NetBench.Features.Scenarios.Domain;
@@ -32,35 +31,34 @@ public sealed class ScenarioListScreen : StatelessWidget
         var palette = NetBenchTheme.PaletteOf(context);
         var strings = Translations<Strings>.Of(context);
 
+        // Кнопка быстрого теста — в слоте FAB, а не поверх Stack: Scaffold поднимает её над
+        // снекбаром, иначе снекбар («Некорректный URL», «Сценарий удалён») накрывал кнопку.
         return new Scaffold(
+            floatingActionButton: new Padding(
+                new Avalonia.Thickness(20, 0, 20, 12),
+                new SizedBox(
+                    width: double.PositiveInfinity,
+                    child: BuildQuickTestButton(context, palette, strings.Mobile.QuickTest))),
+            floatingActionButtonLocation: FloatingActionButtonLocation.CenterFloat,
             body: new SafeArea(
-                new Stack(
-                    fit: StackFit.Expand,
-                    children:
-                    [
-                        new Padding(
-                            new Avalonia.Thickness(20, 12, 20, 0),
-                            new Column(
-                                crossAxisAlignment: CrossAxisAlignment.Stretch,
-                                children:
-                                [
-                                    BuildHeader(context, palette, strings.App.Title, strings.Mobile.HomeSubtitle),
-                                    new SizedBox(height: 20),
-                                    new Expanded(
-                                        new BlocBuilder<ScenarioListCubit, ScenarioListState>(
-                                            builder: BuildBody)),
-                                ])),
-                        new Positioned(
-                            left: 20,
-                            right: 20,
-                            bottom: 28,
-                            child: BuildQuickTestButton(context, palette, strings.Mobile.QuickTest)),
-                    ])));
+                new Padding(
+                    new Avalonia.Thickness(20, 12, 20, 0),
+                    new Column(
+                        crossAxisAlignment: CrossAxisAlignment.Stretch,
+                        children:
+                        [
+                            BuildHeader(context, palette, strings.App.Title, strings.Mobile.HomeSubtitle),
+                            new SizedBox(height: 20),
+                            new Expanded(
+                                new BlocBuilder<ScenarioListCubit, ScenarioListState>(
+                                    builder: BuildBody)),
+                        ]))));
     }
 
     private static Row BuildHeader(BuildContext context, NetBenchPalette palette, string title, string subtitle)
     {
         var theme = NetBenchTheme.Of(context);
+        var strings = Translations<Strings>.Of(context);
 
         return new Row(
             mainAxisAlignment: MainAxisAlignment.SpaceBetween,
@@ -93,39 +91,17 @@ public sealed class ScenarioListScreen : StatelessWidget
                     spacing: 8,
                     children:
                     [
-                        BuildSettingsButton(context, palette),
-                        new Material(
-                            color: palette.BgCard,
-                            borderRadius: BorderRadius.Circular(9),
-                            child: new IconButton(
-                                icon: new IconGlyph(
-                                    palette.IsDark ? GlyphKind.Moon : GlyphKind.Sun,
-                                    palette.TextMid,
-                                    17),
-                                onPressed: theme.ToggleTheme,
-                                constraints: BoxConstraints.Tight(new Avalonia.Size(36, 36)),
-                                padding: default(Avalonia.Thickness))),
+                        new ToolButton(
+                            icon: new IconGlyph(GlyphKind.Gear, palette.TextMid, 17),
+                            onPressed: () => _ = Navigator.Of(context).Push(
+                                new MaterialPageRoute(static _ => new SettingsScreen(), new RouteSettings("settings"))),
+                            tooltip: strings.Settings.OpenSettings),
+                        new ToolButton(
+                            icon: new IconGlyph(palette.IsDark ? GlyphKind.Moon : GlyphKind.Sun, palette.TextMid, 17),
+                            onPressed: theme.ToggleTheme,
+                            tooltip: strings.Mobile.ToggleTheme),
                     ]),
             ]);
-    }
-
-    /// <summary>Шестерёнка настроек: язык и оформление — на отдельном экране.</summary>
-    private static Material BuildSettingsButton(BuildContext context, NetBenchPalette palette)
-    {
-        var radius = BorderRadius.Circular(9);
-
-        return new Material(
-            color: palette.BgCard,
-            borderRadius: radius,
-            child: new InkWell(
-                onTap: () => _ = Navigator.Of(context).Push(
-                    new MaterialPageRoute(static _ => new SettingsScreen(), new RouteSettings("settings"))),
-                borderRadius: radius,
-                child: new Container(
-                    width: 36,
-                    height: 36,
-                    alignment: Alignment.Center,
-                    child: new IconGlyph(GlyphKind.Gear, palette.TextMid, 17))));
     }
 
     private static Widget BuildBody(BuildContext context, ScenarioListState state)
@@ -143,7 +119,7 @@ public sealed class ScenarioListScreen : StatelessWidget
         List<Widget> children = state.Status == ScenarioListStatus.Failure
             ? [BuildPlaceholder(palette, strings.Scenarios.LoadFailed(state.Error ?? string.Empty))]
             : state.Scenarios.Count == 0
-                ? [BuildPlaceholder(palette, strings.Shell.EmptyDescription)]
+                ? [BuildPlaceholder(palette, strings.Mobile.EmptyHint)]
                 : [.. state.Scenarios.Select(scenario => BuildDismissibleCard(
                     context,
                     scenario,
@@ -277,13 +253,12 @@ public sealed class ScenarioListScreen : StatelessWidget
     }
 
     /// <summary>
-    /// Сегодняшние прогоны — только время, остальные — с датой. Культура берётся
-    /// UI-шная: SetLocale по умолчанию меняет только её, а подпись должна следовать языку.
+    /// Сегодняшние прогоны — только время, остальные — с датой; подпись следует языку интерфейса.
     /// </summary>
     private static string FormatFinishedAt(DateTime finishedAt)
     {
         var local = finishedAt.ToLocalTime();
-        var culture = CultureInfo.CurrentUICulture;
+        var culture = DisplayCulture.Current;
 
         return local.Date == DateTime.Now.Date
             ? local.ToString("HH:mm", culture)
@@ -330,7 +305,7 @@ public sealed class ScenarioListScreen : StatelessWidget
 
     private static async Task<bool?> ConfirmDeleteAsync(BuildContext context, string name)
     {
-        var strings = Translations<Strings>.Of(context);
+        var strings = Translations<Strings>.ReadOf(context);
 
         return await MaterialDialogs.ShowDialog<bool>(
             context,

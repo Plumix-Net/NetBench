@@ -43,9 +43,14 @@ internal sealed class QuickTestScreenState : State, IDisposable
         var palette = NetBenchTheme.PaletteOf(context);
         var strings = Translations<Strings>.Of(context);
         var input = _controller.Text.Trim();
-        var enabled = TargetUrl.TryNormalize(input, out _);
+        var enabled = TargetUrl.TryNormalize(input, out var url);
         // Ошибку показываем только для непустого ввода: пустое поле — не ошибка, а ещё не начатый ввод.
         var error = input.Length > 0 && !enabled ? strings.Mobile.InvalidUrl : null;
+        // Схему дописали за пользователя — покажем, куда пойдут запросы: «10.0.2.2:8080» без
+        // подсказки молча уходил в https и давал 100% ошибок на http-стенде.
+        var helper = enabled && !string.Equals(url, input, StringComparison.Ordinal)
+            ? strings.Mobile.WillRequest(url!)
+            : null;
 
         return new Scaffold(
             body: new SafeArea(
@@ -66,7 +71,7 @@ internal sealed class QuickTestScreenState : State, IDisposable
                                     LetterSpacing: 0.5,
                                     FontFamily: NetBenchFonts.Ui)),
                             new SizedBox(height: 8),
-                            BuildUrlField(context, palette, strings.Scenarios.Editor.TargetPlaceholder, error),
+                            BuildUrlField(palette, strings.Scenarios.Editor.TargetPlaceholder, error, helper),
                             new Spacer(),
                             BuildRunButton(context, palette, strings.Mobile.Run, enabled),
                             new SizedBox(height: 40),
@@ -79,14 +84,12 @@ internal sealed class QuickTestScreenState : State, IDisposable
             spacing: 12,
             children:
             [
-                new Material(
-                    color: palette.BgCard,
-                    borderRadius: BorderRadius.Circular(8),
-                    child: new IconButton(
-                        icon: new Icon(Icons.ArrowBackIosNewRounded, size: 16, color: palette.Text),
-                        onPressed: () => Navigator.Pop(context),
-                        constraints: BoxConstraints.Tight(new Avalonia.Size(34, 34)),
-                        padding: default(Avalonia.Thickness))),
+                new ToolButton(
+                    icon: new Icon(Icons.ArrowBackIosNewRounded, size: 16, color: palette.Text),
+                    onPressed: () => Navigator.Pop(context),
+                    tooltip: Translations<Strings>.Of(context).Mobile.Back,
+                    size: 34,
+                    radius: 8),
                 new Text(
                     title,
                     style: new TextStyle(
@@ -100,7 +103,7 @@ internal sealed class QuickTestScreenState : State, IDisposable
     /// <summary>
     /// Плейсхолдер отдан InputDecoration.hintText — ручной Stack с текстом больше не нужен.
     /// </summary>
-    private TextField BuildUrlField(BuildContext context, NetBenchPalette palette, string placeholder, string? error)
+    private TextField BuildUrlField(NetBenchPalette palette, string placeholder, string? error, string? helper)
     {
         var monoStyle = new TextStyle(
             FontFamily: NetBenchFonts.Mono,
@@ -114,12 +117,15 @@ internal sealed class QuickTestScreenState : State, IDisposable
             textInputAction: TextInputActionType.Go,
             autocorrect: false,
             enableSuggestions: false,
-            onSubmitted: _ => StartRun(context),
+            onSubmitted: _ => StartRun(Context),
             style: monoStyle,
             decoration: new InputDecoration(
                 hintText: placeholder,
                 hintStyle: monoStyle.CopyWith(color: palette.TextFaint),
                 hintMaxLines: 1,
+                helperText: helper,
+                helperStyle: new TextStyle(FontFamily: NetBenchFonts.Mono, FontSize: 12, Color: palette.TextMid),
+                helperMaxLines: 1,
                 errorText: error,
                 errorStyle: new TextStyle(FontFamily: NetBenchFonts.Ui, FontSize: 12, Color: palette.Error),
                 filled: true,

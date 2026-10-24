@@ -1,4 +1,3 @@
-using System.Globalization;
 using Avalonia.Media;
 using NetBench.Features.TestRun.Domain;
 using NetBench.Localization;
@@ -65,14 +64,12 @@ public sealed class ResultScreen : StatelessWidget
                 spacing: 12,
                 children:
                 [
-                    new Material(
-                        color: palette.BgCard,
-                        borderRadius: BorderRadius.Circular(8),
-                        child: new IconButton(
-                            icon: new Icon(Icons.ArrowBackIosNewRounded, size: 16, color: palette.Text),
-                            onPressed: () => Navigator.Pop(context),
-                            constraints: BoxConstraints.Tight(new Avalonia.Size(34, 34)),
-                            padding: default(Avalonia.Thickness))),
+                    new ToolButton(
+                        icon: new Icon(Icons.ArrowBackIosNewRounded, size: 16, color: palette.Text),
+                        onPressed: () => Navigator.Pop(context),
+                        tooltip: Translations<Strings>.Of(context).Mobile.Back,
+                        size: 34,
+                        radius: 8),
                     new Text(
                         title,
                         style: new TextStyle(
@@ -87,8 +84,9 @@ public sealed class ResultScreen : StatelessWidget
     {
         var scenario = _report.Scenario;
         var seconds = (_report.FinishedAt - _report.StartedAt).TotalSeconds;
+        // Дата — на языке интерфейса, как в списке сессий
         var meta = strings.Mobile.RunMeta(
-            _report.FinishedAt.ToLocalTime().ToString("g", CultureInfo.CurrentCulture),
+            _report.FinishedAt.ToLocalTime().ToString("g", DisplayCulture.Current),
             seconds.ToString("F0"));
 
         return new Container(

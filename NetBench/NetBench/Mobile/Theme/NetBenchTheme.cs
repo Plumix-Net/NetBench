@@ -1,4 +1,5 @@
 using Avalonia.Media;
+using NetBench.Features.Settings.Domain;
 using Plumix.Material;
 using Plumix.Widgets;
 using Color = Plumix.UI.Color;
@@ -106,27 +107,35 @@ public static class NetBenchFonts
 }
 
 /// <summary>
-/// Раздаёт палитру токенов и переключатель темы вниз по дереву —
+/// Раздаёт палитру токенов и выбор оформления вниз по дереву —
 /// мобильный аналог ThemeDictionaries из Desktop/Themes.
 /// </summary>
 public sealed class NetBenchTheme : InheritedWidget
 {
     public NetBenchTheme(
         NetBenchPalette palette,
-        Action toggleTheme,
+        ThemePreference preference,
+        Action<ThemePreference> setPreference,
         Widget child,
         Plumix.Foundation.Key? key = null) : base(child, key)
     {
         Palette = palette;
-        ToggleTheme = toggleTheme;
+        Preference = preference;
+        SetPreference = setPreference;
     }
 
     public NetBenchPalette Palette { get; }
 
-    public Action ToggleTheme { get; }
+    /// <summary>Что выбрал пользователь; <see cref="Palette"/> — во что это разрешилось.</summary>
+    public ThemePreference Preference { get; }
+
+    public Action<ThemePreference> SetPreference { get; }
+
+    /// <summary>Быстрый переключатель на главном: явно в противоположную видимой тему.</summary>
+    public void ToggleTheme() => SetPreference(Palette.IsDark ? ThemePreference.Light : ThemePreference.Dark);
 
     public override bool UpdateShouldNotify(InheritedWidget oldWidget) =>
-        !Equals(((NetBenchTheme)oldWidget).Palette, Palette);
+        oldWidget is not NetBenchTheme old || !Equals(old.Palette, Palette) || old.Preference != Preference;
 
     public static NetBenchPalette PaletteOf(BuildContext context) => Of(context).Palette;
 
@@ -150,7 +159,10 @@ public sealed class NetBenchTheme : InheritedWidget
             SurfaceContainerLow = palette.BgPanel,
         };
 
+        // Inter и для Material-текстов (диалоги, снекбары, поля): системный Roboto на Android —
+        // вариативный шрифт, и Plumix 0.4.0-beta.1 рисует его контуры с выколотыми пересечениями.
         return new ThemeData(
+            fontFamily: NetBenchFonts.Ui,
             colorScheme: colorScheme,
             scaffoldBackgroundColor: palette.BgBase,
             canvasColor: palette.BgBase,

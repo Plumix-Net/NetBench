@@ -121,7 +121,11 @@
     "scenarioDeleteFailed": "Couldn’t delete “{name: string}”",
     "recentSessions": "Recent sessions",
     "sessionRps": "{rps: string} rps",
-    "sessionError": "{err: string}% errors"
+    "sessionError": "{err: string}% errors",
+    "back": "Back",
+    "toggleTheme": "Switch theme",
+    "emptyHint": "No saved scenarios yet. Start with a quick test: enter a URL and run it.",
+    "willRequest": "Will request {url: string}"
   },
   "settings": {
     "title": "Settings",
@@ -129,7 +133,9 @@
     "language": "Language",
     "appearance": "Appearance",
     "themeDark": "Dark theme",
-    "themeLight": "Light theme"
+    "themeLight": "Light theme",
+    "themeSystem": "Same as device",
+    "languageSystem": "Same as device"
   },
   "testRun": {
     "recording": "RECORDING",
