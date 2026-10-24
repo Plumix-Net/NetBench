@@ -78,13 +78,7 @@ public sealed class AboutScreen : StatelessWidget
                         tooltip: Translations<Strings>.Of(context).Mobile.Back,
                         size: 34,
                         radius: 8),
-                    new Text(
-                        title,
-                        style: new TextStyle(
-                            FontSize: 20,
-                            FontWeight: FontWeight.ExtraBold,
-                            Color: palette.TextHi,
-                            FontFamily: NetBenchFonts.Ui)),
+                    new Expanded(new ScreenTitle(title)),
                 ]));
 
     private static Column BuildHeader(NetBenchPalette palette, Strings strings, string version) =>
@@ -114,8 +108,8 @@ public sealed class AboutScreen : StatelessWidget
                     style: new TextStyle(FontSize: 13, Color: palette.TextMid, FontFamily: NetBenchFonts.Ui)),
             ]);
 
-    private static InkWell Link(BuildContext context, NetBenchPalette palette, string label, Uri uri) =>
-        SettingsScreen.BuildNavigationRow(palette, label, () => _ = OpenAsync(context, uri));
+    private static Semantics Link(BuildContext context, NetBenchPalette palette, string label, Uri uri) =>
+        SettingsScreen.BuildNavigationRow(palette, label, () => _ = OpenAsync(context, uri), link: true);
 
     private static async Task OpenAsync(BuildContext context, Uri uri)
     {

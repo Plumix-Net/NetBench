@@ -75,12 +75,15 @@ internal sealed class QuickTestScreenState : State, IDisposable
                                         children:
                                         [
                                             new SizedBox(height: 28),
-                                            BuildLabel(palette, strings.Mobile.TargetUrl),
-                                            BuildUrlField(
-                                                palette,
-                                                strings.Scenarios.Editor.TargetPlaceholder,
-                                                error,
-                                                helper),
+                                            // Подпись над полем — для глаз, скринридеру её отдаёт само поле
+                                            new ExcludeSemantics(BuildLabel(palette, strings.Mobile.TargetUrl)),
+                                            new Semantics(
+                                                label: strings.Mobile.TargetUrl,
+                                                child: BuildUrlField(
+                                                    palette,
+                                                    strings.Scenarios.Editor.TargetPlaceholder,
+                                                    error,
+                                                    helper)),
                                             new SizedBox(height: 24),
                                             BuildLabel(palette, strings.Mobile.Users),
                                             new PresetPicker<int>(
@@ -107,7 +110,11 @@ internal sealed class QuickTestScreenState : State, IDisposable
                                                     FontFamily: NetBenchFonts.Ui)),
                                             new SizedBox(height: 24),
                                         ]))),
-                            BuildRunButton(context, palette, strings.Mobile.Run, enabled),
+                            // Кнопки на Material+InkWell — сами по себе не «кнопка» для TalkBack/VoiceOver
+                            new Semantics(
+                                button: true,
+                                enabled: enabled,
+                                child: BuildRunButton(context, palette, strings.Mobile.Run, enabled)),
                             new SizedBox(height: 24),
                         ]))));
     }
@@ -136,13 +143,7 @@ internal sealed class QuickTestScreenState : State, IDisposable
                     tooltip: Translations<Strings>.Of(context).Mobile.Back,
                     size: 34,
                     radius: 8),
-                new Text(
-                    title,
-                    style: new TextStyle(
-                        FontSize: 20,
-                        FontWeight: FontWeight.ExtraBold,
-                        Color: palette.TextHi,
-                        FontFamily: NetBenchFonts.Ui)),
+                new Expanded(new ScreenTitle(title)),
             ]);
     }
 

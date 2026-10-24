@@ -9,8 +9,11 @@ using NetBench.Features.Settings.Domain;
 using NetBench.Features.Shell.Presentation.Mobile;
 using NetBench.Localization;
 using Plumix;
+using Plumix.Painting;
 using Plumix.Rendering;
 using Plumix.Slang;
+using Plumix.Widgets;
+using Xunit;
 
 namespace NetBench.Mobile.Tests.Infrastructure;
 
@@ -33,7 +36,11 @@ public sealed class MobileHarness : IDisposable
     private readonly SemanticsHandle _semantics;
     private TimeSpan _clock;
 
-    public MobileHarness(AppSettings? settings = null, string? dataDirectory = null)
+    /// <param name="textScale">
+    /// Масштаб шрифта, как «Размер шрифта» в настройках ОС: MaterialApp берёт textScaler
+    /// из MediaQuery над собой (MediaQuery.fromView наследует данные платформы).
+    /// </param>
+    public MobileHarness(AppSettings? settings = null, string? dataDirectory = null, double textScale = 1)
     {
         DataDirectory = dataDirectory ?? Directory.CreateTempSubdirectory("netbench-mobile-tests-").FullName;
         if (settings is not null)
@@ -44,7 +51,17 @@ public sealed class MobileHarness : IDisposable
 
         _semantics = SemanticsBinding.Instance.EnsureSemantics();
         _clock = SchedulerBinding.Instance.CurrentSystemFrameTimeStamp;
-        _host = new WidgetHost { RootWidget = new MobileShell(DataDirectory) };
+
+        Widget root = new MobileShell(DataDirectory);
+        if (textScale != 1)
+        {
+            var shell = root;
+            root = new Builder(context => new MediaQuery(
+                data: MediaQuery.Of(context).CopyWith(textScaler: TextScaler.Linear(textScale)),
+                child: shell));
+        }
+
+        _host = new WidgetHost { RootWidget = root };
         _window = new Window { Width = 390, Height = 780, Content = _host };
         _window.Show();
         Pump();
@@ -108,14 +125,33 @@ public sealed class MobileHarness : IDisposable
 
     public void Tap(string label) => Tap(GetByLabel(label));
 
-    /// <summary>Тап мышью по центру узла — через hit-test хоста, как настоящий палец.</summary>
+    /// <summary>
+    /// Тап мышью по центру узла — через hit-test хоста, как настоящий палец. Узел за краем
+    /// экрана сперва докручивается в видимую область действиями скролла, как это делает TalkBack.
+    /// </summary>
     public void Tap(SemanticsNode node)
     {
-        var rect = node.GlobalRect;
+        var rect = ScrollIntoView(node);
         var point = new Point(rect.X + rect.Width / 2, rect.Y + rect.Height / 2);
         _window.MouseDown(point, MouseButton.Left);
         Pump(2);
         _window.MouseUp(point, MouseButton.Left);
+        Pump();
+    }
+
+    /// <summary>Узел целиком в окне и не скрыт — его видно и до него можно дотянуться.</summary>
+    public bool IsOnScreen(SemanticsNode node)
+    {
+        var rect = node.GlobalRect;
+        return !node.IsHidden && rect.Top >= 0 && rect.Left >= 0
+            && rect.Bottom <= _window.Height && rect.Right <= _window.Width;
+    }
+
+    /// <summary>Действие из меню скринридера (custom semantics action) — так его вызывает TalkBack.</summary>
+    public void PerformCustomAction(SemanticsNode node, string label)
+    {
+        var action = node.CustomSemanticsActions.Keys.Single(candidate => candidate.Label == label);
+        Assert.True(_host.PerformCustomSemanticsAction(node.Id, action));
         Pump();
     }
 
@@ -142,6 +178,45 @@ public sealed class MobileHarness : IDisposable
         {
             // отчёт мог дописываться движком в момент удаления — временный каталог не критичен
         }
+    }
+
+    /// <remarks>
+    /// Rect узла уже обрезан вьюпортом скролла: частично видимый узел упирается в его край.
+    /// </remarks>
+    private Rect ScrollIntoView(SemanticsNode node)
+    {
+        var id = node.Id;
+        for (var attempt = 0; attempt < 20; attempt++)
+        {
+            var scrollable = Ancestors(node).FirstOrDefault(static ancestor =>
+                ancestor.Actions.HasFlag(SemanticsActions.ScrollUp) || ancestor.Actions.HasFlag(SemanticsActions.ScrollDown));
+            if (scrollable is null)
+                break;
+
+            var rect = node.GlobalRect;
+            var viewport = scrollable.GlobalRect;
+            // ScrollUp сдвигает содержимое вверх — открывает то, что ниже
+            var action = rect.Bottom >= viewport.Bottom - 0.5 && scrollable.Actions.HasFlag(SemanticsActions.ScrollUp)
+                ? SemanticsActions.ScrollUp
+                : rect.Top <= viewport.Top + 0.5 && scrollable.Actions.HasFlag(SemanticsActions.ScrollDown)
+                    ? SemanticsActions.ScrollDown
+                    : SemanticsActions.None;
+            if (action == SemanticsActions.None)
+                break;
+
+            _host.PerformSemanticsAction(scrollable.Id, action);
+            Pump();
+            node = Nodes().First(candidate => candidate.Id == id);
+        }
+
+        var visible = node.GlobalRect;
+        return new Rect(visible.Left, visible.Top, visible.Width, visible.Height);
+    }
+
+    private static IEnumerable<SemanticsNode> Ancestors(SemanticsNode node)
+    {
+        for (var parent = node.Parent; parent is not null; parent = parent.Parent)
+            yield return parent;
     }
 
     private static IEnumerable<SemanticsNode> Descendants(SemanticsNode node)

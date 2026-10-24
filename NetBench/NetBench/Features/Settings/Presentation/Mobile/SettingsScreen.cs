@@ -76,26 +76,20 @@ public sealed class SettingsScreen : StatelessWidget
                         tooltip: Translations<Strings>.Of(context).Mobile.Back,
                         size: 34,
                         radius: 8),
-                    new Text(
-                        title,
-                        style: new TextStyle(
-                            FontSize: 20,
-                            FontWeight: FontWeight.ExtraBold,
-                            Color: palette.TextHi,
-                            FontFamily: NetBenchFonts.Ui)),
+                    new Expanded(new ScreenTitle(title)),
                 ]));
 
     private static Padding BuildSectionHead(NetBenchPalette palette, string title) =>
         new Padding(
             new Avalonia.Thickness(0, 26, 0, 12),
-            new Text(
+            new Semantics(header: true, child: new Text(
                 title.ToUpperInvariant(),
                 style: new TextStyle(
                     FontSize: 12,
                     FontWeight: FontWeight.Bold,
                     Color: palette.TextMid,
                     LetterSpacing: 0.6,
-                    FontFamily: NetBenchFonts.Ui)));
+                    FontFamily: NetBenchFonts.Ui))));
 
     /// <summary>
     /// StatefulBuilder: «как в системе» может разрешиться в ту же культуру, что уже активна, —
@@ -184,7 +178,7 @@ public sealed class SettingsScreen : StatelessWidget
                 children: children));
     }
 
-    private static InkWell BuildOptionRow(
+    private static Semantics BuildOptionRow(
         NetBenchPalette palette,
         string label,
         string? trailing,
@@ -224,31 +218,39 @@ public sealed class SettingsScreen : StatelessWidget
                     child: new IconGlyph(GlyphKind.Check, palette.Rps, 14))
                 : (Widget?)null));
 
-        return new InkWell(
-            onTap: onTap,
-            child: new Container(
-                // 15 + 15 + строка ≈ 52 — комфортная цель для пальца
-                padding: new Avalonia.Thickness(16, 15),
-                child: new Row(spacing: 10, children: children)));
+        // Строки группы — взаимоисключающий выбор: TalkBack/VoiceOver объявляют «выбрано» у галочки.
+        return new Semantics(
+            button: true,
+            selected: selected,
+            inMutuallyExclusiveGroup: true,
+            child: new InkWell(
+                onTap: onTap,
+                child: new Container(
+                    // 15 + 15 + строка ≈ 52 — комфортная цель для пальца
+                    padding: new Avalonia.Thickness(16, 15),
+                    child: new Row(spacing: 10, children: children))));
     }
 
-    /// <summary>Строка-переход на другой экран: подпись и шеврон.</summary>
-    internal static InkWell BuildNavigationRow(NetBenchPalette palette, string label, Action onTap) =>
+    /// <summary>Строка-переход на другой экран (или внешняя ссылка — <paramref name="link"/>): подпись и шеврон.</summary>
+    internal static Semantics BuildNavigationRow(NetBenchPalette palette, string label, Action onTap, bool link = false) =>
         new(
-            onTap: onTap,
-            child: new Container(
-                padding: new Avalonia.Thickness(16, 15),
-                child: new Row(
-                    spacing: 10,
-                    children:
-                    [
-                        new Expanded(
-                            new Text(
-                                label,
-                                style: new TextStyle(FontSize: 15, Color: palette.Text, FontFamily: NetBenchFonts.Ui),
-                                maxLines: 2)),
-                        new IconGlyph(GlyphKind.ChevronRight, palette.TextFaint, 12),
-                    ])));
+            button: !link,
+            link: link,
+            child: new InkWell(
+                onTap: onTap,
+                child: new Container(
+                    padding: new Avalonia.Thickness(16, 15),
+                    child: new Row(
+                        spacing: 10,
+                        children:
+                        [
+                            new Expanded(
+                                new Text(
+                                    label,
+                                    style: new TextStyle(FontSize: 15, Color: palette.Text, FontFamily: NetBenchFonts.Ui),
+                                    maxLines: 2)),
+                            new IconGlyph(GlyphKind.ChevronRight, palette.TextFaint, 12),
+                        ]))));
 
     private static Column BuildFooter(NetBenchPalette palette, Strings strings) =>
         new Column(

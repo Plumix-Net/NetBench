@@ -118,11 +118,16 @@ internal sealed class ScenarioEditorScreenState : State<ScenarioEditorScreen>, I
         List<Widget> form =
         [
             new SizedBox(height: 20),
-            BuildLabel(palette, strings.Scenarios.Editor.Name),
-            BuildField(palette, _name, strings.Scenarios.Editor.NamePlaceholder, error: null, mono: false),
+            // Подписи над полями — для глаз, скринридеру их отдают сами поля
+            new ExcludeSemantics(BuildLabel(palette, strings.Scenarios.Editor.Name)),
+            new Semantics(
+                label: strings.Scenarios.Editor.Name,
+                child: BuildField(palette, _name, strings.Scenarios.Editor.NamePlaceholder, error: null, mono: false)),
             new SizedBox(height: 20),
-            BuildLabel(palette, strings.Mobile.TargetUrl),
-            BuildField(palette, _target, strings.Scenarios.Editor.TargetPlaceholder, targetError, mono: true),
+            new ExcludeSemantics(BuildLabel(palette, strings.Mobile.TargetUrl)),
+            new Semantics(
+                label: strings.Mobile.TargetUrl,
+                child: BuildField(palette, _target, strings.Scenarios.Editor.TargetPlaceholder, targetError, mono: true)),
             new SizedBox(height: 20),
             BuildLabel(palette, strings.Mobile.Method),
         ];
@@ -178,7 +183,10 @@ internal sealed class ScenarioEditorScreenState : State<ScenarioEditorScreen>, I
                                     new Column(
                                         crossAxisAlignment: CrossAxisAlignment.Stretch,
                                         children: form))),
-                            BuildSaveButton(context, palette, strings.Common.Save),
+                            new Semantics(
+                                button: true,
+                                enabled: !_saving,
+                                child: BuildSaveButton(context, palette, strings.Common.Save)),
                             new SizedBox(height: 24),
                         ]))));
     }
@@ -194,16 +202,7 @@ internal sealed class ScenarioEditorScreenState : State<ScenarioEditorScreen>, I
                     tooltip: Translations<Strings>.Of(context).Mobile.Back,
                     size: 34,
                     radius: 8),
-                new Expanded(
-                    new Text(
-                        title,
-                        style: new TextStyle(
-                            FontSize: 20,
-                            FontWeight: FontWeight.ExtraBold,
-                            Color: palette.TextHi,
-                            FontFamily: NetBenchFonts.Ui),
-                        maxLines: 1,
-                        overflow: TextOverflow.Ellipsis)),
+                new Expanded(new ScreenTitle(title)),
             ]);
 
     private static Padding BuildLabel(NetBenchPalette palette, string text) =>

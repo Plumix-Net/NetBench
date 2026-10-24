@@ -67,7 +67,8 @@ public sealed class MetricCard : StatelessWidget
                         FontFamily: NetBenchFonts.Mono))));
         }
 
-        return new Container(
+        // Один узел семантики на карточку: «P95 latency, 5 ms», а не три отдельные строки
+        return new MergeSemantics(new Container(
             padding: new Avalonia.Thickness(14),
             decoration: new BoxDecoration(
                 Color: palette.BgCard,
@@ -85,12 +86,17 @@ public sealed class MetricCard : StatelessWidget
                             Color: palette.TextMid,
                             LetterSpacing: 0.5,
                             FontFamily: NetBenchFonts.Ui),
-                        maxLines: 1),
+                        // Крупный шрифт: подпись переносится, а значение ужимается под карточку —
+                        // половина экрана не вмещает «49 187» в 48 pt
+                        maxLines: 2),
                     new SizedBox(height: 6),
-                    new Row(
-                        mainAxisSize: MainAxisSize.Min,
-                        crossAxisAlignment: CrossAxisAlignment.End,
-                        children: valueRow),
-                ]));
+                    new FittedBox(
+                        fit: BoxFit.ScaleDown,
+                        alignment: Alignment.CenterLeft,
+                        child: new Row(
+                            mainAxisSize: MainAxisSize.Min,
+                            crossAxisAlignment: CrossAxisAlignment.End,
+                            children: valueRow)),
+                ])));
     }
 }
