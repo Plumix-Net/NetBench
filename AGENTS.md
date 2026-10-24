@@ -52,7 +52,9 @@ NetBench/
 │   │   └── Shell/Presentation/{Desktop,Mobile}   # Mobile: MobileShell — мобильный composition root
 │   ├── Desktop/               # внефичевое desktop: App, ViewLocator, Views, Composition (Pure.DI),
 │   │                          #   Services (Navigation), Controls (LineChart)
-│   ├── Mobile/                # внефичевое mobile: MobileApp (PlumixApplication)
+│   ├── Mobile/                # внефичевое mobile: MobileApp (PlumixApplication), AppInfo,
+│   │                          #   Platform/IPlatformServices (share/экран/ссылки — реализуют головы),
+│   │                          #   Licenses/ (тексты OSS-лицензий для LicensePage)
 │   └── Assets/
 ├── NetBench.Tests/            # xUnit-тесты domain/data-слоёв (собираются против net10.0)
 └── NetBench.{Desktop,Android,iOS,Browser}/  # головы, только bootstrap:
@@ -87,5 +89,12 @@ NetBench/
 
 - Новая логика в Domain/Data-слоях — вместе с тестами в `NetBench.Tests`.
 - Слои не смешивать: Presentation не знает про `HttpClient`, гистограммы и файлы; Domain/Data не знают про Avalonia/Plumix.
-- Код и комментарии — в стиле существующего кода; UI-тексты приложения на русском.
-- CI (GitHub Actions): job `build-and-test` собирает Desktop (`-p:MobileTargets=false`) и гоняет тесты; job `build-mobile` ставит android workload и собирает Plumix-флейвор.
+- Код и комментарии — в стиле существующего кода; UI-тексты — через Slang в ru и en, базовая (запасная)
+  культура — en-US.
+- **Мобильные лимиты:** прогон с телефона — не больше `MobileLoadLimits` (50 пользователей, 5 минут);
+  `MonitorScreen` применяет их к любому сценарию. Перед первым прогоном — `RunConsent` («только свои серверы»).
+- **Платформенное в мобиле** (share sheet, keep-screen-on, открытие ссылок) — через `IPlatformServices`:
+  интерфейс в `Mobile/Platform`, реализации в `NetBench.Android`/`NetBench.iOS`, без `#if`.
+- CI (GitHub Actions): job `build-and-test` собирает Desktop (`-p:MobileTargets=false`) и гоняет тесты; job `build-mobile` ставит android workload и собирает Plumix-флейвор; `build-android-release` — подписанный (при наличии секретов) Release AAB; `build-ios` — iOS-голова под симулятор на macOS-раннере.
+- Версия и id приложения — `NetBenchVersion`/`NetBenchBuildNumber`/`NetBenchApplicationId` в `Directory.Build.props`.
+  Релиз в сторы, подпись, анкеты и заметки для ревью — `store/README.md`; иконки и графика — `scripts/generate_*.py`.

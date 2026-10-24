@@ -19,6 +19,7 @@ IOS_ASSETS = ROOT / "NetBench" / "NetBench.iOS" / "Assets.xcassets"
 STORE = ROOT / "store"
 
 TILE = "#11141D"  # фон логотипа Plumix
+RPS_BLUE = "#1E90FF"  # NetBenchPalette.Rps — акцент для витринной графики
 SPLASH_LIGHT = "#F5F6F8"  # NetBenchPalette.Light.BgBase
 SPLASH_DARK = "#101014"  # NetBenchPalette.Dark.BgBase
 
