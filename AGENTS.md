@@ -1,6 +1,6 @@
 # NetBench
 
-HTTP load-testing tool с GUI (аналог k6/hey/wrk) на Avalonia. Demo-приложение для Plumix: параллелизм, Span<T>, структуры, real-time UI. Полная концепция и roadmap — в [IDEA.md](IDEA.md).
+HTTP load-testing tool с GUI (аналог k6/hey/wrk) на Avalonia. Demo-приложение для Plumix: параллелизм, Span<T>, структуры, real-time UI. Полная концепция и roadmap — в umbrella-репо: `../docs/product/netbench.md`.
 
 ## Команды
 

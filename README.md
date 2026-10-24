@@ -14,8 +14,6 @@ Run load tests from your desktop for full analysis — or from your phone to qui
 - **Real-time metrics** — throughput, latency percentiles (p50/p95/p99 via HDR Histogram) and error rate, charted live while the test runs.
 - **Report** — summary and latency-over-time chart when the run completes.
 
-The full concept and roadmap live in [IDEA.md](IDEA.md).
-
 ## One project, two UI stacks
 
 The interesting part of this repo is the architecture: a single multi-targeted project serves every platform, and the platform picks its UI half at compile time — no `#if`s in code.
