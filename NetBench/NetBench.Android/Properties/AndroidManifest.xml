@@ -1,7 +1,14 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="auto">
 	<uses-permission android:name="android.permission.INTERNET" />
-	<!-- Нагрузочный тест часто бьёт в локальный/стейджинговый стенд по http:// —
-	     без cleartext Android молча режет такие запросы, и прогон даёт 100% ошибок. -->
-	<application android:label="NetBench" android:icon="@drawable/Icon" android:usesCleartextTraffic="true" />
+	<!-- usesCleartextTraffic: нагрузочный тест часто бьёт в локальный/стейджинговый стенд по http:// —
+	     без cleartext Android молча режет такие запросы, и прогон даёт 100% ошибок.
+	     enableOnBackInvokedCallback: predictive back — PlumixMainActivity регистрирует
+	     OnBackAnimationCallback, система показывает анимацию «назад на рабочий стол» на корне. -->
+	<application
+		android:label="NetBench"
+		android:icon="@mipmap/ic_launcher"
+		android:roundIcon="@mipmap/ic_launcher_round"
+		android:usesCleartextTraffic="true"
+		android:enableOnBackInvokedCallback="true" />
 </manifest>

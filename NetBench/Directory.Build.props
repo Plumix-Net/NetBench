@@ -8,4 +8,13 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
+
+  <!-- Версия приложения — единый источник для Android/iOS-голов и экрана «О приложении».
+       NetBenchVersion — то, что видит пользователь; NetBenchBuildNumber — versionCode/CFBundleVersion,
+       обязан монотонно расти: CI передаёт -p:NetBenchBuildNumber=${{ github.run_number }}. -->
+  <PropertyGroup>
+    <NetBenchVersion>1.0.0</NetBenchVersion>
+    <NetBenchBuildNumber Condition="'$(NetBenchBuildNumber)' == ''">1</NetBenchBuildNumber>
+    <NetBenchApplicationId>net.plumix.netbench</NetBenchApplicationId>
+  </PropertyGroup>
 </Project>

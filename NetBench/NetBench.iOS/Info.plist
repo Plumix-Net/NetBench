@@ -2,22 +2,27 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleDisplayName</key>
-	<string>NetBench</string>
-	<key>CFBundleIdentifier</key>
-	<string>companyName.NetBench</string>
-	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
-	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<!-- CFBundleIdentifier, CFBundleShortVersionString, CFBundleVersion и CFBundleDisplayName
+	     вписывает сборка из NetBench.iOS.csproj (ApplicationId/…Version/ApplicationTitle). -->
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>ru</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>MinimumOSVersion</key>
 	<string>13.0</string>
+	<!-- Только iPhone и только портрет: вёрстка рассчитана на телефон в вертикальной ориентации. -->
 	<key>UIDeviceFamily</key>
 	<array>
 		<integer>1</integer>
-		<integer>2</integer>
+	</array>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
@@ -25,25 +30,18 @@
 	<array>
 		<string>arm64</string>
 	</array>
-	<!-- Цели нагрузочного теста бывают и по http:// (локальные стенды) — ATS их иначе блокирует. -->
+	<!-- Только HTTPS из System.Net/Apple TLS, своей криптографии нет — экспортная декларация не нужна. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<!-- Цели нагрузочного теста бывают и по http:// (локальные и стейджинговые стенды) — ATS их
+	     иначе блокирует. Обоснование для App Review — в store/app-review-notes.md. -->
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
-	<key>UISupportedInterfaceOrientations</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
+	<!-- iOS 14+ спрашивает разрешение на доступ к локальной сети, когда цель — адрес в LAN. -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>NetBench sends test requests to the servers you enter, including ones on your local network.</string>
 </dict>
 </plist>

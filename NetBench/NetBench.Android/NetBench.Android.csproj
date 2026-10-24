@@ -3,18 +3,28 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0-android</TargetFramework>
     <SupportedOSPlatformVersion>23</SupportedOSPlatformVersion>
-    <ApplicationId>com.CompanyName.NetBench</ApplicationId>
-    <ApplicationVersion>1</ApplicationVersion>
-    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <ApplicationId>$(NetBenchApplicationId)</ApplicationId>
+    <ApplicationVersion>$(NetBenchBuildNumber)</ApplicationVersion>
+    <ApplicationDisplayVersion>$(NetBenchVersion)</ApplicationDisplayVersion>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
   </PropertyGroup>
 
-  <ItemGroup>
-    <AndroidResource Include="Icon.png">
-      <Link>Resources\drawable\Icon.png</Link>
-    </AndroidResource>
-  </ItemGroup>
+  <!-- Release — AAB для Google Play, подписанный upload-ключом (Play App Signing переподписывает
+       своим ключом приложения). Ключ хранится вне репозитория: путь, алиас и пароль приходят
+       из переменных окружения NETBENCH_KEYSTORE / NETBENCH_KEY_ALIAS / NETBENCH_KEYSTORE_PASSWORD
+       (локально — см. AGENTS.md, в CI — секреты). Без NETBENCH_KEYSTORE сборка подписывается
+       debug-ключом: годится для проверки на эмуляторе, но не для стора. -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <AndroidPackageFormat>aab</AndroidPackageFormat>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release' and '$(NETBENCH_KEYSTORE)' != ''">
+    <AndroidKeyStore>true</AndroidKeyStore>
+    <AndroidSigningKeyStore>$(NETBENCH_KEYSTORE)</AndroidSigningKeyStore>
+    <AndroidSigningKeyAlias>$(NETBENCH_KEY_ALIAS)</AndroidSigningKeyAlias>
+    <AndroidSigningStorePass>env:NETBENCH_KEYSTORE_PASSWORD</AndroidSigningStorePass>
+    <AndroidSigningKeyPass>env:NETBENCH_KEYSTORE_PASSWORD</AndroidSigningKeyPass>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia.Android" />

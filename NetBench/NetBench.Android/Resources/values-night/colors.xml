@@ -1,4 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <color name="splash_background">#212121</color>
+  <!-- NetBenchPalette.Dark.BgBase -->
+  <color name="splash_background">#101014</color>
 </resources>
