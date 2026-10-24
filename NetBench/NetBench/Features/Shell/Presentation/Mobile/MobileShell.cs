@@ -17,6 +17,7 @@ using Plumix.Slang;
 using Plumix.UI;
 using Plumix.Widgets;
 using Colors = Plumix.Material.Colors;
+using Path = System.IO.Path;
 
 namespace NetBench.Features.Shell.Presentation.Mobile;
 
@@ -28,20 +29,36 @@ namespace NetBench.Features.Shell.Presentation.Mobile;
 /// </summary>
 public sealed class MobileShell : StatefulWidget
 {
+    /// <param name="dataDirectory">
+    /// Каталог для сценариев, истории и настроек; <c>null</c> — стандартный каталог приложения.
+    /// Свой каталог нужен headless-тестам, чтобы не трогать данные установленного приложения.
+    /// </param>
+    public MobileShell(string? dataDirectory = null)
+    {
+        DataDirectory = dataDirectory;
+    }
+
+    public string? DataDirectory { get; }
+
     public override State CreateState() => new MobileShellState();
 }
 
-internal sealed class MobileShellState : State
+internal sealed class MobileShellState : State<MobileShell>
 {
-    private readonly JsonScenarioRepository _scenarios = new();
-    private readonly JsonReportStore _reports = new();
-    private readonly JsonAppSettingsStore _settings = new();
+    private JsonScenarioRepository _scenarios = null!;
+    private JsonReportStore _reports = null!;
+    private JsonAppSettingsStore _settings = null!;
     private readonly IPlatformServices _platform = PlatformServices.Current;
     private ReportSharer? _sharer;
 
     public override void InitState()
     {
         base.InitState();
+
+        var directory = Widget.DataDirectory;
+        _scenarios = new JsonScenarioRepository(directory is null ? null : Path.Combine(directory, "scenarios"));
+        _reports = new JsonReportStore(directory is null ? null : Path.Combine(directory, "history.json"));
+        _settings = new JsonAppSettingsStore(directory is null ? null : Path.Combine(directory, "settings.json"));
 
         // Язык восстанавливаем до первого Build — иначе первый кадр мелькнёт на языке устройства.
         if (_settings.Current.Culture is { } culture)

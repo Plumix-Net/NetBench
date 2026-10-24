@@ -9,5 +9,6 @@
     <Deploy />
   </Project>
   <Project Path="NetBench/NetBench.csproj" />
+  <Project Path="NetBench.Mobile.Tests/NetBench.Mobile.Tests.csproj" />
   <Project Path="NetBench.Tests/NetBench.Tests.csproj" />
 </Solution>
