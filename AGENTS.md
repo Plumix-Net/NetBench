@@ -13,6 +13,9 @@ dotnet build NetBench/NetBench.Desktop/NetBench.Desktop.csproj
 # Тесты
 dotnet test NetBench/NetBench.Tests/NetBench.Tests.csproj
 
+# Headless-тесты мобильного UI (Plumix в окне Avalonia.Headless; workloads не нужны)
+dotnet test NetBench/NetBench.Mobile.Tests/NetBench.Mobile.Tests.csproj
+
 # Запуск desktop-приложения
 dotnet run --project NetBench/NetBench.Desktop/NetBench.Desktop.csproj
 
@@ -57,6 +60,9 @@ NetBench/
 │   │                          #   Licenses/ (тексты OSS-лицензий для LicensePage)
 │   └── Assets/
 ├── NetBench.Tests/            # xUnit-тесты domain/data-слоёв (собираются против net10.0)
+├── NetBench.Mobile.Tests/     # headless-тесты мобильной презентации (xunit v3 + Avalonia.Headless.XUnit):
+│                              #   компилирует исходники Mobile/Presentation\Mobile под net10.0,
+│                              #   Infrastructure/MobileHarness — MobileShell в окне 390×780, тапы по семантике
 └── NetBench.{Desktop,Android,iOS,Browser}/  # головы, только bootstrap:
                                # Desktop/Browser → App, Android/iOS → MobileApp
 ```
@@ -88,6 +94,10 @@ NetBench/
 ## Правила разработки
 
 - Новая логика в Domain/Data-слоях — вместе с тестами в `NetBench.Tests`.
+- Пользовательские сценарии мобилы — в `NetBench.Mobile.Tests` через `MobileHarness`: данные во временном
+  каталоге (`MobileShell(dataDirectory)`), кадры — `Pump()`, цели ищутся по подписи/tooltip в дереве
+  семантики (то же, что читает TalkBack), прогоны — против `LocalTarget` на loopback. Plumix-биндинги —
+  синглтоны процесса, тесты идут последовательно.
 - Слои не смешивать: Presentation не знает про `HttpClient`, гистограммы и файлы; Domain/Data не знают про Avalonia/Plumix.
 - Код и комментарии — в стиле существующего кода; UI-тексты — через Slang в ru и en, базовая (запасная)
   культура — en-US.
@@ -95,6 +105,6 @@ NetBench/
   `MonitorScreen` применяет их к любому сценарию. Перед первым прогоном — `RunConsent` («только свои серверы»).
 - **Платформенное в мобиле** (share sheet, keep-screen-on, открытие ссылок) — через `IPlatformServices`:
   интерфейс в `Mobile/Platform`, реализации в `NetBench.Android`/`NetBench.iOS`, без `#if`.
-- CI (GitHub Actions): job `build-and-test` собирает Desktop (`-p:MobileTargets=false`) и гоняет тесты; job `build-mobile` ставит android workload и собирает Plumix-флейвор; `build-android-release` — подписанный (при наличии секретов) Release AAB; `build-ios` — iOS-голова под симулятор на macOS-раннере.
+- CI (GitHub Actions): job `build-and-test` собирает Desktop (`-p:MobileTargets=false`) и гоняет оба тестовых проекта; job `build-mobile` ставит android workload и собирает Plumix-флейвор; `build-android-release` — подписанный (при наличии секретов) Release AAB; `build-ios` — iOS-голова под симулятор на macOS-раннере.
 - Версия и id приложения — `NetBenchVersion`/`NetBenchBuildNumber`/`NetBenchApplicationId` в `Directory.Build.props`.
   Релиз в сторы, подпись, анкеты и заметки для ревью — `store/README.md`; иконки и графика — `scripts/generate_*.py`.

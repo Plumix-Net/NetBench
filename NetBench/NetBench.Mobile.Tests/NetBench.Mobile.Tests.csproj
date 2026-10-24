@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Headless-тесты мобильной (Plumix) презентации. Общий проект собирает Plumix-половину только
+       в android/ios-таргетах, поэтому исходники мобильной версии компилируются здесь напрямую под
+       net10.0: так тесты идут на любом runner'е без мобильных workloads. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>NetBench.Mobile.Tests</RootNamespace>
+    <!-- AppInfo читает версию из атрибутов сборки, как в приложении -->
+    <Version>$(NetBenchVersion)</Version>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AppSource>..\NetBench\</AppSource>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Всё, кроме desktop-половины и Avalonia-приложения MobileApp (его заменяет TestApp) -->
+    <Compile Include="$(AppSource)**\*.cs"
+             Exclude="$(AppSource)bin\**;$(AppSource)obj\**;$(AppSource)Desktop\**;$(AppSource)Features\**\Presentation\Desktop\**;$(AppSource)ViewModels\**;$(AppSource)Mobile\MobileApp.axaml.cs"
+             LinkBase="App" />
+    <AdditionalFiles Include="$(AppSource)Localization\i18n\*.i18n.json" LinkBase="App\Localization\i18n" />
+    <AdditionalFiles Include="$(AppSource)Localization\slang.json" LinkBase="App\Localization" />
+    <EmbeddedResource Include="$(AppSource)Mobile\Licenses\*.txt" LogicalName="NetBench.Licenses.%(Filename).txt" />
+    <AssemblyMetadata Include="BuildNumber" Value="$(NetBenchBuildNumber)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="Avalonia.Fonts.Inter" />
+    <PackageReference Include="Avalonia.Skia" />
+    <PackageReference Include="Avalonia.Headless.XUnit" />
+    <PackageReference Include="HdrHistogram" />
+    <PackageReference Include="Slang.Net" />
+    <PackageReference Include="Plumix" />
+    <PackageReference Include="Plumix.Material" />
+    <PackageReference Include="Plumix.Bloc" />
+    <PackageReference Include="Plumix.Slang" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

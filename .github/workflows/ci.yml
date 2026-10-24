@@ -23,6 +23,11 @@ jobs:
       - name: Test
         run: dotnet test NetBench/NetBench.Tests/NetBench.Tests.csproj -c Release -p:MobileTargets=false
 
+      # Мобильная (Plumix) презентация в headless-окне: исходники компилируются под net10.0,
+      # мобильные workloads не нужны.
+      - name: Test (Mobile UI, headless)
+        run: dotnet test NetBench/NetBench.Mobile.Tests/NetBench.Mobile.Tests.csproj -c Release
+
   build-mobile:
     runs-on: ubuntu-latest
     steps:
