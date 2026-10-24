@@ -10,7 +10,7 @@
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-android'))">23</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-android'))">24</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-ios'))">13.0</SupportedOSPlatformVersion>
 
     <!-- Версия из Directory.Build.props — её показывает экран «О приложении» (Mobile/AppInfo). -->

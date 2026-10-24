@@ -137,7 +137,7 @@ def android():
     for name in ("ic_launcher", "ic_launcher_round"):
         save_text(ANDROID_RES / "mipmap-anydpi-v26" / f"{name}.xml", ADAPTIVE_ICON)
 
-    # Растровые иконки для Android 6–7.1 (до адаптивных): скруглённый квадрат и круг.
+    # Растровые иконки для Android 7.0–7.1 (до адаптивных): скруглённый квадрат и круг.
     for density, size in ANDROID_DENSITIES.items():
         tile = render(size)
         save_png(masked(tile, 0.18), ANDROID_RES / f"mipmap-{density}" / "ic_launcher.png")
