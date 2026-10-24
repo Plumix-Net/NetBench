@@ -19,10 +19,12 @@ internal sealed class DemoData
     {
         var ru = culture.StartsWith("ru", StringComparison.Ordinal);
 
-        var checkout = Scenario(ru ? "Оформление заказа" : "Checkout API", $"{LanHost}/api/orders", users: 50, seconds: 20);
-        var catalog = Scenario(ru ? "Каталог товаров" : "Product catalog", "https://staging.shop.dev/api/products", 25, 60);
-        var search = Scenario(ru ? "Поиск" : "Search", "https://staging.shop.dev/api/search?q=sneakers", 10, 30);
-        var auth = Scenario(ru ? "Авторизация" : "Auth service", "https://auth.staging.shop.dev/token", 10, 30);
+        // Id постоянные: главный экран показывает сценарии в порядке файлов в каталоге (имя файла — Id),
+        // а APFS отдаёт их в порядке хешей имён. Номера подобраны так, чтобы на macOS порядок был как здесь.
+        var checkout = Scenario(24, ru ? "Оформление заказа" : "Checkout API", $"{LanHost}/api/orders", users: 50, seconds: 20);
+        var catalog = Scenario(32, ru ? "Каталог товаров" : "Product catalog", "https://staging.shop.dev/api/products", 25, 60);
+        var search = Scenario(8, ru ? "Поиск" : "Search", "https://staging.shop.dev/api/search?q=sneakers", 10, 30);
+        var auth = Scenario(28, ru ? "Авторизация" : "Auth service", "https://auth.staging.shop.dev/token", 10, 30);
         var quick = new LoadScenario
         {
             Name = "Quick test",
@@ -46,8 +48,9 @@ internal sealed class DemoData
         };
     }
 
-    private static LoadScenario Scenario(string name, string target, int users, int seconds) => new()
+    private static LoadScenario Scenario(int number, string name, string target, int users, int seconds) => new()
     {
+        Id = new Guid($"00000000-0000-0000-0000-{number:000000000000}"),
         Name = name,
         Target = target,
         Load = new LoadConfig { ConcurrentUsers = users, Duration = TimeSpan.FromSeconds(seconds) },

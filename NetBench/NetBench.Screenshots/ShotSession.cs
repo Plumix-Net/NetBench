@@ -5,10 +5,12 @@ using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Input;
 using Avalonia.Threading;
+using NetBench.Features.Scenarios.Data;
+using NetBench.Features.Settings.Data;
 using NetBench.Features.Settings.Domain;
 using NetBench.Features.Shell.Presentation.Mobile;
+using NetBench.Features.TestRun.Data;
 using NetBench.Localization;
-using NetBench.Screenshots.Storage;
 using Plumix;
 using Plumix.Rendering;
 using Plumix.Slang;
@@ -19,8 +21,9 @@ namespace NetBench.Screenshots;
 /// <summary>
 /// Один запуск приложения для съёмки: <see cref="MobileShell"/> в headless-окне размера iPhone 6.9"
 /// (440×<see cref="ScreenHeight"/> pt, масштаб 3 — ровно пиксели скриншота App Store без полос
-/// статус-бара и home-индикатора, их дорисовывает <see cref="StoreFrame"/>). Кадры качаются вручную,
-/// цели для тапов ищутся по дереву семантики, как их видит VoiceOver/TalkBack.
+/// статус-бара и home-индикатора, их дорисовывает <see cref="StoreFrame"/>). Данные — демо, во временном
+/// каталоге (данные приложения на машине не трогаются). Кадры качаются вручную, цели для тапов ищутся
+/// по дереву семантики, как их видит VoiceOver/TalkBack.
 /// </summary>
 internal sealed class ShotSession : IDisposable
 {
@@ -41,24 +44,27 @@ internal sealed class ShotSession : IDisposable
     private readonly Window _window;
     private readonly WidgetHost _host;
     private readonly SemanticsHandle _semantics;
+    private readonly string _dataDirectory;
     private TimeSpan _clock;
 
     public ShotSession(AppSettings settings, DemoData data)
     {
-        DemoStorage.Reset(settings, data.Scenarios, data.History);
+        IsDark = settings.Theme == ThemePreference.Dark;
+        _dataDirectory = Directory.CreateTempSubdirectory("netbench-screenshots-").FullName;
+        Seed(_dataDirectory, settings, data);
         LocaleSettings<Strings>.SetLocaleRaw(settings.Culture ?? "en-US");
 
         _semantics = SemanticsBinding.Instance.EnsureSemantics();
         _clock = SchedulerBinding.Instance.CurrentSystemFrameTimeStamp;
         // FocusAdorner = null: иначе Fluent рисует рамку фокуса по краю хоста прямо в кадре
-        _host = new WidgetHost { RootWidget = new MobileShell(), FocusAdorner = null };
+        _host = new WidgetHost { RootWidget = new MobileShell(_dataDirectory), FocusAdorner = null };
         _window = new Window { Width = ScreenWidth, Height = ScreenHeight, Content = _host };
         _window.Show();
         _window.SetRenderScaling(Scale);
         Pump(40);
     }
 
-    public bool IsDark => DemoStorage.Settings.Theme == ThemePreference.Dark;
+    public bool IsDark { get; }
 
     public SemanticsNode Root => _host.SemanticsRoot ?? throw new InvalidOperationException("Semantics are off");
 
@@ -142,6 +148,34 @@ internal sealed class ShotSession : IDisposable
         Pump(2);
         _window.Close();
         _semantics.Dispose();
+
+        try
+        {
+            Directory.Delete(_dataDirectory, recursive: true);
+        }
+        catch (IOException)
+        {
+            // временный каталог не критичен
+        }
+    }
+
+    /// <summary>Раскладывает демо-данные так же, как их сохранило бы приложение (раскладка — MobileShell).</summary>
+    private static void Seed(string directory, AppSettings settings, DemoData data)
+    {
+        new JsonAppSettingsStore(Path.Combine(directory, "settings.json")).Save(settings);
+
+        // Вне UI-потока: SaveAsync возвращается в контекст синхронизации (await using), а его поток ждёт здесь.
+        var scenarios = new JsonScenarioRepository(Path.Combine(directory, "scenarios"));
+        Task.Run(async () =>
+        {
+            foreach (var scenario in data.Scenarios)
+                await scenarios.SaveAsync(scenario);
+        }).GetAwaiter().GetResult();
+
+        // История — новые первыми, а Save кладёт в начало: сохраняем с конца.
+        var reports = new JsonReportStore(Path.Combine(directory, "history.json"));
+        for (var i = data.History.Count - 1; i >= 0; i--)
+            reports.Save(data.History[i]);
     }
 
     private static IEnumerable<SemanticsNode> Descendants(SemanticsNode node)

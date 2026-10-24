@@ -19,11 +19,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Всё, кроме desktop-половины, Avalonia-приложения MobileApp (корневой виджет ставит ShotSession)
-         и JSON-хранилищ: их место занимают демо-хранилища из Storage/ с теми же именами — MobileShell
-         собирается как есть, а данные пользователя на машине не читаются и не пишутся. -->
+    <!-- Всё, кроме desktop-половины и Avalonia-приложения MobileApp (корневой виджет ставит ShotSession) -->
     <Compile Include="$(AppSource)**\*.cs"
-             Exclude="$(AppSource)bin\**;$(AppSource)obj\**;$(AppSource)Desktop\**;$(AppSource)Features\**\Presentation\Desktop\**;$(AppSource)Mobile\MobileApp.axaml.cs;$(AppSource)Features\**\Data\Json*.cs"
+             Exclude="$(AppSource)bin\**;$(AppSource)obj\**;$(AppSource)Desktop\**;$(AppSource)Features\**\Presentation\Desktop\**;$(AppSource)Mobile\MobileApp.axaml.cs"
              LinkBase="App" />
     <AdditionalFiles Include="$(AppSource)Localization\i18n\*.i18n.json" LinkBase="App\Localization\i18n" />
     <AdditionalFiles Include="$(AppSource)Localization\slang.json" LinkBase="App\Localization" />
@@ -35,8 +33,8 @@
     <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="Avalonia.Fonts.Inter" />
-    <!-- ради Avalonia.Skia: headless-окно рисует настоящим Skia, как устройство -->
-    <PackageReference Include="Avalonia.Desktop" />
+    <!-- headless-окно рисует настоящим Skia, как устройство -->
+    <PackageReference Include="Avalonia.Skia" />
     <PackageReference Include="Avalonia.Headless" />
     <PackageReference Include="HdrHistogram" />
     <PackageReference Include="Slang.Net" />

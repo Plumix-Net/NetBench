@@ -132,8 +132,9 @@ NetBench/
 - Тексты витрины — `fastlane/metadata/{ios,android}/<язык>/`; «Что нового» — только в
   `metadata/ios/*/release_notes.txt` (в Play копируется при выгрузке); заметки GitHub Release — раздел
   версии в `CHANGELOG.md`. Лимиты длины проверяет `bundle exec fastlane check`.
-- `NetBench.Screenshots` — генератор скриншотов: компилирует мобильные исходники под net10.0, JSON-хранилища
-  подменены демо-хранилищами с теми же именами (`Storage/`), живой прогон идёт через `DemoTarget` (локальный
-  http_proxy). Новый экран в наборе — шаг в `Program.cs` (тапы по подписям семантики) и подпись в `Listing`.
+- `NetBench.Screenshots` — генератор скриншотов: компилирует мобильные исходники под net10.0, как
+  `NetBench.Mobile.Tests`; демо-данные (`DemoData`) раскладываются во временный каталог для
+  `MobileShell(dataDirectory)`, живой прогон идёт через `DemoTarget` (локальный http_proxy). Новый экран в наборе —
+  шаг в `Program.cs` (тапы по подписям семантики) и подпись в `Listing`.
 - Desktop-голова обновляется сама из GitHub Releases (`DesktopUpdater`, канал = RID); `VelopackApp.Build().Run()`
   должен оставаться первой строкой `Main`.
