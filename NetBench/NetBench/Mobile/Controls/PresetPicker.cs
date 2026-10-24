@@ -57,14 +57,18 @@ public sealed class PresetPicker<T>(
                             Border: Border.All(
                                 isSelected ? palette.Rps : palette.Border,
                                 width: isSelected ? 1.5 : 1)),
-                        child: new Text(
-                            text,
-                            style: new TextStyle(
-                                FontSize: 14,
-                                FontWeight: isSelected ? FontWeight.Bold : FontWeight.Medium,
-                                Color: isSelected ? palette.Rps : palette.Text,
-                                FontFamily: NetBenchFonts.Mono),
-                            textAlign: TextAlign.Center,
-                            maxLines: 1)))));
+                        // Крупный шрифт: подпись ужимается под ячейку, а не обрезается («1 min» → «1»)
+                        // и не рвётся по буквам («DELE/TE»)
+                        child: new FittedBox(
+                            fit: BoxFit.ScaleDown,
+                            child: new Text(
+                                text,
+                                style: new TextStyle(
+                                    FontSize: 14,
+                                    FontWeight: isSelected ? FontWeight.Bold : FontWeight.Medium,
+                                    Color: isSelected ? palette.Rps : palette.Text,
+                                    FontFamily: NetBenchFonts.Mono),
+                                textAlign: TextAlign.Center,
+                                maxLines: 1))))));
     }
 }

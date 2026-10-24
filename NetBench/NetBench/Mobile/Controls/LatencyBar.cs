@@ -23,13 +23,16 @@ public sealed class LatencyBar : StatelessWidget
     public override Widget Build(BuildContext context)
     {
         var palette = NetBenchTheme.PaletteOf(context);
+        // Колонки метки и значения растут вместе с шрифтом — иначе при крупном «Mean» режется до «Me»
+        var scaler = MediaQuery.TextScalerOf(context);
 
-        return new Row(
+        // Метка и значение читаются скринридером вместе: «P95, 5 ms»
+        return new MergeSemantics(new Row(
             spacing: 10,
             children:
             [
                 new SizedBox(
-                    width: 44,
+                    width: scaler.Scale(44),
                     child: new Text(
                         _label,
                         style: new TextStyle(
@@ -54,7 +57,7 @@ public sealed class LatencyBar : StatelessWidget
                                             Color: palette.Latency,
                                             BorderRadius: BorderRadius.Circular(100)))))))),
                 new SizedBox(
-                    width: 56,
+                    width: scaler.Scale(56),
                     child: new Text(
                         _display,
                         style: new TextStyle(
@@ -63,6 +66,6 @@ public sealed class LatencyBar : StatelessWidget
                             FontFamily: NetBenchFonts.Mono),
                         textAlign: TextAlign.Right,
                         maxLines: 1)),
-            ]);
+            ]));
     }
 }

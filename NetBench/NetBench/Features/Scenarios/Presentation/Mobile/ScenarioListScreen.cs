@@ -63,21 +63,28 @@ public sealed class ScenarioListScreen : StatelessWidget
         return new Row(
             mainAxisAlignment: MainAxisAlignment.SpaceBetween,
             crossAxisAlignment: CrossAxisAlignment.Center,
+            spacing: 8,
             children:
             [
-                new Column(
+                // Expanded + scaleDown: при крупном шрифте заголовок ужимается, а не наезжает на кнопки
+                new Expanded(new Column(
                     crossAxisAlignment: CrossAxisAlignment.Start,
                     mainAxisSize: MainAxisSize.Min,
                     children:
                     [
-                        new Text(
-                            title,
-                            style: new TextStyle(
-                                FontSize: 26,
-                                FontWeight: FontWeight.ExtraBold,
-                                Color: palette.TextHi,
-                                LetterSpacing: -0.5,
-                                FontFamily: NetBenchFonts.Ui)),
+                        new FittedBox(
+                            fit: BoxFit.ScaleDown,
+                            alignment: Alignment.CenterLeft,
+                            child: new Semantics(
+                                header: true,
+                                child: new Text(
+                                    title,
+                                    style: new TextStyle(
+                                        FontSize: 26,
+                                        FontWeight: FontWeight.ExtraBold,
+                                        Color: palette.TextHi,
+                                        LetterSpacing: -0.5,
+                                        FontFamily: NetBenchFonts.Ui)))),
                         new SizedBox(height: 2),
                         new Text(
                             subtitle,
@@ -85,7 +92,7 @@ public sealed class ScenarioListScreen : StatelessWidget
                                 FontSize: 13,
                                 Color: palette.TextMid,
                                 FontFamily: NetBenchFonts.Ui)),
-                    ]),
+                    ])),
                 new Row(
                     mainAxisSize: MainAxisSize.Min,
                     spacing: 8,
@@ -162,14 +169,14 @@ public sealed class ScenarioListScreen : StatelessWidget
     private static Padding BuildSectionHead(NetBenchPalette palette, string title) =>
         new Padding(
             new Avalonia.Thickness(0, 14, 0, 12),
-            new Text(
+            new Semantics(header: true, child: new Text(
                 title.ToUpperInvariant(),
                 style: new TextStyle(
                     FontSize: 12,
                     FontWeight: FontWeight.Bold,
                     Color: palette.TextMid,
                     LetterSpacing: 0.6,
-                    FontFamily: NetBenchFonts.Ui)));
+                    FontFamily: NetBenchFonts.Ui))));
 
     /// <summary>
     /// Строка истории: точка статуса, сценарий с хостом, RPS и время прогона.
@@ -190,69 +197,71 @@ public sealed class ScenarioListScreen : StatelessWidget
             crossAxisAlignment: CrossAxisAlignment.Stretch,
             children:
             [
-                new InkWell(
-                    onTap: () => _ = Navigator.Of(context).Push(
-                        new MaterialPageRoute(_ => new ResultScreen(report))),
-                    child: new Container(
-                        padding: new Avalonia.Thickness(0, 12),
-                        child: new Row(
-                            spacing: 10,
-                            crossAxisAlignment: CrossAxisAlignment.Center,
-                            children:
-                            [
-                                new Container(
-                                    width: 7,
-                                    height: 7,
-                                    decoration: new BoxDecoration(
-                                        Color: failed ? palette.Error : palette.Success,
-                                        Shape: BoxShape.Circle)),
-                                new Expanded(
+                new Semantics(
+                    button: true,
+                    child: new InkWell(
+                        onTap: () => _ = Navigator.Of(context).Push(
+                            new MaterialPageRoute(_ => new ResultScreen(report))),
+                        child: new Container(
+                            padding: new Avalonia.Thickness(0, 12),
+                            child: new Row(
+                                spacing: 10,
+                                crossAxisAlignment: CrossAxisAlignment.Center,
+                                children:
+                                [
+                                    new Container(
+                                        width: 7,
+                                        height: 7,
+                                        decoration: new BoxDecoration(
+                                            Color: failed ? palette.Error : palette.Success,
+                                            Shape: BoxShape.Circle)),
+                                    new Expanded(
+                                        new Column(
+                                            crossAxisAlignment: CrossAxisAlignment.Start,
+                                            mainAxisSize: MainAxisSize.Min,
+                                            children:
+                                            [
+                                                new Text(
+                                                    strings.DisplayNameOf(report.Scenario),
+                                                    style: new TextStyle(
+                                                        FontSize: 14,
+                                                        FontWeight: FontWeight.SemiBold,
+                                                        Color: palette.TextHi,
+                                                        FontFamily: NetBenchFonts.Ui),
+                                                    maxLines: 1),
+                                                new SizedBox(height: 2),
+                                                new Text(
+                                                    host,
+                                                    style: new TextStyle(
+                                                        FontSize: 11.5,
+                                                        Color: palette.TextFaint,
+                                                        FontFamily: NetBenchFonts.Mono),
+                                                    maxLines: 1),
+                                            ])),
                                     new Column(
-                                        crossAxisAlignment: CrossAxisAlignment.Start,
+                                        crossAxisAlignment: CrossAxisAlignment.End,
                                         mainAxisSize: MainAxisSize.Min,
                                         children:
                                         [
                                             new Text(
-                                                strings.DisplayNameOf(report.Scenario),
+                                                strings.Mobile.SessionRps(FormatRps(report.Summary.RequestsPerSecond)),
                                                 style: new TextStyle(
-                                                    FontSize: 14,
+                                                    FontSize: 12.5,
                                                     FontWeight: FontWeight.SemiBold,
-                                                    Color: palette.TextHi,
-                                                    FontFamily: NetBenchFonts.Ui),
+                                                    Color: palette.Rps,
+                                                    FontFamily: NetBenchFonts.Mono),
                                                 maxLines: 1),
                                             new SizedBox(height: 2),
                                             new Text(
-                                                host,
+                                                FormatFinishedAt(report.FinishedAt),
                                                 style: new TextStyle(
-                                                    FontSize: 11.5,
+                                                    FontSize: 11,
                                                     Color: palette.TextFaint,
                                                     FontFamily: NetBenchFonts.Mono),
                                                 maxLines: 1),
-                                        ])),
-                                new Column(
-                                    crossAxisAlignment: CrossAxisAlignment.End,
-                                    mainAxisSize: MainAxisSize.Min,
-                                    children:
-                                    [
-                                        new Text(
-                                            strings.Mobile.SessionRps(FormatRps(report.Summary.RequestsPerSecond)),
-                                            style: new TextStyle(
-                                                FontSize: 12.5,
-                                                FontWeight: FontWeight.SemiBold,
-                                                Color: palette.Rps,
-                                                FontFamily: NetBenchFonts.Mono),
-                                            maxLines: 1),
-                                        new SizedBox(height: 2),
-                                        new Text(
-                                            FormatFinishedAt(report.FinishedAt),
-                                            style: new TextStyle(
-                                                FontSize: 11,
-                                                Color: palette.TextFaint,
-                                                FontFamily: NetBenchFonts.Mono),
-                                            maxLines: 1),
-                                    ]),
-                                new IconGlyph(GlyphKind.ChevronRight, palette.TextFaint, 12),
-                            ]))),
+                                        ]),
+                                    new IconGlyph(GlyphKind.ChevronRight, palette.TextFaint, 12),
+                                ])))),
                 new Container(height: 1, color: palette.Border),
             ]);
     }
@@ -289,7 +298,22 @@ public sealed class ScenarioListScreen : StatelessWidget
             background: BuildDeleteBackground(palette, strings.Mobile.Delete),
             confirmDismiss: _ => ConfirmDeleteAsync(context, name),
             onDismissed: direction => _ = DeleteScenarioAsync(context, scenario, name),
-            child: BuildCard(context, scenario, lastRun));
+            child: new Semantics(
+                // Свайп недоступен с TalkBack/VoiceOver — удаление дублируется действием в меню скринридера
+                customSemanticsActions: new Dictionary<CustomSemanticsAction, Action>
+                {
+                    [new CustomSemanticsAction(strings.Mobile.Delete)] = () => _ = DeleteWithConfirmationAsync(
+                        context,
+                        scenario,
+                        name),
+                },
+                child: BuildCard(context, scenario, lastRun)));
+    }
+
+    private static async Task DeleteWithConfirmationAsync(BuildContext context, LoadScenario scenario, string name)
+    {
+        if (await ConfirmDeleteAsync(context, name) == true)
+            await DeleteScenarioAsync(context, scenario, name);
     }
 
     /// <summary>
@@ -376,47 +400,49 @@ public sealed class ScenarioListScreen : StatelessWidget
                 color: palette.BgCard,
                 borderRadius: radius,
                 clipBehavior: Clip.AntiAlias,
-                child: new InkWell(
-                    onTap: () => _ = OpenScenarioAsync(context, scenario),
-                    borderRadius: radius,
-                    child: new Padding(
-                        new Avalonia.Thickness(16),
-                        new Column(
-                            crossAxisAlignment: CrossAxisAlignment.Start,
-                            children:
-                            [
-                                new Text(
-                                    name,
-                                    style: new TextStyle(
-                                        FontSize: 16,
-                                        FontWeight: FontWeight.Bold,
-                                        Color: palette.TextHi,
-                                        FontFamily: NetBenchFonts.Ui),
-                                    maxLines: 1),
-                                new SizedBox(height: 3),
-                                new Text(
-                                    host,
-                                    style: new TextStyle(
-                                        FontSize: 12.5,
-                                        Color: palette.TextMid,
-                                        FontFamily: NetBenchFonts.Mono),
-                                    maxLines: 1),
-                                new SizedBox(height: 12),
-                                new Row(
-                                    mainAxisAlignment: MainAxisAlignment.SpaceBetween,
-                                    children:
-                                    [
-                                        status,
-                                        // Тап по карточке запускает прогон, правка — отдельной кнопкой
-                                        new ToolButton(
-                                            icon: new Icon(Icons.EditOutlined, size: 16, color: palette.TextMid),
-                                            onPressed: () => _ = Navigator.Of(context).Push(
-                                                new MaterialPageRoute(_ => new ScenarioEditorScreen(scenario))),
-                                            tooltip: strings.Scenarios.Edit,
-                                            size: 32,
-                                            radius: 8),
-                                    ]),
-                            ])))));
+                child: new Semantics(
+                    button: true,
+                    child: new InkWell(
+                        onTap: () => _ = OpenScenarioAsync(context, scenario),
+                        borderRadius: radius,
+                        child: new Padding(
+                            new Avalonia.Thickness(16),
+                            new Column(
+                                crossAxisAlignment: CrossAxisAlignment.Start,
+                                children:
+                                [
+                                    new Text(
+                                        name,
+                                        style: new TextStyle(
+                                            FontSize: 16,
+                                            FontWeight: FontWeight.Bold,
+                                            Color: palette.TextHi,
+                                            FontFamily: NetBenchFonts.Ui),
+                                        maxLines: 1),
+                                    new SizedBox(height: 3),
+                                    new Text(
+                                        host,
+                                        style: new TextStyle(
+                                            FontSize: 12.5,
+                                            Color: palette.TextMid,
+                                            FontFamily: NetBenchFonts.Mono),
+                                        maxLines: 1),
+                                    new SizedBox(height: 12),
+                                    new Row(
+                                        mainAxisAlignment: MainAxisAlignment.SpaceBetween,
+                                        children:
+                                        [
+                                            status,
+                                            // Тап по карточке запускает прогон, правка — отдельной кнопкой
+                                            new ToolButton(
+                                                icon: new Icon(Icons.EditOutlined, size: 16, color: palette.TextMid),
+                                                onPressed: () => _ = Navigator.Of(context).Push(
+                                                    new MaterialPageRoute(_ => new ScenarioEditorScreen(scenario))),
+                                                tooltip: strings.Scenarios.Edit,
+                                                size: 32,
+                                                radius: 8),
+                                        ]),
+                                ]))))));
     }
 
     private static async Task OpenScenarioAsync(BuildContext context, LoadScenario scenario)
@@ -447,26 +473,28 @@ public sealed class ScenarioListScreen : StatelessWidget
             borderRadius: radius,
             elevation: 6,
             shadowColor: palette.Rps,
-            child: new InkWell(
-                onTap: () => _ = Navigator.Of(context).Push(new MaterialPageRoute(static _ => new QuickTestScreen())),
-                borderRadius: radius,
-                child: new Container(
-                    height: 54,
-                    alignment: Alignment.Center,
-                    child: new Row(
-                        mainAxisSize: MainAxisSize.Min,
-                        spacing: 8,
-                        children:
-                        [
-                            new IconGlyph(GlyphKind.Plus, Colors.White, 14),
-                            new Text(
-                                label,
-                                style: new TextStyle(
-                                    FontSize: 15,
-                                    FontWeight: FontWeight.Bold,
-                                    Color: Colors.White,
-                                    FontFamily: NetBenchFonts.Ui)),
-                        ]))));
+            child: new Semantics(
+                button: true,
+                child: new InkWell(
+                    onTap: () => _ = Navigator.Of(context).Push(new MaterialPageRoute(static _ => new QuickTestScreen())),
+                    borderRadius: radius,
+                    child: new Container(
+                        height: 54,
+                        alignment: Alignment.Center,
+                        child: new Row(
+                            mainAxisSize: MainAxisSize.Min,
+                            spacing: 8,
+                            children:
+                            [
+                                new IconGlyph(GlyphKind.Plus, Colors.White, 14),
+                                new Text(
+                                    label,
+                                    style: new TextStyle(
+                                        FontSize: 15,
+                                        FontWeight: FontWeight.Bold,
+                                        Color: Colors.White,
+                                        FontFamily: NetBenchFonts.Ui)),
+                            ])))));
     }
 
     private static string StripScheme(string target)

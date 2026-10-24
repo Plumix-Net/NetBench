@@ -7,6 +7,7 @@ using NetBench.Mobile.Controls;
 using NetBench.Mobile.Theme;
 using Plumix.Bloc;
 using Plumix.Material;
+using Plumix.Painting;
 using Plumix.Rendering;
 using Plumix.Slang;
 using Plumix.Widgets;
@@ -58,9 +59,10 @@ public sealed class ResultScreen : StatelessWidget
                                             BuildSectionHead(palette, strings.Mobile.LatencyDistribution),
                                             BuildLatencyRows(strings),
                                             BuildSectionHead(palette, strings.Mobile.StatusCodes),
-                                            .. BuildStatusRows(strings, palette),
+                                            // Колонка кода растёт с шрифтом: при крупном «200» не переносится по цифрам
+                                            .. BuildStatusRows(strings, palette, MediaQuery.TextScalerOf(context)),
                                             new SizedBox(height: 24),
-                                            BuildShareButton(context, strings, palette),
+                                            new Semantics(button: true, child: BuildShareButton(context, strings, palette)),
                                             .. BuildSaveAsScenario(context, strings, palette),
                                             new SizedBox(height: 24),
                                         ]))),
@@ -81,13 +83,7 @@ public sealed class ResultScreen : StatelessWidget
                         tooltip: Translations<Strings>.Of(context).Mobile.Back,
                         size: 34,
                         radius: 8),
-                    new Text(
-                        title,
-                        style: new TextStyle(
-                            FontSize: 20,
-                            FontWeight: FontWeight.ExtraBold,
-                            Color: palette.TextHi,
-                            FontFamily: NetBenchFonts.Ui)),
+                    new Expanded(new ScreenTitle(title)),
                 ]));
     }
 
@@ -171,14 +167,14 @@ public sealed class ResultScreen : StatelessWidget
     {
         return new Padding(
             new Avalonia.Thickness(0, 26, 0, 12),
-            new Text(
+            new Semantics(header: true, child: new Text(
                 title.ToUpperInvariant(),
                 style: new TextStyle(
                     FontSize: 12,
                     FontWeight: FontWeight.Bold,
                     Color: palette.TextMid,
                     LetterSpacing: 0.6,
-                    FontFamily: NetBenchFonts.Ui)));
+                    FontFamily: NetBenchFonts.Ui))));
     }
 
     private Column BuildLatencyRows(Strings strings)
@@ -207,7 +203,7 @@ public sealed class ResultScreen : StatelessWidget
             ]);
     }
 
-    private IEnumerable<Widget> BuildStatusRows(Strings strings, NetBenchPalette palette)
+    private IEnumerable<Widget> BuildStatusRows(Strings strings, NetBenchPalette palette, TextScaler scaler)
     {
         var total = Math.Max(1, _report.Summary.TotalRequests);
 
@@ -217,7 +213,7 @@ public sealed class ResultScreen : StatelessWidget
             var codeLabel = bucket.StatusCode == 0 ? "ERR" : bucket.StatusCode.ToString();
             var pct = bucket.Count * 100.0 / total;
 
-            yield return new Container(
+            yield return new MergeSemantics(new Container(
                 padding: new Avalonia.Thickness(0, 10),
                 decoration: new BoxDecoration(),
                 child: new Row(
@@ -229,7 +225,7 @@ public sealed class ResultScreen : StatelessWidget
                             height: 7,
                             decoration: new BoxDecoration(Color: color, Shape: BoxShape.Circle)),
                         new SizedBox(
-                            width: 44,
+                            width: scaler.Scale(44),
                             child: new Text(
                                 codeLabel,
                                 style: new TextStyle(
@@ -251,7 +247,7 @@ public sealed class ResultScreen : StatelessWidget
                                 FontSize: 13,
                                 Color: palette.TextMid,
                                 FontFamily: NetBenchFonts.Mono)),
-                    ]));
+                    ])));
             yield return new Container(height: 1, color: palette.Border);
         }
     }

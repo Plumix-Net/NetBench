@@ -9,6 +9,7 @@ using NetBench.Mobile.Theme;
 using Plumix;
 using Plumix.Bloc;
 using Plumix.Material;
+using Plumix.Painting;
 using Plumix.Rendering;
 using Plumix.Slang;
 using Plumix.UI;
@@ -22,6 +23,8 @@ namespace NetBench.Features.TestRun.Presentation.Mobile;
 /// <summary>Экран живого прогона: большие метрики, спарклайн RPS, прогресс и «Стоп».</summary>
 public sealed class MonitorScreen : StatelessWidget
 {
+    private const double MaxDigitScale = 1.5;
+
     private readonly LoadScenario _scenario;
 
     public MonitorScreen(LoadScenario scenario)
@@ -160,42 +163,51 @@ public sealed class MonitorScreen : StatelessWidget
                                         FontFamily: NetBenchFonts.Ui)),
                             ]),
                     ]),
-                BuildMetricRow(
-                    palette,
-                    strings.Mobile.RequestsPerSecond,
-                    palette.Rps,
-                    stats?.RequestsPerSecond ?? 0,
-                    "N0",
-                    unit: null,
-                    valueColor: palette.Rps),
-                BuildDivider(palette),
-                BuildMetricRow(
-                    palette,
-                    strings.Mobile.P95Latency,
-                    palette.Latency,
-                    stats?.LatencyP95Ms ?? 0,
-                    "F0",
-                    unit: strings.Common.MillisecondsShort,
-                    valueColor: palette.Latency),
-                BuildDivider(palette),
-                BuildMetricRow(
-                    palette,
-                    strings.Mobile.ErrorRate,
-                    errorColor,
-                    errorRatePct,
-                    "F1",
-                    unit: strings.Common.Percent,
-                    valueColor: errorColor),
-                new Padding(
-                    new Avalonia.Thickness(0, 18, 0, 6),
-                    new Sparkline(state.RpsPoints, palette.Rps, palette.RpsTint)),
-                BuildProgress(palette, progress, Format(elapsed), Format(duration)),
-                new SizedBox(height: 14),
-                new Text(
-                    strings.Mobile.KeepOpenHint,
-                    style: new TextStyle(FontSize: 12, Color: palette.TextMid, FontFamily: NetBenchFonts.Ui)),
-                new Spacer(),
-                BuildStopButton(palette, strings.Mobile.Stop, cubit.Stop),
+                // Метрики прокручиваются, «Стоп» прижат к низу: при крупном шрифте экран
+                // не помещается целиком, а остановить прогон нужно всегда
+                new Expanded(
+                    new SingleChildScrollView(
+                        new Column(
+                            crossAxisAlignment: CrossAxisAlignment.Stretch,
+                            children:
+                            [
+                                BuildMetricRow(
+                                    palette,
+                                    strings.Mobile.RequestsPerSecond,
+                                    palette.Rps,
+                                    stats?.RequestsPerSecond ?? 0,
+                                    "N0",
+                                    unit: null,
+                                    valueColor: palette.Rps),
+                                BuildDivider(palette),
+                                BuildMetricRow(
+                                    palette,
+                                    strings.Mobile.P95Latency,
+                                    palette.Latency,
+                                    stats?.LatencyP95Ms ?? 0,
+                                    "F0",
+                                    unit: strings.Common.MillisecondsShort,
+                                    valueColor: palette.Latency),
+                                BuildDivider(palette),
+                                BuildMetricRow(
+                                    palette,
+                                    strings.Mobile.ErrorRate,
+                                    errorColor,
+                                    errorRatePct,
+                                    "F1",
+                                    unit: strings.Common.Percent,
+                                    valueColor: errorColor),
+                                new Padding(
+                                    new Avalonia.Thickness(0, 18, 0, 6),
+                                    new Sparkline(state.RpsPoints, palette.Rps, palette.RpsTint)),
+                                BuildProgress(palette, strings.Mobile.Duration, progress, Format(elapsed), Format(duration)),
+                                new SizedBox(height: 14),
+                                new Text(
+                                    strings.Mobile.KeepOpenHint,
+                                    style: new TextStyle(FontSize: 12, Color: palette.TextMid, FontFamily: NetBenchFonts.Ui)),
+                                new SizedBox(height: 12),
+                            ]))),
+                new Semantics(button: true, child: BuildStopButton(palette, strings.Mobile.Stop, cubit.Stop)),
                 new SizedBox(height: 24),
             ]);
     }
@@ -220,8 +232,10 @@ public sealed class MonitorScreen : StatelessWidget
                 tween: new DoubleTween(end: value),
                 duration: TimeSpan.FromMilliseconds(250),
                 curve: Curves.Linear,
-                builder: (_, animated, _) => new Text(
+                // Цифры и так 52 pt: выше 1.5× они не влезают в строку — дальше масштаб не растёт
+                builder: (context, animated, _) => new Text(
                     animated.ToString(format),
+                    textScaler: MediaQuery.TextScalerOf(context).Clamp(maxScaleFactor: MaxDigitScale),
                     style: new TextStyle(
                         FontSize: 52,
                         FontWeight: FontWeight.ExtraBold,
@@ -236,6 +250,7 @@ public sealed class MonitorScreen : StatelessWidget
                 new Avalonia.Thickness(0, 0, 0, 9),
                 new Text(
                     unit,
+                    textScaler: TextScaler.Linear(MaxDigitScale),
                     style: new TextStyle(
                         FontSize: 20,
                         FontWeight: FontWeight.ExtraBold,
@@ -245,7 +260,7 @@ public sealed class MonitorScreen : StatelessWidget
 
         return new Padding(
             new Avalonia.Thickness(0, 14),
-            new Column(
+            new MergeSemantics(new Column(
                 crossAxisAlignment: CrossAxisAlignment.Start,
                 children:
                 [
@@ -271,11 +286,12 @@ public sealed class MonitorScreen : StatelessWidget
                         mainAxisSize: MainAxisSize.Min,
                         crossAxisAlignment: CrossAxisAlignment.End,
                         children: valueRow),
-                ]));
+                ])));
     }
 
     private static Column BuildProgress(
         NetBenchPalette palette,
+        string label,
         double progress,
         string elapsedLabel,
         string totalLabel)
@@ -286,6 +302,8 @@ public sealed class MonitorScreen : StatelessWidget
             [
                 new LinearProgressIndicator(
                     value: Math.Clamp(progress, 0, 1),
+                    semanticsLabel: label,
+                    semanticsValue: $"{elapsedLabel} / {totalLabel}",
                     minHeight: 6,
                     color: palette.Rps,
                     backgroundColor: palette.Border,
