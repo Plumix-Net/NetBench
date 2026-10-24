@@ -42,8 +42,18 @@ Build number считает fastlane: следующий после послед
 платформ. Локально — те же лейны: `bundle exec fastlane ios beta`, `… android internal`, `… ios metadata`,
 `… android metadata` (ключи — из `fastlane/.env`).
 
-Ruby для fastlane — версия из `.ruby-version` (на Mac: `brew install ruby`, затем
-`PATH=/opt/homebrew/opt/ruby/bin:$PATH bundle install`).
+Ruby для fastlane — версия из `.ruby-version` (на Mac: `brew install ruby`). Гемы — в `vendor/bundle`
+репозитория (в .gitignore): в системный каталог Homebrew Ruby bundler писать не может.
+
+```bash
+export PATH=/opt/homebrew/opt/ruby/bin:$PATH
+bundle config set --local path vendor/bundle
+bundle install
+```
+
+Первый AAB для ручной загрузки в Play (versionCode задаётся явно: без ключа Play лейн не узнает
+последний загруженный): `NETBENCH_BUILD_NUMBER=1 bundle exec fastlane android build` →
+`NetBench/NetBench.Android/bin/Release/net10.0-android/publish/net.plumix.netbench-Signed.aab`.
 
 ## Ключи для fastlane и CI
 
