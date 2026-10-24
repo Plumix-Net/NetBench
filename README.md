@@ -67,6 +67,15 @@ dotnet build NetBench/NetBench/NetBench.csproj -f net10.0-android   # shared pro
 dotnet build NetBench/NetBench.Android/NetBench.Android.csproj      # full APK
 ```
 
+## Download
+
+- **Desktop** — Windows (`Setup.exe`), macOS (`.app`, Apple Silicon and Intel) and Linux (`AppImage`) on
+  [GitHub Releases](https://github.com/Plumix-Net/NetBench/releases); installed copies update themselves.
+- **Mobile** — App Store and Google Play (coming with 1.0).
+
+Releases are cut by pushing a `vX.Y.Z` tag: CI builds every platform and uploads to TestFlight, Play internal
+testing and a draft GitHub Release with fastlane and Velopack — see [store/README.md](store/README.md).
+
 ## See also
 
 - [Plumix](https://github.com/Plumix-Net/Plumix) — Flutter-inspired UI framework for .NET

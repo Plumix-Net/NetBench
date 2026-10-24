@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Скриншоты для App Store и Google Play: мобильный (Plumix) UI в headless-окне Avalonia с настоящей
+       отрисовкой Skia. Общий проект собирает Plumix-половину только в android/ios-таргетах, поэтому
+       исходники мобильной версии компилируются здесь напрямую под net10.0 — генератор идёт на любом
+       macOS/Linux без мобильных workloads. Запуск: bundle exec fastlane screenshots. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>NetBench.Screenshots</RootNamespace>
+    <!-- AppInfo читает версию из атрибутов сборки, как в приложении -->
+    <Version>$(NetBenchVersion)</Version>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AppSource>..\NetBench\</AppSource>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Всё, кроме desktop-половины, Avalonia-приложения MobileApp (корневой виджет ставит ShotSession)
+         и JSON-хранилищ: их место занимают демо-хранилища из Storage/ с теми же именами — MobileShell
+         собирается как есть, а данные пользователя на машине не читаются и не пишутся. -->
+    <Compile Include="$(AppSource)**\*.cs"
+             Exclude="$(AppSource)bin\**;$(AppSource)obj\**;$(AppSource)Desktop\**;$(AppSource)Features\**\Presentation\Desktop\**;$(AppSource)Mobile\MobileApp.axaml.cs;$(AppSource)Features\**\Data\Json*.cs"
+             LinkBase="App" />
+    <AdditionalFiles Include="$(AppSource)Localization\i18n\*.i18n.json" LinkBase="App\Localization\i18n" />
+    <AdditionalFiles Include="$(AppSource)Localization\slang.json" LinkBase="App\Localization" />
+    <EmbeddedResource Include="$(AppSource)Mobile\Licenses\*.txt" LogicalName="NetBench.Licenses.%(Filename).txt" />
+    <AssemblyMetadata Include="BuildNumber" Value="$(NetBenchBuildNumber)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="Avalonia.Fonts.Inter" />
+    <!-- ради Avalonia.Skia: headless-окно рисует настоящим Skia, как устройство -->
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Headless" />
+    <PackageReference Include="HdrHistogram" />
+    <PackageReference Include="Slang.Net" />
+    <PackageReference Include="Plumix" />
+    <PackageReference Include="Plumix.Material" />
+    <PackageReference Include="Plumix.Bloc" />
+    <PackageReference Include="Plumix.Slang" />
+  </ItemGroup>
+
+</Project>

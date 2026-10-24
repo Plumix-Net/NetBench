@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Генерирует иконки и сплэш NetBench для Android/iOS и иконку для Google Play.
+"""Генерирует иконки и сплэш NetBench для Android/iOS, иконку для Google Play и иконки десктопа.
 
 Знак — логотип Plumix (два шеврона), векторизованный по landing/src/assets/plumix-logo.jpg
 (1920×1920). Геометрия задана один раз в координатах адаптивной иконки Android (108×108):
@@ -16,7 +16,10 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).resolve().parent.parent
 ANDROID_RES = ROOT / "NetBench" / "NetBench.Android" / "Resources"
 IOS_ASSETS = ROOT / "NetBench" / "NetBench.iOS" / "Assets.xcassets"
-STORE = ROOT / "store"
+APP_ASSETS = ROOT / "NetBench" / "NetBench" / "Assets"
+DESKTOP_PACKAGING = ROOT / "NetBench" / "NetBench.Desktop" / "Packaging"
+PLAY_METADATA = ROOT / "fastlane" / "metadata" / "android"
+PLAY_LANGUAGES = ("en-US", "ru-RU")
 
 TILE = "#11141D"  # фон логотипа Plumix
 RPS_BLUE = "#1E90FF"  # NetBenchPalette.Rps — акцент для витринной графики
@@ -184,10 +187,31 @@ def ios():
 
 def store():
     # Google Play: 512×512, 32-bit PNG без прозрачности; маску скругления Play накладывает сам.
-    save_png(render(512), STORE / "google-play" / "icon-512.png", opaque=True)
+    # supply берёт графику из папки каждого языка листинга.
+    for language in PLAY_LANGUAGES:
+        save_png(render(512), PLAY_METADATA / language / "images" / "icon.png", opaque=True)
+
+
+def desktop():
+    # Windows/Linux: скруглённая плитка во весь кадр. .ico — иконка окна (Avalonia-ресурс) и exe,
+    # её же и png берёт vpk для установщика и AppImage.
+    sizes = [16, 24, 32, 48, 64, 128, 256]
+    tile = masked(render(1024), 0.18)
+    APP_ASSETS.mkdir(parents=True, exist_ok=True)
+    tile.save(APP_ASSETS / "netbench.ico", sizes=[(s, s) for s in sizes])
+    print("wrote", (APP_ASSETS / "netbench.ico").relative_to(ROOT))
+    save_png(tile.resize((512, 512), Image.LANCZOS), DESKTOP_PACKAGING / "netbench.png")
+
+    # macOS: сетка Big Sur — плитка 824 в кадре 1024 со скруглением ~22.5% и прозрачными полями.
+    mac = Image.new("RGBA", (1024, 1024), (0, 0, 0, 0))
+    mac.paste(masked(render(824), 0.225), (100, 100))
+    DESKTOP_PACKAGING.mkdir(parents=True, exist_ok=True)
+    mac.save(DESKTOP_PACKAGING / "netbench.icns")
+    print("wrote", (DESKTOP_PACKAGING / "netbench.icns").relative_to(ROOT))
 
 
 if __name__ == "__main__":
     android()
     ios()
     store()
+    desktop()

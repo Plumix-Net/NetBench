@@ -1,0 +1,239 @@
+# Сборка и выгрузка NetBench в App Store Connect и Google Play. Порядок релиза, секреты и
+# одноразовые шаги в консолях — store/README.md.
+#
+#   bundle exec fastlane ios beta        # IPA → TestFlight
+#   bundle exec fastlane ios metadata    # тексты, release notes и скриншоты → App Store Connect
+#   bundle exec fastlane android internal  # AAB → внутреннее тестирование Play
+#   bundle exec fastlane android metadata  # листинг, графика и скриншоты → Play
+#   bundle exec fastlane screenshots     # перегенерировать скриншоты для обоих сторов
+#   bundle exec fastlane check           # лимиты длины текстов, без сети
+#
+# Ключи — из переменных окружения (локально удобно положить в fastlane/.env, образец —
+# fastlane/.env.example):
+#   App Store Connect API: ASC_KEY_ID, ASC_ISSUER_ID и ASC_KEY_P8_BASE64 или ASC_KEY_PATH
+#   подпись iOS в CI:      IOS_DIST_CERT_P12_BASE64, IOS_DIST_CERT_PASSWORD (локально — связка ключей)
+#   Google Play API:       PLAY_JSON_KEY (содержимое) или PLAY_JSON_KEY_PATH
+#   подпись Android:       NETBENCH_KEYSTORE(_BASE64), NETBENCH_KEY_ALIAS, NETBENCH_KEYSTORE_PASSWORD
+#                          (локально по умолчанию — ~/.android-keys/netbench-upload.*)
+
+require "base64"
+require "tmpdir"
+
+skip_docs
+opt_out_usage
+
+ROOT = File.expand_path("..", __dir__)
+METADATA = File.join(ROOT, "fastlane", "metadata")
+SCREENSHOTS = File.join(ROOT, "fastlane", "screenshots")
+APP_ID = CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier)
+
+# Лимиты полей сторов (символы) — проверяются до любой выгрузки.
+LIMITS = {
+  "ios/*/name.txt" => 30, "ios/*/subtitle.txt" => 30, "ios/*/keywords.txt" => 100,
+  "ios/*/promotional_text.txt" => 170, "ios/*/description.txt" => 4000, "ios/*/release_notes.txt" => 4000,
+  "android/*/title.txt" => 30, "android/*/short_description.txt" => 80,
+  "android/*/full_description.txt" => 4000,
+  # changelogs Play копируются из release_notes App Store — лимит Play строже
+  "ios/*/release_notes.txt#play" => 500,
+}.freeze
+
+# Языки листинга: App Store → Google Play.
+PLAY_LANGUAGE = { "en-US" => "en-US", "ru" => "ru-RU" }.freeze
+
+def netbench_version
+  props = File.read(File.join(ROOT, "NetBench", "Directory.Build.props"))
+  props[%r{<NetBenchVersion>([^<]+)</NetBenchVersion>}, 1]
+end
+
+def dotnet(*args)
+  Dir.chdir(ROOT) { sh("dotnet", *args) }
+end
+
+def check_metadata!
+  errors = LIMITS.flat_map do |pattern, limit|
+    Dir.glob(File.join(METADATA, pattern.split("#").first)).filter_map do |path|
+      length = File.read(path).strip.length
+      "#{path.delete_prefix(ROOT + '/')}: #{length} > #{limit}" if length > limit
+    end
+  end
+  UI.user_error!("Store texts over the limit:\n#{errors.join("\n")}") unless errors.empty?
+  UI.success("Store texts fit the limits")
+end
+
+desc "Проверить лимиты длины текстов витрины"
+lane :check do
+  check_metadata!
+end
+
+desc "Скриншоты обоих сторов из headless-рендера мобильного UI (ru/en, светлая/тёмная тема)"
+lane :screenshots do
+  dotnet("run", "--project", "NetBench/NetBench.Screenshots/NetBench.Screenshots.csproj", "-c", "Release",
+         "--", "--output", ROOT)
+end
+
+platform :ios do
+  def asc_api_key
+    app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_content: ENV["ASC_KEY_P8_BASE64"],
+      key_filepath: ENV["ASC_KEY_PATH"],
+      is_key_content_base64: !ENV["ASC_KEY_P8_BASE64"].to_s.empty?,
+    )
+  end
+
+  # В CI сертификат приходит секретом во временную связку ключей; локально он уже в login.keychain.
+  def import_distribution_certificate
+    return if ENV["IOS_DIST_CERT_P12_BASE64"].to_s.empty?
+
+    setup_ci(force: true)
+    p12 = File.join(Dir.tmpdir, "netbench-distribution.p12")
+    File.binwrite(p12, Base64.decode64(ENV["IOS_DIST_CERT_P12_BASE64"]))
+    import_certificate(
+      certificate_path: p12,
+      certificate_password: ENV.fetch("IOS_DIST_CERT_PASSWORD"),
+      keychain_name: "fastlane_tmp_keychain",
+      keychain_password: "",
+    )
+  end
+
+  desc "Подписанный IPA для App Store (build number — следующий после последнего в TestFlight)"
+  lane :build do |options|
+    api_key = asc_api_key
+    import_distribution_certificate
+
+    # App Store-профиль для Bundle ID: скачивается или создаётся через API.
+    get_provisioning_profile(api_key: api_key, app_identifier: APP_ID)
+    profile = lane_context[SharedValues::SIGH_NAME]
+
+    build_number = options[:build_number] || ENV["NETBENCH_BUILD_NUMBER"] ||
+                   latest_testflight_build_number(api_key: api_key, app_identifier: APP_ID, initial_build_number: 0) + 1
+
+    FileUtils.rm_rf(Dir[File.join(ROOT, "NetBench", "NetBench.iOS", "{bin,obj}")])
+    dotnet("publish", "NetBench/NetBench.iOS/NetBench.iOS.csproj", "-c", "Release",
+           "-p:NetBenchBuildNumber=#{build_number}", "-p:CodesignProvision=#{profile}")
+
+    ipa = Dir[File.join(ROOT, "NetBench/NetBench.iOS/bin/Release/net10.0-ios/ios-arm64/publish/*.ipa")].first
+    UI.user_error!("IPA not found") unless ipa
+    lane_context[:NETBENCH_IPA] = ipa
+    UI.success("IPA #{netbench_version} (#{build_number}): #{ipa}")
+    ipa
+  end
+
+  desc "Собрать IPA и загрузить в TestFlight"
+  lane :beta do |options|
+    ipa = build(options)
+    upload_to_testflight(
+      api_key: lane_context[SharedValues::APP_STORE_CONNECT_API_KEY],
+      ipa: ipa,
+      skip_waiting_for_build_processing: true,
+    )
+  end
+
+  desc "Тексты, release notes и скриншоты → App Store Connect (версия создаётся, на ревью не отправляется)"
+  lane :metadata do
+    check_metadata!
+    deliver(
+      api_key: asc_api_key,
+      app_identifier: APP_ID,
+      app_version: netbench_version,
+      metadata_path: File.join(METADATA, "ios"),
+      screenshots_path: File.join(SCREENSHOTS, "ios"),
+      skip_binary_upload: true,
+      skip_screenshots: Dir[File.join(SCREENSHOTS, "ios", "*", "*.png")].empty?,
+      overwrite_screenshots: true,
+      submit_for_review: false,
+      run_precheck_before_submit: false,
+      force: true,
+    )
+  end
+end
+
+platform :android do
+  def play_json_key
+    data = ENV["PLAY_JSON_KEY"].to_s
+    data.empty? ? { json_key: ENV.fetch("PLAY_JSON_KEY_PATH") } : { json_key_data: data }
+  end
+
+  # Upload-ключ: в CI — секрет base64, локально — ~/.android-keys (store/README.md).
+  def prepare_upload_key
+    if !ENV["NETBENCH_KEYSTORE_BASE64"].to_s.empty?
+      path = File.join(Dir.tmpdir, "netbench-upload.jks")
+      File.binwrite(path, Base64.decode64(ENV["NETBENCH_KEYSTORE_BASE64"]))
+      ENV["NETBENCH_KEYSTORE"] = path
+    elsif ENV["NETBENCH_KEYSTORE"].to_s.empty?
+      local = File.expand_path("~/.android-keys/netbench-upload.jks")
+      UI.user_error!("Upload key not found: set NETBENCH_KEYSTORE or NETBENCH_KEYSTORE_BASE64") unless File.exist?(local)
+      ENV["NETBENCH_KEYSTORE"] = local
+      ENV["NETBENCH_KEY_ALIAS"] ||= "netbench-upload"
+      ENV["NETBENCH_KEYSTORE_PASSWORD"] ||= File.read(File.expand_path("~/.android-keys/netbench-upload.password")).strip
+    end
+    ENV.fetch("NETBENCH_KEY_ALIAS")
+    ENV.fetch("NETBENCH_KEYSTORE_PASSWORD")
+  end
+
+  # Следующий versionCode — больше любого уже загруженного в любой трек.
+  def next_version_code
+    codes = %w[internal alpha beta production].flat_map do |track|
+      google_play_track_version_codes(track: track, **play_json_key)
+    rescue StandardError => e
+      UI.important("No version codes in #{track}: #{e.message}")
+      []
+    end
+    (codes.map(&:to_i).max || 0) + 1
+  end
+
+  # changelogs Play — те же release notes, что в App Store (единый источник: metadata/ios/*/release_notes.txt).
+  def sync_changelogs
+    PLAY_LANGUAGE.each do |ios, play|
+      notes = File.read(File.join(METADATA, "ios", ios, "release_notes.txt")).strip
+      path = File.join(METADATA, "android", play, "changelogs", "default.txt")
+      FileUtils.mkdir_p(File.dirname(path))
+      File.write(path, notes + "\n")
+    end
+  end
+
+  desc "Подписанный AAB для Google Play (versionCode — следующий после загруженных)"
+  lane :build do |options|
+    prepare_upload_key
+    version_code = options[:build_number] || ENV["NETBENCH_BUILD_NUMBER"] || next_version_code
+
+    dotnet("publish", "NetBench/NetBench.Android/NetBench.Android.csproj", "-c", "Release",
+           "-p:NetBenchBuildNumber=#{version_code}")
+
+    aab = Dir[File.join(ROOT, "NetBench/NetBench.Android/bin/Release/net10.0-android/publish/*-Signed.aab")].first
+    UI.user_error!("AAB not found") unless aab
+    UI.success("AAB #{netbench_version} (#{version_code}): #{aab}")
+    aab
+  end
+
+  desc "Собрать AAB и загрузить во внутреннее тестирование (черновиком, пока приложение не опубликовано)"
+  lane :internal do |options|
+    check_metadata!
+    aab = build(options)
+    sync_changelogs
+    upload_to_play_store(
+      **play_json_key,
+      track: "internal",
+      aab: aab,
+      # Пока в Play нет ни одного опубликованного релиза, API принимает только draft.
+      release_status: ENV.fetch("PLAY_RELEASE_STATUS", "draft"),
+      metadata_path: File.join(METADATA, "android"),
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+    )
+  end
+
+  desc "Листинг, графика и скриншоты → Google Play"
+  lane :metadata do
+    check_metadata!
+    upload_to_play_store(
+      **play_json_key,
+      metadata_path: File.join(METADATA, "android"),
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      skip_upload_changelogs: true,
+    )
+  end
+end

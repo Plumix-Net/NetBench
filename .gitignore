@@ -452,3 +452,12 @@ $RECYCLE.BIN/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# fastlane / bundler
+/vendor/bundle/
+/.bundle/
+/fastlane/.env
+/fastlane/report.xml
+/fastlane/README.md
+# changelogs Play копируются из metadata/ios/*/release_notes.txt при выгрузке
+/fastlane/metadata/android/*/changelogs/

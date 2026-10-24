@@ -1,0 +1,2 @@
+# Bash-скрипты запускаются и на Windows-раннере (Git Bash) — CRLF там ломает интерпретатор.
+*.sh text eol=lf

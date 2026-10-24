@@ -96,3 +96,23 @@ jobs:
         run: >-
           dotnet build NetBench/NetBench.iOS/NetBench.iOS.csproj -c Release -r iossimulator-arm64
           -p:NetBenchBuildNumber=${{ github.run_number }}
+
+  # Скриншоты сторов из headless-рендера: заодно проверка, что мобильный UI проходит основные сценарии
+  # (главный экран → быстрый тест → живой прогон → результат → редактор) на ru и en.
+  screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Render screenshots
+        run: dotnet run --project NetBench/NetBench.Screenshots/NetBench.Screenshots.csproj -c Release -- --output "$RUNNER_TEMP/shots"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: store-screenshots
+          path: ${{ runner.temp }}/shots/fastlane
+          if-no-files-found: error

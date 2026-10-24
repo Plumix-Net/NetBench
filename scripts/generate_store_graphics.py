@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Генерирует feature graphic для Google Play (1024×500).
+"""Генерирует feature graphic для Google Play (1024×500) на каждый язык листинга.
 
 Знак Plumix — из scripts/generate_icons.py, шрифт — Inter (OFL), который приложение уже
 использует: TTF берётся из пакета Avalonia.Fonts.Inter в кэше NuGet (нужен restore проекта).
@@ -13,10 +13,10 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-from generate_icons import RPS_BLUE, ROOT, TILE, hex_rgb, render
+from generate_icons import PLAY_METADATA, RPS_BLUE, ROOT, TILE, hex_rgb, render
 
 INTER_DLL = Path.home() / ".nuget/packages/avalonia.fonts.inter/12.1.4/lib/net8.0/Avalonia.Fonts.Inter.dll"
-OUT = ROOT / "store" / "google-play" / "feature-graphic.png"
+TAGLINES = {"en-US": "HTTP load testing for your API", "ru-RU": "Нагрузочный тест своего API"}
 WIDTH, HEIGHT = 1024, 500
 
 
@@ -41,7 +41,7 @@ def font(weight, size):
     return ImageFont.truetype(inter(weight), size)
 
 
-def main():
+def feature_graphic(language):
     scale = 2
     image = Image.new("RGBA", (WIDTH * scale, HEIGHT * scale), (*hex_rgb(TILE), 255))
 
@@ -61,15 +61,17 @@ def main():
 
     draw = ImageDraw.Draw(image)
     draw.text((360 * scale, 120 * scale), "NetBench", font=font("Bold", 92 * scale), fill=(255, 255, 255, 255))
-    draw.text((364 * scale, 240 * scale), "HTTP load testing for your API", font=font("Medium", 34 * scale),
+    draw.text((364 * scale, 240 * scale), TAGLINES[language], font=font("Medium", 34 * scale),
               fill=(0xC9, 0xC9, 0xD4, 255))
     draw.text((364 * scale, 296 * scale), "Powered by Plumix", font=font("SemiBold", 24 * scale),
               fill=(0x9B, 0x7B, 0xE6, 255))
 
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    image.resize((WIDTH, HEIGHT), Image.LANCZOS).convert("RGB").save(OUT, optimize=True)
-    print("wrote", OUT.relative_to(ROOT))
+    out = PLAY_METADATA / language / "images" / "featureGraphic.png"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    image.resize((WIDTH, HEIGHT), Image.LANCZOS).convert("RGB").save(out, optimize=True)
+    print("wrote", out.relative_to(ROOT))
 
 
 if __name__ == "__main__":
-    main()
+    for language in TAGLINES:
+        feature_graphic(language)

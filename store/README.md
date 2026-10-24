@@ -1,108 +1,129 @@
-# Публикация в App Store и Google Play
+# Релиз: App Store, Google Play и desktop
 
-Актуально на 2026-10-24 (1.0.0). Тексты витрины (описания ru/en, ключевые слова,
-категории) — в umbrella-репо: `docs/marketing/netbench-store-listing.md`. Здесь —
-графика, ответы на анкеты сторов, заметки для ревью и порядок сборки релиза.
+Актуально на 2026-10-25 (1.0.0). Здесь — как устроен релиз, какие ключи нужны и что остаётся
+сделать руками в консолях сторов. Исходные тексты витрины (копирайт) — в umbrella-репо:
+`docs/marketing/netbench-store-listing.md`; то, что реально выгружается, — в `fastlane/metadata`.
 
 ```
-store/
-├── google-play/   icon-512.png, feature-graphic.png, screenshots/
-└── app-store/     screenshots/
+fastlane/
+├── Fastfile, Appfile          лейны выгрузки (bundle exec fastlane lanes)
+├── .env.example               образец локальных ключей → fastlane/.env (в .gitignore)
+├── metadata/ios/<язык>/       App Store: name, subtitle, description, keywords, release_notes, URL…
+│   └── review_information/    заметки для App Review
+├── metadata/android/<язык>/   Google Play: title, short/full description,
+│   └── images/                icon, featureGraphic, phoneScreenshots/
+└── screenshots/ios/<язык>/    скриншоты iPhone 6.9" (1320×2868)
+CHANGELOG.md                   заметки версии → GitHub Release и desktop-обновление
+scripts/pack-desktop.sh        desktop-установщики (Velopack)
+.github/workflows/release.yml  релиз по тегу vX.Y.Z
 ```
 
-Иконки и feature graphic генерируются: `python3 scripts/generate_icons.py`,
-`python3 scripts/generate_store_graphics.py` (нужен Pillow).
+Языки: App Store — `en-US`, `ru`; Google Play — `en-US`, `ru-RU`.
 
-## Идентичность и версии
+## Как выпустить версию
 
-- `applicationId` / Bundle ID — `net.plumix.netbench` (`NetBenchApplicationId` в
-  `NetBench/Directory.Build.props`). После публикации менять нельзя.
-- Версия — `NetBenchVersion` (видна пользователю), build number — `NetBenchBuildNumber`
-  (versionCode / CFBundleVersion, только растёт). CI передаёт
-  `-p:NetBenchBuildNumber=${{ github.run_number }}`; локальный релиз — номер больше
-  последнего загруженного.
+1. Поднять `NetBenchVersion` в `NetBench/Directory.Build.props`.
+2. Раздел `## vX.Y.Z` в `CHANGELOG.md` (заметки GitHub Release и desktop-обновления).
+3. «Что нового» для сторов — `fastlane/metadata/ios/{en-US,ru}/release_notes.txt` (в Play уходит
+   тот же текст, лимит 500 символов). Проверка лимитов: `bundle exec fastlane check`.
+4. Если менялся мобильный UI — перегенерировать скриншоты (ниже) и закоммитить.
+5. `git tag vX.Y.Z && git push origin vX.Y.Z` — workflow **Release**:
+   - IPA → TestFlight, тексты и скриншоты → App Store Connect (версия создаётся, на ревью не уходит);
+   - AAB → внутреннее тестирование Play, листинг и скриншоты → Play;
+   - установщики Windows/macOS/Linux → черновик GitHub Release `vX.Y.Z` с заметками из CHANGELOG.
+6. Руками: в App Store Connect выбрать билд у версии и «Add for Review»; в Play — продвинуть релиз
+   из internal в closed/production; на GitHub — опубликовать черновик релиза (после публикации
+   установленные desktop-копии обновятся сами).
 
-## Сборка релиза
+Build number считает fastlane: следующий после последнего в TestFlight / максимального versionCode
+во всех треках Play. Задать вручную — `NETBENCH_BUILD_NUMBER` или `build_number:` у лейна.
 
-### Google Play (AAB)
+Ручной запуск workflow (Actions → Release → Run workflow) — та же цепочка для текущей версии с выбором
+платформ. Локально — те же лейны: `bundle exec fastlane ios beta`, `… android internal`, `… ios metadata`,
+`… android metadata` (ключи — из `fastlane/.env`).
 
-Upload-ключ лежит вне репозитория: `~/.android-keys/netbench-upload.jks`, алиас
-`netbench-upload`, пароль — в `~/.android-keys/netbench-upload.password`.
-**Сделайте резервную копию обоих файлов** (менеджер паролей) — без upload-ключа
-обновления придётся вести через сброс ключа в Play Console. Ключ приложения хранит
-Google (Play App Signing — включить при первой загрузке).
+Ruby для fastlane — версия из `.ruby-version` (на Mac: `brew install ruby`, затем
+`PATH=/opt/homebrew/opt/ruby/bin:$PATH bundle install`).
 
-```bash
-export NETBENCH_KEYSTORE=~/.android-keys/netbench-upload.jks
-export NETBENCH_KEY_ALIAS=netbench-upload
-export NETBENCH_KEYSTORE_PASSWORD="$(cat ~/.android-keys/netbench-upload.password)"
-dotnet publish NetBench/NetBench.Android/NetBench.Android.csproj -c Release -p:NetBenchBuildNumber=2
-# → NetBench/NetBench.Android/bin/Release/net10.0-android/publish/net.plumix.netbench-Signed.aab
-```
+## Ключи для fastlane и CI
 
-Для CI: секреты `ANDROID_KEYSTORE_BASE64` (`base64 -i netbench-upload.jks`),
-`ANDROID_KEY_ALIAS`, `ANDROID_KEYSTORE_PASSWORD` — job `build-android-release`.
+Один раз завести и положить в GitHub → Settings → Secrets and variables → Actions:
 
-Новый личный аккаунт Play: перед production нужен закрытый тест (не меньше
-12 тестировщиков 14 дней подряд), затем заявка на production-доступ.
+| Секрет | Откуда |
+|---|---|
+| `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8_BASE64` | App Store Connect → Users and Access → Integrations → App Store Connect API → ключ с ролью **App Manager**; `base64 -i AuthKey_XXXX.p8`. Тот же ключ нотаризует macOS-сборку. |
+| `IOS_DIST_CERT_P12_BASE64`, `IOS_DIST_CERT_PASSWORD` | Связка ключей → «Apple Distribution: …» → экспорт в .p12 с паролем; `base64 -i dist.p12`. Профиль App Store fastlane создаёт сам через API. |
+| `PLAY_JSON_KEY` | Google Cloud → сервисный аккаунт → JSON-ключ (содержимое целиком); в Play Console → Users and permissions пригласить его e-mail с правами на приложение (релизы, листинг). |
+| `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEY_ALIAS`, `ANDROID_KEYSTORE_PASSWORD` | upload-ключ (ниже), `base64 -i netbench-upload.jks`. |
+| `MACOS_DEVELOPER_ID_P12_BASE64`, `MACOS_DEVELOPER_ID_P12_PASSWORD` | «Developer ID Application: …» (и «Developer ID Installer: …», если есть — тогда собирается подписанный .pkg) → экспорт в один .p12. Без секрета macOS-сборка неподписанная. |
 
-### App Store (IPA)
+Переменная репозитория `PLAY_RELEASE_STATUS` — `draft` (по умолчанию: пока в Play нет ни одного
+опубликованного релиза, API принимает только черновики), после первой публикации — `completed`.
 
-1. developer.apple.com → Identifiers: App ID `net.plumix.netbench` (уже заведён
-   вместе с приложением в App Store Connect). Capabilities не нужны.
-2. Profiles → App Store Connect distribution profile для этого App ID, скачать и
-   открыть двойным кликом (ляжет в `~/Library/Developer/Xcode/UserData/Provisioning Profiles`).
-3. Сборка (сертификат «Apple Distribution» уже в связке ключей):
+Локально те же значения — в `fastlane/.env` (образец — `fastlane/.env.example`); сертификаты Apple
+берутся из связки ключей, upload-ключ Android — из `~/.android-keys`.
 
-```bash
-rm -rf NetBench/NetBench.iOS/{bin,obj}
-dotnet publish NetBench/NetBench.iOS/NetBench.iOS.csproj -c Release -p:NetBenchBuildNumber=2 \
-  -p:CodesignProvision="<имя профиля>"
-# → NetBench/NetBench.iOS/bin/Release/net10.0-ios/ios-arm64/publish/NetBench.iOS.ipa
-```
+## Одноразовые шаги в консолях
 
-4. Загрузка — Transporter (Mac App Store) или
-   `xcrun altool --upload-app -f <ipa> -t ios --apiKey … --apiIssuer …`.
+Fastlane не умеет (или API не даёт) — сделать руками до первого релиза:
+
+- **Google Play:** первый AAB загрузить вручную (Play Console → Testing → Internal testing → Create
+  release; файл — из артефакта `netbench-android-aab` прогона CI или `bundle exec fastlane android build`):
+  API работает только с приложением, у которого уже есть хоть одна сборка. При первой загрузке —
+  включить Play App Signing. Заполнить Data safety, рейтинг контента, целевую аудиторию, «App access»,
+  «Ads» (ответы — ниже), контактный e-mail разработчика.
+- **App Store Connect:** App Privacy, Age Rating, цена (бесплатно), контакт для App Review (имя,
+  телефон, e-mail) — ответы ниже. Заметки для ревью выгружаются из
+  `fastlane/metadata/ios/review_information/notes.txt`.
+
+## Подпись
+
+- **Android:** upload-ключ вне репозитория — `~/.android-keys/netbench-upload.jks`, алиас
+  `netbench-upload`, пароль в `~/.android-keys/netbench-upload.password`. **Сделайте резервную копию
+  обоих файлов** (менеджер паролей) — без upload-ключа обновления придётся вести через сброс ключа
+  в Play Console. Ключ приложения хранит Google (Play App Signing).
+- **iOS:** сертификат «Apple Distribution» (связка ключей / секрет CI); App Store-профиль для
+  `net.plumix.netbench` fastlane скачивает или создаёт сам (`get_provisioning_profile`).
+- **macOS desktop:** «Developer ID Application» + нотаризация (Velopack: `--signAppIdentity`,
+  `--notaryProfile`), hardened runtime с `NetBench.Desktop/Packaging/netbench.entitlements`.
+  Локально нотаризация: `xcrun notarytool store-credentials netbench-notary --key AuthKey.p8 --key-id … --issuer …`,
+  затем `MACOS_NOTARY_PROFILE=netbench-notary`.
+- **Windows desktop:** без подписи (SmartScreen покажет предупреждение при первом запуске);
+  сертификат можно добавить позже через `--signParams` у `vpk pack`.
+
+## Desktop (Windows, macOS, Linux)
+
+`scripts/pack-desktop.sh <rid>` — self-contained publish и упаковка
+[Velopack](https://velopack.io) (`vpk` — локальный dotnet-tool из `.config/dotnet-tools.json`). Пакует только
+под свою ОС, поэтому в CI — матрица раннеров:
+
+| RID | Что получается |
+|---|---|
+| `win-x64` | `NetBench-win-x64-Setup.exe`, `-Portable.zip` |
+| `osx-arm64`, `osx-x64` | `NetBench-osx-*-Portable.zip` (NetBench.app); `-Setup.pkg` — при сертификате Developer ID Installer |
+| `linux-x64` | `NetBench-linux-x64.AppImage` |
+
+Плюс пакеты обновления (`*-full.nupkg`, `*-delta.nupkg`, `releases.<rid>.json`): установленное приложение
+(`NetBench.Desktop/DesktopUpdater.cs`) при запуске проверяет GitHub Releases своего канала (= RID), качает
+новую версию в фоне и ставит её после выхода. Черновики и пре-релизы обновлением не считаются.
+Иконки desktop — `scripts/generate_icons.py` (`Assets/netbench.ico`, `Packaging/netbench.{icns,png}`).
 
 ## Скриншоты
 
-Сценарий съёмки (одинаковый для обоих сторов, светлая и тёмная темы по желанию):
-главный экран со сценариями и историей → быстрый тест с пресетами → монитор во время
-прогона → результат → шторка «Поделиться».
+`bundle exec fastlane screenshots` (или `dotnet run --project NetBench/NetBench.Screenshots -c Release -- --output .`)
+рендерит мобильный UI headless (Avalonia.Headless + Skia, как на устройстве) и пишет оба набора:
 
-- **Google Play:** соотношение сторон не больше 2:1, поэтому эмулятор Pixel_6a
-  (1080×2400) временно переводим в 1080×2160: `adb shell wm size 1080x2160`, снимаем
-  `adb exec-out screencap -p > store/google-play/screenshots/01-home.png`, затем
-  `adb shell wm size reset`.
-- **App Store:** обязательный размер 6.9" — симулятор iPhone 17 Pro Max (1320×2868),
-  `xcrun simctl io booted screenshot store/app-store/screenshots/01-home.png`.
+- App Store — `fastlane/screenshots/ios/<язык>/` 1320×2868 (iPhone 6.9");
+- Google Play — `fastlane/metadata/android/<язык>/images/phoneScreenshots/` 1080×1920.
 
-Цель для живого прогона на скриншотах — свой сервер (например,
-`python3 -m http.server` на Mac: `http://10.0.2.2:PORT` с эмулятора,
-`http://localhost:PORT` с симулятора).
+Кадры: главный экран → быстрый тест → живой прогон → результат → редактор сценария, ru и en, светлая и
+тёмная темы. Данные — демо (`NetBench.Screenshots/DemoData.cs`), прогон идёт по-настоящему против
+`DemoTarget` — локального прокси, который отвечает за адрес `http://192.168.1.10:8080`; в сеть ничего не
+уходит, данные приложения на машине не читаются и не пишутся. Подписи кадров — `Program.cs` (`Listing`),
+рамка и статус-бар — `StoreFrame.cs`. Генерировать на macOS: моноширинный шрифт приложения системный, и
+на Mac он ближе всего к iOS (CI-джоба `screenshots` на Linux — проверка сценариев, её кадры не выгружаются).
 
-## App Review notes (App Store Connect → App Review Information)
-
-> NetBench is an HTTP load-testing tool for developers to measure the performance of
-> their own APIs. It sends HTTP requests only to the URL the user enters and shows
-> throughput, latency percentiles and error rate.
->
-> Safeguards against misuse: before the first run the app asks the user to confirm that
-> they test only servers they own or are allowed to test; runs from the phone are limited
-> to 50 concurrent virtual users and 5 minutes. The app has no account, no backend of its
-> own, no analytics and no tracking.
->
-> NSAllowsArbitraryLoads is enabled because developers test local and staging servers
-> that are often served over plain http:// (for example http://192.168.1.10:8080);
-> NSLocalNetworkUsageDescription covers targets on the local network. The app never
-> loads web content and only contacts the address the user typed.
->
-> How to test: tap "Quick test", enter https://httpbin.org/get (or any server you
-> control), keep 10 users / 30 s and tap "Run". Confirm the "Test only your own servers"
-> dialog. The result screen opens when the run finishes; "Share report" offers text,
-> HTML, CSV and JSON.
-
-Sign-in: не требуется. Contact: владелец аккаунта App Store Connect.
+Feature graphic и иконка Play — `scripts/generate_store_graphics.py`, `scripts/generate_icons.py`.
 
 ## App Privacy (App Store) и Data safety (Google Play)
 

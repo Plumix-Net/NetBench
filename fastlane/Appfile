@@ -1,0 +1,3 @@
+app_identifier("net.plumix.netbench") # Bundle ID в App Store Connect
+package_name("net.plumix.netbench")   # applicationId в Google Play
+team_id("VX89ZRZZPW")                 # Apple Developer Team

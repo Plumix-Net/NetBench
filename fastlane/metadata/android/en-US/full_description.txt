@@ -1,0 +1,20 @@
+NetBench is an HTTP load-testing tool for developers who want a quick, honest answer to "how does my API hold up?" — right from their phone.
+
+Enter a URL, choose how many virtual users to simulate and for how long, and start the run. NetBench shows live metrics while the test is running:
+
+• Requests per second with a live throughput chart
+• p95 latency, updated four times per second
+• Error rate and HTTP status code breakdown
+
+When the run finishes you get a full report: average and total requests, latency percentiles (min, p50, mean, p95, p99, max) and status codes. Share it as a text summary, an HTML report, a CSV table or JSON data.
+
+Save frequent targets as scenarios with their own method, users and duration, and keep a history of recent runs on the home screen.
+
+Built for testing your own services:
+• Runs from a phone are limited to 50 virtual users and 5 minutes
+• Plain http:// is allowed, so you can test local and staging servers
+• Nothing leaves your device except the requests you send to your own targets — no account, no analytics, no ads, no tracking
+
+Use NetBench only against servers you own or are allowed to test.
+
+NetBench is open source and is a showcase app for Plumix, a Flutter-like UI framework for .NET: the whole mobile UI is written in C# with Plumix widgets.

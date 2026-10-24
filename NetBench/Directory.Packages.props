@@ -25,6 +25,10 @@
     <PackageVersion Include="Plumix.Slang" Version="0.4.0-beta.1" />
     <PackageVersion Include="Plumix.Android" Version="$(PlumixVersion)" />
     <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.15" />
+    <!-- Установщики и автообновление desktop-версии -->
+    <PackageVersion Include="Velopack" Version="1.2.161" />
+    <!-- Скриншоты сторов: мобильный UI в headless-окне (NetBench.Screenshots) -->
+    <PackageVersion Include="Avalonia.Headless" Version="$(AvaloniaVersion)" />
     <!-- Core packages -->
     <PackageVersion Include="HdrHistogram" Version="2.5.0" />
     <PackageVersion Include="Slang.Net" Version="9.8.0" />

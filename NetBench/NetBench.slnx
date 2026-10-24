@@ -4,6 +4,7 @@
   </Project>
   <Project Path="NetBench.Browser/NetBench.Browser.csproj" />
   <Project Path="NetBench.Desktop/NetBench.Desktop.csproj" />
+  <Project Path="NetBench.Screenshots/NetBench.Screenshots.csproj" />
   <Project Path="NetBench.iOS/NetBench.iOS.csproj">
     <Deploy />
   </Project>

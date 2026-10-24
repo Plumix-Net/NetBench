@@ -1,0 +1,1 @@
+First release: quick HTTP load tests from your phone with live requests per second, p95 latency and error rate, saved scenarios, run history and shareable reports (text, HTML, CSV, JSON).

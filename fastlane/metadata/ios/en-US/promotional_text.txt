@@ -1,0 +1,1 @@
+Point NetBench at your API, pick users and duration, and watch requests per second, p95 latency and error rate update live. Share the report as HTML, CSV or JSON.

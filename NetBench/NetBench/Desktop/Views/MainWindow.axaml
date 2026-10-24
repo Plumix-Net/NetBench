@@ -8,7 +8,7 @@
         mc:Ignorable="d" d:DesignWidth="1440" d:DesignHeight="900"
         x:Class="NetBench.Desktop.Views.MainWindow"
         x:DataType="vm:ShellViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/netbench.ico"
         Title="{Binding Root.App.Title, Source={x:Static l10n:Strings.Instance}}"
         Width="1440" Height="900"
         MinWidth="1100" MinHeight="640"

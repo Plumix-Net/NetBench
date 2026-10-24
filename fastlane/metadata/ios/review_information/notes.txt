@@ -1,0 +1,7 @@
+NetBench is an HTTP load-testing tool for developers to measure the performance of their own APIs. It sends HTTP requests only to the URL the user enters and shows throughput, latency percentiles and error rate.
+
+Safeguards against misuse: before the first run the app asks the user to confirm that they test only servers they own or are allowed to test; runs from the phone are limited to 50 concurrent virtual users and 5 minutes. The app has no account, no backend of its own, no analytics and no tracking.
+
+NSAllowsArbitraryLoads is enabled because developers test local and staging servers that are often served over plain http:// (for example http://192.168.1.10:8080); NSLocalNetworkUsageDescription covers targets on the local network. The app never loads web content and only contacts the address the user typed.
+
+How to test: tap "Quick test", enter https://httpbin.org/get (or any server you control), keep 10 users / 30 s and tap "Run". Confirm the "Test only your own servers" dialog. The result screen opens when the run finishes; "Share report" offers text, HTML, CSV and JSON.

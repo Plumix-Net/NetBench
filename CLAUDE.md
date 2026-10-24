@@ -21,6 +21,13 @@ dotnet build NetBench/NetBench/NetBench.csproj -f net10.0-android
 
 # Полная Android-голова (APK)
 dotnet build NetBench/NetBench.Android/NetBench.Android.csproj
+
+# Скриншоты сторов (headless-рендер мобильного UI) и лимиты текстов витрины
+bundle exec fastlane screenshots
+bundle exec fastlane check
+
+# Desktop-установщик под текущую ОС (Velopack)
+scripts/pack-desktop.sh osx-arm64
 ```
 
 Общий проект `NetBench` мультитаргетный (`net10.0;net10.0-android;net10.0-ios`) — его restore требует установленных workloads android/ios. В окружении без workloads добавляй `-p:MobileTargets=false` (оставляет только `net10.0`) — так делает CI.
@@ -104,3 +111,19 @@ NetBench/
 - CI (GitHub Actions): job `build-and-test` собирает Desktop (`-p:MobileTargets=false`) и гоняет тесты; job `build-mobile` ставит android workload и собирает Plumix-флейвор; `build-android-release` — подписанный (при наличии секретов) Release AAB; `build-ios` — iOS-голова под симулятор на macOS-раннере.
 - Версия и id приложения — `NetBenchVersion`/`NetBenchBuildNumber`/`NetBenchApplicationId` в `Directory.Build.props`.
   Релиз в сторы, подпись, анкеты и заметки для ревью — `store/README.md`; иконки и графика — `scripts/generate_*.py`.
+
+## Релиз и сторы
+
+Порядок релиза, ключи и одноразовые шаги в консолях — `store/README.md`. Коротко:
+
+- Тег `vX.Y.Z` (= `NetBenchVersion`) запускает `.github/workflows/release.yml`: fastlane выгружает IPA в TestFlight
+  и AAB во внутреннее тестирование Play, тексты и скриншоты — в оба стора; desktop-установщики Windows/macOS/Linux
+  (Velopack, `scripts/pack-desktop.sh`) — в черновик GitHub Release. Production и ревью — вручную.
+- Тексты витрины — `fastlane/metadata/{ios,android}/<язык>/`; «Что нового» — только в
+  `metadata/ios/*/release_notes.txt` (в Play копируется при выгрузке); заметки GitHub Release — раздел
+  версии в `CHANGELOG.md`. Лимиты длины проверяет `bundle exec fastlane check`.
+- `NetBench.Screenshots` — генератор скриншотов: компилирует мобильные исходники под net10.0, JSON-хранилища
+  подменены демо-хранилищами с теми же именами (`Storage/`), живой прогон идёт через `DemoTarget` (локальный
+  http_proxy). Новый экран в наборе — шаг в `Program.cs` (тапы по подписям семантики) и подпись в `Listing`.
+- Desktop-голова обновляется сама из GitHub Releases (`DesktopUpdater`, канал = RID); `VelopackApp.Build().Run()`
+  должен оставаться первой строкой `Main`.
