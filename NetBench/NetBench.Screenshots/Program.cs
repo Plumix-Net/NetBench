@@ -62,7 +62,7 @@ foreach (var listing in Listing.All)
     {
         var strings = Strings.Instance.Root;
         session.Tap(strings.Mobile.QuickTest);
-        session.Tap(session.Get(strings.Scenarios.Editor.TargetPlaceholder));
+        session.Tap(strings.Mobile.TargetUrl);
         session.Type($"{DemoData.LanHost}/api/products");
         Save(session, "quick_test");
     }
