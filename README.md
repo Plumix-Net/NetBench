@@ -72,3 +72,8 @@ dotnet build NetBench/NetBench.Android/NetBench.Android.csproj      # full APK
 - [Plumix](https://github.com/Plumix-Net/Plumix) — Flutter-inspired UI framework for .NET
 - [Plumix.Packages](https://github.com/Plumix-Net/Plumix.Packages) — Plumix.Bloc, Plumix.Provider
 - [plumix.net](https://plumix.net/)
+
+## License
+
+[MIT](LICENSE). NetBench uses Plumix.Bloc and Plumix.Slang under the MIT option of their dual license,
+which applies to applications distributed under an OSI-approved license.
