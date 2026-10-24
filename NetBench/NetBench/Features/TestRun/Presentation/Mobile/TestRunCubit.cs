@@ -44,6 +44,19 @@ public sealed class TestRunCubit : Cubit<TestRunState>
 
     public void Stop() => _cts?.Cancel();
 
+    /// <summary>
+    /// Приложение ушло в фон: iOS через несколько секунд замораживает процесс, Android душит
+    /// сеть — цифры дальше были бы мусором. Останавливаем и помечаем отчёт.
+    /// </summary>
+    public void StopInBackground()
+    {
+        if (State.Phase != TestRunPhase.Running || _cts is null || _cts.IsCancellationRequested)
+            return;
+
+        Emit(State with { StoppedInBackground = true });
+        _cts.Cancel();
+    }
+
     private void ApplyStats(TestRunStats stats)
     {
         if (IsClosed || State.Phase == TestRunPhase.Completed)

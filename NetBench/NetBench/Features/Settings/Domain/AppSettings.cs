@@ -15,6 +15,12 @@ public sealed record AppSettings
 
     /// <summary>Имя культуры интерфейса («ru-RU»); <c>null</c> — язык устройства.</summary>
     public string? Culture { get; init; }
+
+    /// <summary>
+    /// Пользователь подтвердил, что тестирует только свои серверы (или с разрешения владельца).
+    /// Спрашиваем один раз — перед первым прогоном.
+    /// </summary>
+    public bool OwnTargetsConfirmed { get; init; }
 }
 
 public interface IAppSettingsStore

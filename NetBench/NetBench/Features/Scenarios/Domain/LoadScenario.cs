@@ -5,6 +5,13 @@ public sealed class LoadScenario
     public Guid Id { get; init; } = Guid.NewGuid();
     public string Name { get; set; } = string.Empty;
     public string Target { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Разовый прогон с экрана быстрого теста: такого сценария нет в репозитории, а имя
+    /// показывается локализованным на текущем языке, а не тем, что было при запуске.
+    /// </summary>
+    public bool IsQuickTest { get; set; }
+
     public List<RequestStep> Requests { get; init; } = [];
     public LoadConfig Load { get; init; } = new();
 }

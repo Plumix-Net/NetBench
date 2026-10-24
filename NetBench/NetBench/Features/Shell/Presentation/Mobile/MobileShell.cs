@@ -1,3 +1,6 @@
+using System.Globalization;
+using NetBench.Features.Report.Data;
+using NetBench.Features.Report.Domain;
 using NetBench.Features.Scenarios.Data;
 using NetBench.Features.Scenarios.Domain;
 using NetBench.Features.Scenarios.Presentation.Mobile;
@@ -6,6 +9,7 @@ using NetBench.Features.Settings.Domain;
 using NetBench.Features.TestRun.Data;
 using NetBench.Features.TestRun.Domain;
 using NetBench.Localization;
+using NetBench.Mobile.Platform;
 using NetBench.Mobile.Theme;
 using Plumix.Bloc;
 using Plumix.Material;
@@ -32,6 +36,8 @@ internal sealed class MobileShellState : State
     private readonly JsonScenarioRepository _scenarios = new();
     private readonly JsonReportStore _reports = new();
     private readonly JsonAppSettingsStore _settings = new();
+    private readonly IPlatformServices _platform = PlatformServices.Current;
+    private ReportSharer? _sharer;
 
     public override void InitState()
     {
@@ -78,6 +84,10 @@ internal sealed class MobileShellState : State
                         value: _reports,
                         child: new RepositoryProvider<IAppSettingsStore>(
                             value: _settings,
+                            child: new RepositoryProvider<IPlatformServices>(
+                            value: _platform,
+                            child: new RepositoryProvider<IReportSharer>(
+                            value: _sharer ??= new ReportSharer(_platform),
                             child: new BlocProvider<ScenarioListCubit>(
                                 create: static providerContext =>
                                 {
@@ -89,12 +99,32 @@ internal sealed class MobileShellState : State
                                 },
                                 child: new AnnotatedRegion<SystemUiOverlayStyle>(
                                     value: SystemBarsStyle(isDark),
-                                    child: new MaterialApp(
-                                        onGenerateTitle: static titleContext =>
-                                            Translations<Strings>.Of(titleContext).App.Title,
-                                        theme: NetBenchTheme.CreateThemeData(palette),
-                                        debugShowCheckedModeBanner: false,
-                                        home: new ScenarioListScreen()))))))));
+                                    child: new Builder(appContext => BuildApp(appContext, palette)))))))))));
+    }
+
+    /// <summary>
+    /// MaterialApp получает язык из Slang — иначе системные строки Material (заголовок
+    /// «Лицензии», подписи диалогов) остаются английскими при русском интерфейсе.
+    /// CultureOf подписывает на смену языка: MaterialApp перестроится вместе с остальным.
+    /// </summary>
+    private static MaterialApp BuildApp(BuildContext context, NetBenchPalette palette)
+    {
+        var culture = Translations<Strings>.CultureOf(context);
+
+        return new MaterialApp(
+            onGenerateTitle: static titleContext => Translations<Strings>.Of(titleContext).App.Title,
+            theme: NetBenchTheme.CreateThemeData(palette),
+            debugShowCheckedModeBanner: false,
+            locale: ToLocale(culture),
+            supportedLocales: [.. LocaleSettings<Strings>.SupportedCultures.Select(ToLocale)],
+            localizationsDelegates: GlobalMaterialLocalizations.Delegates,
+            home: new ScenarioListScreen());
+    }
+
+    private static Locale ToLocale(CultureInfo culture)
+    {
+        var parts = culture.Name.Split('-');
+        return new Locale(parts[0], parts.Length > 1 ? parts[^1] : null);
     }
 
     /// <summary>

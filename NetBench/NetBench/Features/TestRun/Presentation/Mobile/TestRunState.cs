@@ -13,7 +13,8 @@ public sealed record TestRunState(
     TestRunPhase Phase,
     TestRunStats? Stats,
     IReadOnlyList<double> RpsPoints,
-    TestRunReport? Report = null)
+    TestRunReport? Report = null,
+    bool StoppedInBackground = false)
 {
     public static TestRunState Initial { get; } = new(TestRunPhase.Running, null, []);
 }

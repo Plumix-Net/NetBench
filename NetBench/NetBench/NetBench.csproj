@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net10.0;net10.0-android;net10.0-ios</TargetFrameworks>
     <!-- Нужен CI: на runner'е без мобильных workloads собираем только desktop (-p:MobileTargets=false) -->
@@ -12,7 +12,15 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-android'))">23</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-ios'))">13.0</SupportedOSPlatformVersion>
+
+    <!-- Версия из Directory.Build.props — её показывает экран «О приложении» (Mobile/AppInfo). -->
+    <Version>$(NetBenchVersion)</Version>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="BuildNumber" Value="$(NetBenchBuildNumber)" />
+  </ItemGroup>
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
@@ -22,6 +30,8 @@
 
   <!-- Мобильные таргеты компилируют только Plumix-презентацию (Mobile/), -->
   <ItemGroup Condition="'$(IsMobileTarget)' == 'true'">
+    <!-- Тексты лицензий для экрана «Лицензии открытого ПО» (Mobile/Licenses/OssLicenses). -->
+    <EmbeddedResource Include="Mobile\Licenses\*.txt" LogicalName="NetBench.Licenses.%(Filename).txt" />
     <Compile Remove="Desktop\**;Features\**\Presentation\Desktop\**" />
     <AvaloniaXaml Remove="Desktop\**;Features\**\Presentation\Desktop\**" />
     <!-- Android неявно импортирует Android.Widget — его ListView/Switch и т.п.

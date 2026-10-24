@@ -13,7 +13,10 @@ using Colors = Plumix.Material.Colors;
 
 namespace NetBench.Features.Scenarios.Presentation.Mobile;
 
-/// <summary>Экран быстрого теста: один URL и большая кнопка запуска.</summary>
+/// <summary>
+/// Экран быстрого теста: URL, пресеты числа пользователей и длительности (в пределах
+/// <see cref="MobileLoadLimits"/>) и большая кнопка запуска.
+/// </summary>
 public sealed class QuickTestScreen : StatefulWidget
 {
     public override State CreateState() => new QuickTestScreenState();
@@ -22,6 +25,8 @@ public sealed class QuickTestScreen : StatefulWidget
 internal sealed class QuickTestScreenState : State, IDisposable
 {
     private readonly TextEditingController _controller = new();
+    private int _users = new LoadConfig().ConcurrentUsers;
+    private TimeSpan _duration = new LoadConfig().Duration;
 
     public override void InitState()
     {
@@ -52,6 +57,8 @@ internal sealed class QuickTestScreenState : State, IDisposable
             ? strings.Mobile.WillRequest(url!)
             : null;
 
+        // Форма скроллится, а кнопка запуска прижата к низу: с открытой клавиатурой
+        // на невысоком экране поля и пресеты не помещаются целиком.
         return new Scaffold(
             body: new SafeArea(
                 new Padding(
@@ -61,22 +68,61 @@ internal sealed class QuickTestScreenState : State, IDisposable
                         children:
                         [
                             BuildTopBar(context, palette, strings.Mobile.QuickTest),
-                            new SizedBox(height: 28),
-                            new Text(
-                                strings.Mobile.TargetUrl,
-                                style: new TextStyle(
-                                    FontSize: 12,
-                                    FontWeight: FontWeight.SemiBold,
-                                    Color: palette.TextMid,
-                                    LetterSpacing: 0.5,
-                                    FontFamily: NetBenchFonts.Ui)),
-                            new SizedBox(height: 8),
-                            BuildUrlField(palette, strings.Scenarios.Editor.TargetPlaceholder, error, helper),
-                            new Spacer(),
+                            new Expanded(
+                                new SingleChildScrollView(
+                                    new Column(
+                                        crossAxisAlignment: CrossAxisAlignment.Stretch,
+                                        children:
+                                        [
+                                            new SizedBox(height: 28),
+                                            BuildLabel(palette, strings.Mobile.TargetUrl),
+                                            BuildUrlField(
+                                                palette,
+                                                strings.Scenarios.Editor.TargetPlaceholder,
+                                                error,
+                                                helper),
+                                            new SizedBox(height: 24),
+                                            BuildLabel(palette, strings.Mobile.Users),
+                                            new PresetPicker<int>(
+                                                MobileLoadLimits.UserPresets,
+                                                _users,
+                                                static users => users.ToString(DisplayCulture.Current),
+                                                users => SetState(() => _users = users)),
+                                            new SizedBox(height: 20),
+                                            BuildLabel(palette, strings.Mobile.Duration),
+                                            new PresetPicker<TimeSpan>(
+                                                MobileLoadLimits.DurationPresets,
+                                                _duration,
+                                                strings.DurationLabel,
+                                                duration => SetState(() => _duration = duration)),
+                                            new SizedBox(height: 14),
+                                            new Text(
+                                                strings.Mobile.LimitsHint(
+                                                    MobileLoadLimits.MaxUsers.ToString(DisplayCulture.Current),
+                                                    MobileLoadLimits.MaxDuration.TotalMinutes.ToString(
+                                                        DisplayCulture.Current)),
+                                                style: new TextStyle(
+                                                    FontSize: 12.5,
+                                                    Color: palette.TextMid,
+                                                    FontFamily: NetBenchFonts.Ui)),
+                                            new SizedBox(height: 24),
+                                        ]))),
                             BuildRunButton(context, palette, strings.Mobile.Run, enabled),
-                            new SizedBox(height: 40),
+                            new SizedBox(height: 24),
                         ]))));
     }
+
+    private static Padding BuildLabel(NetBenchPalette palette, string text) =>
+        new(
+            new Avalonia.Thickness(0, 0, 0, 8),
+            new Text(
+                text,
+                style: new TextStyle(
+                    FontSize: 12,
+                    FontWeight: FontWeight.SemiBold,
+                    Color: palette.TextMid,
+                    LetterSpacing: 0.5,
+                    FontFamily: NetBenchFonts.Ui)));
 
     private static Row BuildTopBar(BuildContext context, NetBenchPalette palette, string title)
     {
@@ -117,7 +163,7 @@ internal sealed class QuickTestScreenState : State, IDisposable
             textInputAction: TextInputActionType.Go,
             autocorrect: false,
             enableSuggestions: false,
-            onSubmitted: _ => StartRun(Context),
+            onSubmitted: value => _ = StartRunAsync(Context),
             style: monoStyle,
             decoration: new InputDecoration(
                 hintText: placeholder,
@@ -155,7 +201,7 @@ internal sealed class QuickTestScreenState : State, IDisposable
             animateColor: true,
             animationDuration: TimeSpan.FromMilliseconds(180),
             child: new InkWell(
-                onTap: enabled ? () => StartRun(context) : null,
+                onTap: enabled ? () => _ = StartRunAsync(context) : null,
                 borderRadius: radius,
                 child: new Container(
                     height: 64,
@@ -176,18 +222,24 @@ internal sealed class QuickTestScreenState : State, IDisposable
                         ]))));
     }
 
-    private void StartRun(BuildContext context)
+    private async Task StartRunAsync(BuildContext context)
     {
         // Кнопка с невалидным URL неактивна, но «Go» на клавиатуре приходит в обход неё.
         if (!TargetUrl.TryNormalize(_controller.Text, out var url))
             return;
 
+        // Имя — запасное для desktop и экспорта; в мобильном UI быстрый тест подписывается
+        // по IsQuickTest на текущем языке.
         var scenario = new LoadScenario
         {
             Name = Translations<Strings>.ReadOf(context).Mobile.QuickTest,
             Target = url,
+            IsQuickTest = true,
+            Load = new LoadConfig { ConcurrentUsers = _users, Duration = _duration },
         };
 
-        _ = Navigator.Of(context).Push(new MaterialPageRoute(_ => new MonitorScreen(scenario)));
+        var navigator = Navigator.Of(context);
+        if (await RunConsent.EnsureAsync(context) && Mounted)
+            _ = navigator.Push(new MaterialPageRoute(_ => new MonitorScreen(scenario)));
     }
 }

@@ -92,6 +92,11 @@ public sealed class ScenarioListScreen : StatelessWidget
                     children:
                     [
                         new ToolButton(
+                            icon: new IconGlyph(GlyphKind.Plus, palette.TextMid, 15),
+                            onPressed: () => _ = Navigator.Of(context).Push(
+                                new MaterialPageRoute(static _ => new ScenarioEditorScreen())),
+                            tooltip: strings.Scenarios.New),
+                        new ToolButton(
                             icon: new IconGlyph(GlyphKind.Gear, palette.TextMid, 17),
                             onPressed: () => _ = Navigator.Of(context).Push(
                                 new MaterialPageRoute(static _ => new SettingsScreen(), new RouteSettings("settings"))),
@@ -372,7 +377,7 @@ public sealed class ScenarioListScreen : StatelessWidget
                 borderRadius: radius,
                 clipBehavior: Clip.AntiAlias,
                 child: new InkWell(
-                    onTap: () => OpenScenario(context, scenario),
+                    onTap: () => _ = OpenScenarioAsync(context, scenario),
                     borderRadius: radius,
                     child: new Padding(
                         new Avalonia.Thickness(16),
@@ -402,12 +407,19 @@ public sealed class ScenarioListScreen : StatelessWidget
                                     children:
                                     [
                                         status,
-                                        new IconGlyph(GlyphKind.ChevronRight, palette.TextFaint, 14),
+                                        // Тап по карточке запускает прогон, правка — отдельной кнопкой
+                                        new ToolButton(
+                                            icon: new Icon(Icons.EditOutlined, size: 16, color: palette.TextMid),
+                                            onPressed: () => _ = Navigator.Of(context).Push(
+                                                new MaterialPageRoute(_ => new ScenarioEditorScreen(scenario))),
+                                            tooltip: strings.Scenarios.Edit,
+                                            size: 32,
+                                            radius: 8),
                                     ]),
                             ])))));
     }
 
-    private static void OpenScenario(BuildContext context, LoadScenario scenario)
+    private static async Task OpenScenarioAsync(BuildContext context, LoadScenario scenario)
     {
         // Сценарии приходят и с desktop-редактора, где Target не валидируется:
         // с битым адресом прогон отработал бы всю длительность одними ошибками.
@@ -421,7 +433,9 @@ public sealed class ScenarioListScreen : StatelessWidget
             return;
         }
 
-        _ = Navigator.Of(context).Push(new MaterialPageRoute(_ => new MonitorScreen(scenario)));
+        var navigator = Navigator.Of(context);
+        if (await RunConsent.EnsureAsync(context))
+            _ = navigator.Push(new MaterialPageRoute(_ => new MonitorScreen(scenario)));
     }
 
     private static Material BuildQuickTestButton(BuildContext context, NetBenchPalette palette, string label)

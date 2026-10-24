@@ -2,7 +2,6 @@ using Avalonia.Threading;
 using NetBench.Features.Scenarios.Domain;
 using NetBench.Features.TestRun.Domain;
 using Plumix.Bloc;
-using NetBench.Localization;
 
 namespace NetBench.Features.Scenarios.Presentation.Mobile;
 
@@ -54,17 +53,31 @@ public sealed class ScenarioListCubit : Cubit<ScenarioListState>
         }
     }
 
-    public async Task AddScenarioAsync(CancellationToken ct = default)
+    /// <summary>
+    /// Создаёт или обновляет сценарий (по <see cref="LoadScenario.Id"/>): сначала запись
+    /// на диск, затем состояние — карточка появляется, только если сценарий сохранён.
+    /// </summary>
+    /// <returns><c>false</c>, если записать сценарий не удалось.</returns>
+    public async Task<bool> SaveScenarioAsync(LoadScenario scenario, CancellationToken ct = default)
     {
-        var scenario = new LoadScenario { Name = Strings.Instance.Root.Scenarios.New };
-        scenario.Requests.Add(new RequestStep { Method = "GET", Path = "/" });
-
-        await _repository.SaveAsync(scenario, ct);
-        EmitSafe(State with
+        try
         {
-            Status = ScenarioListStatus.Ready,
-            Scenarios = [.. State.Scenarios, scenario],
-        });
+            await _repository.SaveAsync(scenario, ct);
+        }
+        catch (Exception) when (!ct.IsCancellationRequested)
+        {
+            return false;
+        }
+
+        var scenarios = State.Scenarios.ToList();
+        var index = scenarios.FindIndex(s => s.Id == scenario.Id);
+        if (index >= 0)
+            scenarios[index] = scenario;
+        else
+            scenarios.Add(scenario);
+
+        EmitSafe(State with { Status = ScenarioListStatus.Ready, Scenarios = scenarios });
+        return true;
     }
 
     /// <summary>

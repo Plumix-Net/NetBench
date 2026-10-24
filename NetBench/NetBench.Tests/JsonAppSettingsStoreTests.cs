@@ -23,18 +23,20 @@ public sealed class JsonAppSettingsStoreTests : IDisposable
 
         Assert.Equal(ThemePreference.System, store.Current.Theme);
         Assert.Null(store.Current.Culture);
+        Assert.False(store.Current.OwnTargetsConfirmed);
     }
 
     [Fact]
     public void SavedSettingsSurviveRestart()
     {
         var store = new JsonAppSettingsStore(SettingsPath);
-        store.Save(store.Current with { Theme = ThemePreference.Light, Culture = "ru-RU" });
+        store.Save(store.Current with { Theme = ThemePreference.Light, Culture = "ru-RU", OwnTargetsConfirmed = true });
 
         var restored = new JsonAppSettingsStore(SettingsPath).Current;
 
         Assert.Equal(ThemePreference.Light, restored.Theme);
         Assert.Equal("ru-RU", restored.Culture);
+        Assert.True(restored.OwnTargetsConfirmed);
     }
 
     [Fact]

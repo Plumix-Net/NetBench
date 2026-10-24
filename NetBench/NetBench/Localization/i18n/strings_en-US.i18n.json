@@ -110,7 +110,6 @@
     "statusCodes": "Status codes",
     "statusRequests": "{count: string} requests",
     "shareReport": "Share report",
-    "reportCopied": "Report copied to clipboard",
     "abortRunTitle": "Abort the run?",
     "abortRunMessage": "The test is still running. Stop it and show the result?",
     "abortRunConfirm": "Abort",
@@ -125,7 +124,30 @@
     "back": "Back",
     "toggleTheme": "Switch theme",
     "emptyHint": "No saved scenarios yet. Start with a quick test: enter a URL and run it.",
-    "willRequest": "Will request {url: string}"
+    "willRequest": "Will request {url: string}",
+    "ownTargetsTitle": "Test only your own servers",
+    "ownTargetsMessage": "NetBench sends many requests in a short time. Run tests only against servers you own or are allowed to test: load on someone else's service can disrupt it and may be illegal.",
+    "ownTargetsConfirm": "I understand",
+    "users": "USERS",
+    "duration": "DURATION",
+    "method": "METHOD",
+    "durationSeconds": "{seconds: string} s",
+    "durationMinutes": "{minutes: string} min",
+    "limitsHint": "From a phone: up to {users: string} users and {minutes: string} minutes per run.",
+    "keepOpenHint": "Keep the app open — the run stops if it goes to the background.",
+    "stoppedInBackground": "The run was stopped because the app went to the background",
+    "newScenarioTitle": "New scenario",
+    "editScenarioTitle": "Edit scenario",
+    "multiStepHint": "This scenario has {count: string} request steps — edit them in the desktop app.",
+    "saveAsScenario": "Save as scenario",
+    "scenarioSaved": "Scenario “{name: string}” saved",
+    "scenarioSaveFailed": "Couldn’t save the scenario",
+    "shareAs": "Share report as",
+    "shareText": "Text summary",
+    "shareHtml": "HTML report",
+    "shareCsv": "CSV table",
+    "shareJson": "JSON data",
+    "shareFailed": "Couldn’t share the report"
   },
   "settings": {
     "title": "Settings",
@@ -135,7 +157,8 @@
     "themeDark": "Dark theme",
     "themeLight": "Light theme",
     "themeSystem": "Same as device",
-    "languageSystem": "Same as device"
+    "languageSystem": "Same as device",
+    "about": "About"
   },
   "testRun": {
     "recording": "RECORDING",
@@ -144,5 +167,17 @@
     "connections": "CONNECTIONS",
     "throughputChart": "THROUGHPUT (RPS)",
     "latencyChart": "P95 LATENCY (MS)"
+  },
+  "about": {
+    "title": "About",
+    "version": "Version {version: string} ({build: string})",
+    "description": "HTTP load testing for your own APIs: throughput, latency percentiles and error rate in real time.",
+    "poweredBy": "Built with Plumix — a Flutter-like UI framework for .NET",
+    "privacy": "Privacy policy",
+    "terms": "Terms of use",
+    "feedback": "Feedback and bug reports",
+    "sourceCode": "Source code",
+    "licenses": "Open source licenses",
+    "openFailed": "Couldn’t open the link"
   }
 }

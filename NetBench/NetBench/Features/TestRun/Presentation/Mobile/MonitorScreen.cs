@@ -4,6 +4,7 @@ using NetBench.Features.Scenarios.Domain;
 using NetBench.Features.TestRun.Domain;
 using NetBench.Localization;
 using NetBench.Mobile.Controls;
+using NetBench.Mobile.Platform;
 using NetBench.Mobile.Theme;
 using Plumix;
 using Plumix.Bloc;
@@ -25,7 +26,8 @@ public sealed class MonitorScreen : StatelessWidget
 
     public MonitorScreen(LoadScenario scenario)
     {
-        _scenario = scenario;
+        // С телефона нагрузка всегда в пределах лимитов — какой бы сценарий ни пришёл.
+        _scenario = MobileLoadLimits.Apply(scenario);
     }
 
     public override Widget Build(BuildContext context)
@@ -39,7 +41,7 @@ public sealed class MonitorScreen : StatelessWidget
                 _ = cubit.StartAsync();
                 return cubit;
             },
-            child: new Builder(BuildScaffold));
+            child: new RunSessionGuard(new Builder(BuildScaffold)));
     }
 
     /// <summary>
@@ -96,8 +98,11 @@ public sealed class MonitorScreen : StatelessWidget
             return;
 
         var report = state.Report;
+        var stoppedInBackground = state.StoppedInBackground;
         _ = Navigator.Of(context).PushAndRemoveUntil(
-            new MaterialPageRoute(_ => new ResultScreen(report), new RouteSettings("result")),
+            new MaterialPageRoute(
+                _ => new ResultScreen(report, stoppedInBackground),
+                new RouteSettings("result")),
             static route => route.IsFirst);
     }
 
@@ -185,6 +190,10 @@ public sealed class MonitorScreen : StatelessWidget
                     new Avalonia.Thickness(0, 18, 0, 6),
                     new Sparkline(state.RpsPoints, palette.Rps, palette.RpsTint)),
                 BuildProgress(palette, progress, Format(elapsed), Format(duration)),
+                new SizedBox(height: 14),
+                new Text(
+                    strings.Mobile.KeepOpenHint,
+                    style: new TextStyle(FontSize: 12, Color: palette.TextMid, FontFamily: NetBenchFonts.Ui)),
                 new Spacer(),
                 BuildStopButton(palette, strings.Mobile.Stop, cubit.Stop),
                 new SizedBox(height: 24),
@@ -323,4 +332,46 @@ public sealed class MonitorScreen : StatelessWidget
 
     private static string Format(TimeSpan time) =>
         $"{(int)time.TotalMinutes:00}:{time.Seconds:00}";
+}
+
+/// <summary>
+/// Пока прогон на экране — экран не гаснет, а уход приложения в фон останавливает прогон
+/// (<see cref="TestRunCubit.StopInBackground"/>). Inactive (шторка, входящий звонок поверх)
+/// прогон не трогает — приложение ещё видно и работает.
+/// </summary>
+internal sealed class RunSessionGuard(Widget child) : StatefulWidget
+{
+    public Widget Child { get; } = child;
+
+    public override State CreateState() => new RunSessionGuardState();
+}
+
+internal sealed class RunSessionGuardState : State<RunSessionGuard>, IDisposable
+{
+    private AppLifecycleListener? _lifecycle;
+    private IPlatformServices? _platform;
+
+    public override void InitState()
+    {
+        base.InitState();
+
+        _platform = RepositoryProvider<IPlatformServices>.ReadOf(Context);
+        _platform.SetKeepScreenOn(true);
+
+        var cubit = Context.Read<TestRunCubit>();
+        _lifecycle = new AppLifecycleListener(onStateChange: state =>
+        {
+            if (state is AppLifecycleState.Hidden or AppLifecycleState.Paused or AppLifecycleState.Detached)
+                cubit.StopInBackground();
+        });
+    }
+
+    public override void Dispose()
+    {
+        _lifecycle?.Dispose();
+        _platform?.SetKeepScreenOn(false);
+        base.Dispose();
+    }
+
+    public override Widget Build(BuildContext context) => Widget.Child;
 }

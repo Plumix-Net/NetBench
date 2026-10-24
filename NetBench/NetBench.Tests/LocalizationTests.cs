@@ -12,6 +12,8 @@ public class LocalizationTests
 
         Assert.Contains("ru-RU", cultureNames);
         Assert.Contains("en-US", cultureNames);
-        Assert.Equal("ru-RU", Strings.BaseCulture.Name);
+        // Базовая культура — запасная для неподдерживаемых языков устройства (hr-HR и т.п.):
+        // в международных сторах это английский.
+        Assert.Equal("en-US", Strings.BaseCulture.Name);
     }
 }

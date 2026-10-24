@@ -45,6 +45,17 @@ public sealed class SettingsScreen : StatelessWidget
                                             BuildLanguageGroup(palette, strings),
                                             BuildSectionHead(palette, strings.Settings.Appearance),
                                             BuildThemeGroup(context, palette, strings),
+                                            new SizedBox(height: 26),
+                                            BuildGroup(
+                                                palette,
+                                                [
+                                                    BuildNavigationRow(
+                                                        palette,
+                                                        strings.Settings.About,
+                                                        () => _ = Navigator.Of(context).Push(new MaterialPageRoute(
+                                                            static _ => new AboutScreen(),
+                                                            new RouteSettings("about")))),
+                                                ]),
                                             new SizedBox(height: 28),
                                             BuildFooter(palette, strings),
                                             new SizedBox(height: 24),
@@ -153,7 +164,7 @@ public sealed class SettingsScreen : StatelessWidget
     }
 
     /// <summary>Карточка-группа: строки настроек, разделённые тонкой линией.</summary>
-    private static Material BuildGroup(NetBenchPalette palette, IReadOnlyList<Widget> rows)
+    internal static Material BuildGroup(NetBenchPalette palette, IReadOnlyList<Widget> rows)
     {
         var children = new List<Widget>(rows.Count * 2);
         for (var i = 0; i < rows.Count; i++)
@@ -220,6 +231,24 @@ public sealed class SettingsScreen : StatelessWidget
                 padding: new Avalonia.Thickness(16, 15),
                 child: new Row(spacing: 10, children: children)));
     }
+
+    /// <summary>Строка-переход на другой экран: подпись и шеврон.</summary>
+    internal static InkWell BuildNavigationRow(NetBenchPalette palette, string label, Action onTap) =>
+        new(
+            onTap: onTap,
+            child: new Container(
+                padding: new Avalonia.Thickness(16, 15),
+                child: new Row(
+                    spacing: 10,
+                    children:
+                    [
+                        new Expanded(
+                            new Text(
+                                label,
+                                style: new TextStyle(FontSize: 15, Color: palette.Text, FontFamily: NetBenchFonts.Ui),
+                                maxLines: 2)),
+                        new IconGlyph(GlyphKind.ChevronRight, palette.TextFaint, 12),
+                    ])));
 
     private static Column BuildFooter(NetBenchPalette palette, Strings strings) =>
         new Column(

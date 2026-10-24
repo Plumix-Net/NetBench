@@ -1,8 +1,11 @@
 using Avalonia.Media;
+using NetBench.Features.Report.Domain;
+using NetBench.Features.Scenarios.Presentation.Mobile;
 using NetBench.Features.TestRun.Domain;
 using NetBench.Localization;
 using NetBench.Mobile.Controls;
 using NetBench.Mobile.Theme;
+using Plumix.Bloc;
 using Plumix.Material;
 using Plumix.Rendering;
 using Plumix.Slang;
@@ -12,14 +15,20 @@ using Color = Plumix.UI.Color;
 
 namespace NetBench.Features.Report.Presentation.Mobile;
 
-/// <summary>Экран результата прогона: сводка, сетка метрик, распределение задержек и коды ответов.</summary>
+/// <summary>
+/// Экран результата прогона: сводка, сетка метрик, распределение задержек и коды ответов;
+/// «Поделиться» отдаёт отчёт в системное меню текстом или файлом (HTML/CSV/JSON).
+/// </summary>
 public sealed class ResultScreen : StatelessWidget
 {
     private readonly TestRunReport _report;
+    private readonly bool _stoppedInBackground;
 
-    public ResultScreen(TestRunReport report)
+    /// <param name="stoppedInBackground">Прогон оборвал уход приложения в фон — покажем пометку.</param>
+    public ResultScreen(TestRunReport report, bool stoppedInBackground = false)
     {
         _report = report;
+        _stoppedInBackground = stoppedInBackground;
     }
 
     public override Widget Build(BuildContext context)
@@ -42,6 +51,7 @@ public sealed class ResultScreen : StatelessWidget
                                         crossAxisAlignment: CrossAxisAlignment.Stretch,
                                         children:
                                         [
+                                            .. BuildNotice(strings, palette),
                                             BuildSummaryCard(strings, palette),
                                             new SizedBox(height: 20),
                                             BuildMetricGrid(strings),
@@ -51,6 +61,7 @@ public sealed class ResultScreen : StatelessWidget
                                             .. BuildStatusRows(strings, palette),
                                             new SizedBox(height: 24),
                                             BuildShareButton(context, strings, palette),
+                                            .. BuildSaveAsScenario(context, strings, palette),
                                             new SizedBox(height: 24),
                                         ]))),
                         ]))));
@@ -253,6 +264,26 @@ public sealed class ResultScreen : StatelessWidget
         _ => palette.Error,
     };
 
+    private IEnumerable<Widget> BuildNotice(Strings strings, NetBenchPalette palette)
+    {
+        if (!_stoppedInBackground)
+            yield break;
+
+        yield return new Container(
+            margin: new Avalonia.Thickness(0, 0, 0, 12),
+            padding: new Avalonia.Thickness(14, 12),
+            decoration: new BoxDecoration(
+                Color: palette.LatencyTint,
+                BorderRadius: BorderRadius.Circular(10)),
+            child: new Text(
+                strings.Mobile.StoppedInBackground,
+                style: new TextStyle(
+                    FontSize: 13,
+                    FontWeight: FontWeight.SemiBold,
+                    Color: palette.TextHi,
+                    FontFamily: NetBenchFonts.Ui)));
+    }
+
     private Material BuildShareButton(BuildContext context, Strings strings, NetBenchPalette palette)
     {
         var radius = BorderRadius.Circular(12);
@@ -261,12 +292,7 @@ public sealed class ResultScreen : StatelessWidget
             color: palette.Rps,
             borderRadius: radius,
             child: new InkWell(
-                onTap: () =>
-                {
-                    TextClipboard.SetText(BuildShareText(strings));
-                    ScaffoldMessenger.Of(context).ShowSnackBar(
-                        new SnackBar(content: new Text(strings.Mobile.ReportCopied)));
-                },
+                onTap: () => _ = ShareAsync(context),
                 borderRadius: radius,
                 child: new Container(
                     height: 54,
@@ -286,6 +312,99 @@ public sealed class ResultScreen : StatelessWidget
                                     FontFamily: NetBenchFonts.Ui)),
                         ]))));
     }
+
+    /// <summary>
+    /// Быстрый тест не сохраняется как сценарий сам — даём превратить удачный прогон
+    /// в сценарий с тем же адресом и нагрузкой.
+    /// </summary>
+    private IEnumerable<Widget> BuildSaveAsScenario(BuildContext context, Strings strings, NetBenchPalette palette)
+    {
+        if (!_report.Scenario.IsQuickTest)
+            yield break;
+
+        yield return new SizedBox(height: 10);
+        yield return new SizedBox(
+            height: 54,
+            child: new OutlinedButton(
+                onPressed: () => _ = Navigator.Of(context).Push(new MaterialPageRoute(
+                    _ => ScenarioEditorScreen.FromQuickTest(_report.Scenario))),
+                style: OutlinedButton.StyleFrom(
+                    foregroundColor: palette.Rps,
+                    side: new BorderSide(palette.Rps),
+                    shape: new RoundedRectangleBorder(borderRadius: BorderRadius.Circular(12))),
+                child: new Text(
+                    strings.Mobile.SaveAsScenario,
+                    style: new TextStyle(FontSize: 15, FontWeight: FontWeight.Bold, FontFamily: NetBenchFonts.Ui))));
+    }
+
+    /// <summary>Выбор формата в нижней шторке, затем системное меню «Поделиться».</summary>
+    private async Task ShareAsync(BuildContext context)
+    {
+        // Всё из контекста — до await: пока открыта шторка, экран мог смениться.
+        var strings = Translations<Strings>.ReadOf(context);
+        var palette = NetBenchTheme.PaletteOf(context);
+        var sharer = RepositoryProvider<IReportSharer>.ReadOf(context);
+        var messenger = ScaffoldMessenger.Of(context);
+
+        var choice = await MaterialBottomSheets.ShowModalBottomSheet<ShareChoice>(
+            context,
+            sheetContext => BuildShareSheet(sheetContext, strings, palette),
+            backgroundColor: palette.BgPanel,
+            showDragHandle: true,
+            useSafeArea: true);
+        if (choice is null)
+            return;
+
+        try
+        {
+            if (choice.Format is { } format)
+                await sharer.ShareAsync(_report, format, strings.Mobile.ShareReport);
+            else
+                await sharer.ShareTextAsync(BuildShareText(strings), strings.Mobile.ShareReport);
+        }
+        catch (Exception)
+        {
+            messenger.ShowSnackBar(new SnackBar(content: new Text(strings.Mobile.ShareFailed)));
+        }
+    }
+
+    private static Padding BuildShareSheet(BuildContext context, Strings strings, NetBenchPalette palette)
+    {
+        Widget Option(IconData icon, string label, ShareChoice choice) => new ListTile(
+            leading: new Icon(icon, color: palette.Rps),
+            title: new Text(
+                label,
+                style: new TextStyle(FontSize: 15, Color: palette.TextHi, FontFamily: NetBenchFonts.Ui)),
+            onTap: () => Navigator.Pop(context, choice));
+
+        // Шторка рисуется до низа экрана — последний пункт не должен лечь под жестовую панель.
+        return new Padding(
+            new Avalonia.Thickness(0, 0, 0, 12 + MediaQuery.ViewPaddingOf(context).Bottom),
+            new Column(
+                mainAxisSize: MainAxisSize.Min,
+                crossAxisAlignment: CrossAxisAlignment.Stretch,
+                children:
+                [
+                    new Padding(
+                        new Avalonia.Thickness(24, 0, 24, 8),
+                        new Semantics(
+                            header: true,
+                            child: new Text(
+                                strings.Mobile.ShareAs,
+                                style: new TextStyle(
+                                    FontSize: 16,
+                                    FontWeight: FontWeight.Bold,
+                                    Color: palette.TextHi,
+                                    FontFamily: NetBenchFonts.Ui)))),
+                    Option(Icons.NotesRounded, strings.Mobile.ShareText, new ShareChoice(null)),
+                    Option(Icons.HtmlRounded, strings.Mobile.ShareHtml, new ShareChoice(ReportFormat.Html)),
+                    Option(Icons.TableChartRounded, strings.Mobile.ShareCsv, new ShareChoice(ReportFormat.Csv)),
+                    Option(Icons.DataObjectRounded, strings.Mobile.ShareJson, new ShareChoice(ReportFormat.Json)),
+                ]));
+    }
+
+    /// <summary>Выбор в шторке; <see cref="Format"/> = null — текстовая сводка.</summary>
+    private sealed record ShareChoice(ReportFormat? Format);
 
     private string BuildShareText(Strings strings)
     {

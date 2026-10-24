@@ -112,7 +112,6 @@
     "statusCodes": "Коды ответов",
     "statusRequests": "запросов: {count: string}",
     "shareReport": "Поделиться отчётом",
-    "reportCopied": "Отчёт скопирован в буфер обмена",
     "abortRunTitle": "Прервать прогон?",
     "abortRunMessage": "Тест ещё идёт. Остановить и показать результат?",
     "abortRunConfirm": "Прервать",
@@ -127,7 +126,30 @@
     "back": "Назад",
     "toggleTheme": "Сменить тему",
     "emptyHint": "Сохранённых сценариев пока нет. Начните с быстрого теста: введите URL и запустите.",
-    "willRequest": "Будет запрошен {url: string}"
+    "willRequest": "Будет запрошен {url: string}",
+    "ownTargetsTitle": "Тестируйте только свои серверы",
+    "ownTargetsMessage": "NetBench отправляет много запросов за короткое время. Запускайте тесты только против своих серверов или тех, что вам разрешил тестировать владелец: нагрузка на чужой сервис может нарушить его работу и бывает незаконной.",
+    "ownTargetsConfirm": "Понятно",
+    "users": "ПОЛЬЗОВАТЕЛИ",
+    "duration": "ДЛИТЕЛЬНОСТЬ",
+    "method": "МЕТОД",
+    "durationSeconds": "{seconds: string} с",
+    "durationMinutes": "{minutes: string} мин",
+    "limitsHint": "С телефона — до {users: string} пользователей и {minutes: string} минут за прогон.",
+    "keepOpenHint": "Не сворачивайте приложение — в фоне прогон остановится.",
+    "stoppedInBackground": "Прогон остановлен: приложение ушло в фон",
+    "newScenarioTitle": "Новый сценарий",
+    "editScenarioTitle": "Сценарий",
+    "multiStepHint": "В сценарии шагов: {count: string} — редактируйте их в desktop-версии.",
+    "saveAsScenario": "Сохранить как сценарий",
+    "scenarioSaved": "Сценарий «{name: string}» сохранён",
+    "scenarioSaveFailed": "Не удалось сохранить сценарий",
+    "shareAs": "Поделиться отчётом",
+    "shareText": "Текстовая сводка",
+    "shareHtml": "HTML-отчёт",
+    "shareCsv": "Таблица CSV",
+    "shareJson": "Данные JSON",
+    "shareFailed": "Не удалось поделиться отчётом"
   },
   "settings": {
     "title": "Настройки",
@@ -137,7 +159,8 @@
     "themeDark": "Тёмная тема",
     "themeLight": "Светлая тема",
     "themeSystem": "Как в системе",
-    "languageSystem": "Как в системе"
+    "languageSystem": "Как в системе",
+    "about": "О приложении"
   },
   "testRun": {
     "recording": "ЗАПИСЬ",
@@ -146,5 +169,17 @@
     "connections": "СОЕДИНЕНИЯ",
     "throughputChart": "ПРОПУСКНАЯ СПОСОБНОСТЬ (RPS)",
     "latencyChart": "ЗАДЕРЖКА P95 (МС)"
+  },
+  "about": {
+    "title": "О приложении",
+    "version": "Версия {version: string} ({build: string})",
+    "description": "Нагрузочное тестирование своих HTTP API: пропускная способность, перцентили задержки и ошибки в реальном времени.",
+    "poweredBy": "Сделано на Plumix — Flutter-подобном UI-фреймворке для .NET",
+    "privacy": "Политика конфиденциальности",
+    "terms": "Условия использования",
+    "feedback": "Обратная связь и ошибки",
+    "sourceCode": "Исходный код",
+    "licenses": "Лицензии открытого ПО",
+    "openFailed": "Не удалось открыть ссылку"
   }
 }
