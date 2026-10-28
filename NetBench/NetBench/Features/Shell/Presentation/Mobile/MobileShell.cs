@@ -81,7 +81,7 @@ internal sealed class MobileShellState : State<MobileShell>
             ThemePreference.Dark => true,
             ThemePreference.Light => false,
             // MediaQuery от View: при смене темы устройства Build вызовется снова
-            _ => MediaQuery.PlatformBrightnessOf(context) == PlatformBrightness.Dark,
+            _ => MediaQuery.PlatformBrightnessOf(context) == Brightness.Dark,
         };
         var palette = isDark ? NetBenchPalette.Dark : NetBenchPalette.Light;
 
@@ -152,7 +152,7 @@ internal sealed class MobileShellState : State<MobileShell>
     private static SystemUiOverlayStyle SystemBarsStyle(bool isDark) => new(
         statusBarColor: Colors.Transparent,
         systemNavigationBarColor: Colors.Transparent,
-        statusBarIconBrightness: isDark ? PlatformBrightness.Light : PlatformBrightness.Dark,
-        systemNavigationBarIconBrightness: isDark ? PlatformBrightness.Light : PlatformBrightness.Dark,
-        statusBarBrightness: isDark ? PlatformBrightness.Dark : PlatformBrightness.Light);
+        statusBarIconBrightness: isDark ? Brightness.Light : Brightness.Dark,
+        systemNavigationBarIconBrightness: isDark ? Brightness.Light : Brightness.Dark,
+        statusBarBrightness: isDark ? Brightness.Dark : Brightness.Light);
 }

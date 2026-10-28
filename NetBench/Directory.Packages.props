@@ -3,9 +3,9 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <AvaloniaVersion>12.1.4</AvaloniaVersion>
-    <!-- Plumix, Plumix.Material и Plumix.Android выходят одной версией. Проверка непубликованного
+    <!-- Все пакеты Plumix (и Plumix.Bloc/Plumix.Slang из Plumix.Packages) выходят одной версией. Проверка непубликованного
          Plumix: -p:PlumixVersion=<версия из локального фида> -p:RestoreAdditionalProjectSources=<фид>. -->
-    <PlumixVersion>0.4.0-beta.3</PlumixVersion>
+    <PlumixVersion>1.0.0-preview.1</PlumixVersion>
   </PropertyGroup>
   <ItemGroup>
     <!-- Avalonia packages -->
@@ -23,8 +23,8 @@
     <!-- Plumix (мобильный UI: Flutter-подобные виджеты + Bloc) -->
     <PackageVersion Include="Plumix" Version="$(PlumixVersion)" />
     <PackageVersion Include="Plumix.Material" Version="$(PlumixVersion)" />
-    <PackageVersion Include="Plumix.Bloc" Version="0.4.0-beta.1" />
-    <PackageVersion Include="Plumix.Slang" Version="0.4.0-beta.1" />
+    <PackageVersion Include="Plumix.Bloc" Version="$(PlumixVersion)" />
+    <PackageVersion Include="Plumix.Slang" Version="$(PlumixVersion)" />
     <PackageVersion Include="Plumix.Android" Version="$(PlumixVersion)" />
     <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.15" />
     <!-- Установщики и автообновление desktop-версии -->
