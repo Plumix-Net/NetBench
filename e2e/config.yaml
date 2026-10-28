@@ -1,0 +1,5 @@
+# Maestro: какие флоу гонять и в каком порядке. Запуск — scripts/e2e.sh (см. e2e/README.md).
+flows:
+  - flows/*
+executionOrder:
+  continueOnFailure: true

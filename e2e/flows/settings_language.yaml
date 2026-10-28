@@ -1,0 +1,26 @@
+appId: net.plumix.netbench
+name: Settings — switching the language rebuilds the UI
+tags: [settings]
+---
+- runFlow: ../subflows/launch_clean.yaml
+- tapOn:
+    text: Open settings
+    retryTapIfNoChange: true
+- assertVisible: Settings
+- tapOn:
+    text: "(?s)Русский.*"
+    retryTapIfNoChange: true
+- extendedWaitUntil:
+    visible: Настройки
+    timeout: 5000
+- tapOn:
+    text: Назад
+    retryTapIfNoChange: true
+- assertVisible: Быстрый тест
+- assertVisible: Дежурный мониторинг
+# Выбор переживает перезапуск
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible: Быстрый тест
+    timeout: 30000

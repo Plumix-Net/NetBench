@@ -1,0 +1,16 @@
+# Чистый старт: без сценариев, истории и согласия на прогоны. Первый запрос дерева доступности
+# включает семантику Plumix, поэтому ждём главный экран с запасом.
+# retry: Android изредка убивает только что запущенный процесс по таймауту удаления старой задачи
+# («Killing … remove task» после clearState) — тогда окно остаётся пустым, и помогает новый запуск.
+appId: net.plumix.netbench
+---
+- retry:
+    maxRetries: 2
+    commands:
+      - launchApp:
+          clearState: true
+          stopApp: true
+      - extendedWaitUntil:
+          visible: Quick test
+          timeout: 30000
+- waitForAnimationToEnd

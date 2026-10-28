@@ -1,6 +1,7 @@
 using Avalonia.Media;
 using NetBench.Features.Scenarios.Domain;
 using NetBench.Localization;
+using NetBench.Mobile;
 using NetBench.Mobile.Controls;
 using NetBench.Mobile.Theme;
 using Plumix.Bloc;
@@ -122,11 +123,13 @@ internal sealed class ScenarioEditorScreenState : State<ScenarioEditorScreen>, I
             new ExcludeSemantics(BuildLabel(palette, strings.Scenarios.Editor.Name)),
             new Semantics(
                 label: strings.Scenarios.Editor.Name,
+                identifier: AutomationIds.ScenarioName,
                 child: BuildField(palette, _name, strings.Scenarios.Editor.NamePlaceholder, error: null, mono: false)),
             new SizedBox(height: 20),
             new ExcludeSemantics(BuildLabel(palette, strings.Mobile.TargetUrl)),
             new Semantics(
                 label: strings.Mobile.TargetUrl,
+                identifier: AutomationIds.ScenarioUrl,
                 child: BuildField(palette, _target, strings.Scenarios.Editor.TargetPlaceholder, targetError, mono: true)),
             new SizedBox(height: 20),
             BuildLabel(palette, strings.Mobile.Method),

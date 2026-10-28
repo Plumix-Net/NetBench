@@ -2,6 +2,7 @@ using Avalonia.Media;
 using NetBench.Features.Scenarios.Domain;
 using NetBench.Features.TestRun.Presentation.Mobile;
 using NetBench.Localization;
+using NetBench.Mobile;
 using NetBench.Mobile.Controls;
 using NetBench.Mobile.Theme;
 using Plumix.Material;
@@ -79,6 +80,7 @@ internal sealed class QuickTestScreenState : State, IDisposable
                                             new ExcludeSemantics(BuildLabel(palette, strings.Mobile.TargetUrl)),
                                             new Semantics(
                                                 label: strings.Mobile.TargetUrl,
+                                                identifier: AutomationIds.QuickTestUrl,
                                                 child: BuildUrlField(
                                                     palette,
                                                     strings.Scenarios.Editor.TargetPlaceholder,

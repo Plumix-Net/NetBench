@@ -1,0 +1,22 @@
+# Монитор живого прогона → «Стоп» → экран результата (отчёт к этому моменту сохранён).
+# Монитор перерисовывается непрерывно (график, таймер): снимок дерева доступности на нём занимает
+# до ~15 с, а retryTapIfNoChange не срабатывает — экран меняется всегда. Поэтому «Стоп» жмём в цикле,
+# пока не откроется результат. Прогоны во флоу — на 5 минут, чтобы не кончились раньше.
+appId: net.plumix.netbench
+---
+- extendedWaitUntil:
+    visible: STOP
+    timeout: 60000
+# Карточки метрик сливают подпись и значение в один узел: «REQUESTS / SEC\n217»
+- assertVisible: "(?is)requests / sec.*"
+- repeat:
+    times: 3
+    while:
+      notVisible: Result
+    commands:
+      - tapOn:
+          text: STOP
+          optional: true
+- extendedWaitUntil:
+    visible: Result
+    timeout: 60000

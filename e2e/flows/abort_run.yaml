@@ -1,0 +1,37 @@
+appId: net.plumix.netbench
+name: Back during a run asks to abort it
+# Системный «назад» есть только на Android; на iOS PopScope монитора отключает и свайп назад
+tags: [run, android]
+---
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - runFlow: ../subflows/launch_clean.yaml
+      - runFlow: ../subflows/open_quick_test.yaml
+      - tapOn:
+          text: RUN
+          retryTapIfNoChange: true
+      - tapOn:
+          text: I understand
+          retryTapIfNoChange: true
+      - extendedWaitUntil:
+          visible: STOP
+          timeout: 60000
+      # «Назад» не бросает прогон молча
+      - back
+      - extendedWaitUntil:
+          visible: Abort the run?
+          timeout: 60000
+      - tapOn: Cancel
+      - extendedWaitUntil:
+          visible: STOP
+          timeout: 60000
+      - back
+      - extendedWaitUntil:
+          visible: Abort the run?
+          timeout: 60000
+      - tapOn: Abort
+      - extendedWaitUntil:
+          visible: Result
+          timeout: 60000

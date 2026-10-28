@@ -1,0 +1,11 @@
+appId: net.plumix.netbench
+name: Home screen on a clean install
+tags: [smoke]
+---
+- runFlow: ../subflows/launch_clean.yaml
+- assertVisible: NetBench
+- assertVisible: On-call monitoring
+- assertVisible: "No saved scenarios yet.*"
+- assertVisible: New scenario
+- assertVisible: Open settings
+- assertVisible: Switch theme

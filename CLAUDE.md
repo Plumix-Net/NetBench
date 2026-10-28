@@ -25,6 +25,10 @@ dotnet build NetBench/NetBench/NetBench.csproj -f net10.0-android
 # Полная Android-голова (APK)
 dotnet build NetBench/NetBench.Android/NetBench.Android.csproj
 
+# E2E-тесты мобильного приложения (Maestro) на загруженном эмуляторе / симуляторе
+scripts/e2e.sh android
+scripts/e2e.sh ios
+
 # Скриншоты сторов (headless-рендер мобильного UI) и лимиты текстов витрины
 bundle exec fastlane screenshots
 bundle exec fastlane check
@@ -72,6 +76,8 @@ NetBench/
 │                              #   Infrastructure/MobileHarness — MobileShell в окне 390×780, тапы по семантике
 └── NetBench.{Desktop,Android,iOS,Browser}/  # головы, только bootstrap:
                                # Desktop/Browser → App, Android/iOS → MobileApp
+e2e/                           # (в корне репозитория) Maestro-флоу настоящего приложения на Android/iOS,
+                               #   запуск — scripts/e2e.sh, правила — e2e/README.md
 ```
 
 ## Принятые паттерны
@@ -111,6 +117,9 @@ NetBench/
   каталоге (`MobileShell(dataDirectory)`), кадры — `Pump()`, цели ищутся по подписи/tooltip в дереве
   семантики (то же, что читает TalkBack), прогоны — против `LocalTarget` на loopback. Plumix-биндинги —
   синглтоны процесса, тесты идут последовательно.
+- Сквозные сценарии на устройстве — флоу Maestro в `e2e/` (`e2e/README.md`): элементы ищутся по дереву
+  доступности, текстовым полям нужен `Semantics(identifier:)` из `Mobile/AutomationIds.cs`. Меняешь подписи
+  экранов или идентификаторы — прогони `scripts/e2e.sh` или поправь флоу.
 - Слои не смешивать: Presentation не знает про `HttpClient`, гистограммы и файлы; Domain/Data не знают про Avalonia/Plumix.
 - Код и комментарии — в стиле существующего кода; UI-тексты — через Slang в ru и en, базовая (запасная)
   культура — en-US.

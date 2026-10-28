@@ -1,0 +1,28 @@
+appId: net.plumix.netbench
+name: Quick test — consent, live run, stop, result, history
+tags: [run]
+---
+- runFlow: ../subflows/launch_clean.yaml
+- runFlow: ../subflows/open_quick_test.yaml
+- tapOn:
+    text: RUN
+    retryTapIfNoChange: true
+# Первый прогон — согласие «только свои серверы»
+- assertVisible: Test only your own servers
+- tapOn:
+    text: I understand
+    retryTapIfNoChange: true
+- runFlow: ../subflows/stop_run.yaml
+- assertVisible: ${TARGET}
+# Цель отвечала: в кодах ответа есть 200 («200\n4,835 requests\n99.9%»). Ноль ошибок не требуем —
+# python http.server с очередью на 5 соединений изредка отказывает под тысячей rps.
+# Скролл — Android отдаёт наружу только видимые узлы, а блок кодов ниже края экрана.
+- scrollUntilVisible:
+    element: "(?s)200\\s.*requests.*"
+- tapOn:
+    text: Back
+    retryTapIfNoChange: true
+# Сессия попала в историю на главном экране
+- extendedWaitUntil:
+    visible: "(?s).*127\\.0\\.0\\.1.*"
+    timeout: 10000

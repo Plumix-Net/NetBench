@@ -1,0 +1,56 @@
+appId: net.plumix.netbench
+name: New scenario — validation, save, run from the list
+tags: [scenarios, run]
+---
+- runFlow: ../subflows/launch_clean.yaml
+- tapOn:
+    text: New scenario
+    retryTapIfNoChange: true
+- assertVisible: New scenario
+# Пресеты — до полей ввода, пока экранная клавиатура не закрыла нижние ряды
+- tapOn:
+    text: POST
+    retryTapIfNoChange: true
+- tapOn:
+    text: "1"
+    retryTapIfNoChange: true
+- scrollUntilVisible:
+    element: 5 min
+- tapOn:
+    text: 5 min
+    retryTapIfNoChange: true
+- tapOn:
+    id: scenario_name
+- inputText: Checkout API
+# Без адреса сценарий не сохраняется: редактор остаётся открытым
+- tapOn:
+    text: Save
+    retryTapIfNoChange: true
+- assertVisible: New scenario
+# Текст ошибки поля на Android — в узле поля; на iOS он уходит в accessibilityHint, которого Maestro не видит
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - assertVisible: "(?s).*Enter a Target URL to run.*"
+- tapOn:
+    id: scenario_url
+- inputText: ${TARGET}
+- tapOn:
+    text: Save
+    retryTapIfNoChange: true
+# Карточка на главном экране вместо пустого состояния
+- extendedWaitUntil:
+    visible: "(?s).*Checkout API.*"
+    timeout: 10000
+- assertNotVisible: "No saved scenarios yet.*"
+# Тап по карточке запускает сценарий
+- tapOn:
+    text: "(?s).*Checkout API.*"
+    retryTapIfNoChange: true
+- assertVisible: Test only your own servers
+- tapOn:
+    text: I understand
+    retryTapIfNoChange: true
+- runFlow: ../subflows/stop_run.yaml
+- assertVisible: Checkout API

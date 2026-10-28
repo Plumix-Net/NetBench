@@ -1,0 +1,16 @@
+# Быстрый тест на ${TARGET} с самой лёгкой нагрузкой (1 пользователь, 5 минут — останавливает флоу).
+# Пресеты — до ввода адреса: поле получает фокус само, и экранная клавиатура может закрыть ряды.
+appId: net.plumix.netbench
+---
+- tapOn:
+    text: Quick test
+    retryTapIfNoChange: true
+- tapOn:
+    text: "1"
+    retryTapIfNoChange: true
+- tapOn:
+    text: 5 min
+    retryTapIfNoChange: true
+- tapOn:
+    id: quick_test_url
+- inputText: ${TARGET}
