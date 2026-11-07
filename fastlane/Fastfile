@@ -4,6 +4,7 @@
 #   bundle exec fastlane ios beta        # IPA → TestFlight
 #   bundle exec fastlane ios metadata    # тексты, release notes и скриншоты → App Store Connect
 #   bundle exec fastlane android internal  # AAB → внутреннее тестирование Play
+#   bundle exec fastlane android closed    # AAB → закрытое тестирование Play (трек alpha)
 #   bundle exec fastlane android metadata  # листинг, графика и скриншоты → Play
 #   bundle exec fastlane screenshots     # перегенерировать скриншоты для обоих сторов
 #   bundle exec fastlane check           # лимиты длины текстов, без сети
@@ -18,6 +19,9 @@
 
 require "base64"
 require "tmpdir"
+
+# Тексты и props — UTF-8; без локали в окружении (CI, чистый shell) Ruby читает файлы как US-ASCII.
+Encoding.default_external = Encoding::UTF_8
 
 skip_docs
 opt_out_usage
@@ -152,7 +156,7 @@ end
 platform :android do
   def play_json_key
     data = ENV["PLAY_JSON_KEY"].to_s
-    data.empty? ? { json_key: ENV.fetch("PLAY_JSON_KEY_PATH") } : { json_key_data: data }
+    data.empty? ? { json_key: File.expand_path(ENV.fetch("PLAY_JSON_KEY_PATH")) } : { json_key_data: data }
   end
 
   # Upload-ключ: в CI — секрет base64, локально — ~/.android-keys (store/README.md).
@@ -207,14 +211,14 @@ platform :android do
     aab
   end
 
-  desc "Собрать AAB и загрузить во внутреннее тестирование (черновиком, пока приложение не опубликовано)"
-  lane :internal do |options|
+  # AAB (собранный заново или готовый — aab:) → трек Play; changelogs — из release notes App Store.
+  def upload_build(track, options)
     check_metadata!
-    aab = build(options)
+    aab = options[:aab] ? File.expand_path(options[:aab]) : build(options)
     sync_changelogs
     upload_to_play_store(
       **play_json_key,
-      track: "internal",
+      track: track,
       aab: aab,
       # Пока в Play нет ни одного опубликованного релиза, API принимает только draft.
       release_status: ENV.fetch("PLAY_RELEASE_STATUS", "draft"),
@@ -225,11 +229,28 @@ platform :android do
     )
   end
 
-  desc "Листинг, графика и скриншоты → Google Play"
-  lane :metadata do
+  desc "Собрать AAB и загрузить во внутреннее тестирование (черновиком, пока приложение не опубликовано)"
+  lane :internal do |options|
+    upload_build("internal", options)
+  end
+
+  desc "Собрать AAB и загрузить в закрытое тестирование (трек alpha; aab: — загрузить готовый)"
+  lane :closed do |options|
+    upload_build("alpha", options)
+  end
+
+  desc "Листинг, графика и скриншоты → Google Play (track: — трек с релизом, по умолчанию internal)"
+  lane :metadata do |options|
     check_metadata!
+    track = options[:track] || ENV.fetch("PLAY_METADATA_TRACK", "internal")
+    # Листинг supply выгружает вместе с релизом трека; до первой сборки в треке выгружать не к чему.
+    version_code = google_play_track_version_codes(track: track, **play_json_key).max
+    UI.user_error!("No release on the #{track} track: upload a build first") unless version_code
+
     upload_to_play_store(
       **play_json_key,
+      track: track,
+      version_code: version_code,
       metadata_path: File.join(METADATA, "android"),
       skip_upload_apk: true,
       skip_upload_aab: true,

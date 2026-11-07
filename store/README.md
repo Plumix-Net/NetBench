@@ -63,7 +63,7 @@ bundle install
 |---|---|
 | `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8_BASE64` | App Store Connect → Users and Access → Integrations → App Store Connect API → ключ с ролью **App Manager**; `base64 -i AuthKey_XXXX.p8`. Тот же ключ нотаризует macOS-сборку. |
 | `IOS_DIST_CERT_P12_BASE64`, `IOS_DIST_CERT_PASSWORD` | Связка ключей → «Apple Distribution: …» → экспорт в .p12 с паролем; `base64 -i dist.p12`. Профиль App Store fastlane создаёт сам через API. |
-| `PLAY_JSON_KEY` | Google Cloud → сервисный аккаунт → JSON-ключ (содержимое целиком); в Play Console → Users and permissions пригласить его e-mail с правами на приложение (релизы, листинг). |
+| `PLAY_JSON_KEY` | Заведён: GCP-проект `plumix-netbench`, сервисный аккаунт `netbench-play@plumix-netbench.iam.gserviceaccount.com` (Android Publisher API включён), ключ — `~/.android-keys/netbench-play-service-account.json`; в Play Console приглашён с правами на NetBench: просмотр, выпуск рабочей и тестовых версий, тестировщики, страница приложения (без финансов). Право на рабочую версию нужно и для листинга: Play сам отправляет изменения карточки на проверку, и без него фиксация правки падает с «The caller does not have permission». В секрет — содержимое файла целиком. |
 | `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEY_ALIAS`, `ANDROID_KEYSTORE_PASSWORD` | upload-ключ (ниже), `base64 -i netbench-upload.jks`. |
 | `MACOS_DEVELOPER_ID_P12_BASE64`, `MACOS_DEVELOPER_ID_P12_PASSWORD` | «Developer ID Application: …» (и «Developer ID Installer: …», если есть — тогда собирается подписанный .pkg) → экспорт в один .p12. Без секрета macOS-сборка неподписанная. |
 
@@ -79,7 +79,11 @@ Fastlane не умеет (или API не даёт) — сделать рука�
 
 - **Google Play:** первый AAB загрузить вручную (Play Console → Testing → Internal testing → Create
   release; файл — из артефакта `netbench-android-aab` прогона CI или `bundle exec fastlane android build`):
-  API работает только с приложением, у которого уже есть хоть одна сборка. При первой загрузке —
+  API работает только с приложением, у которого уже есть хоть одна сборка (сделано: versionCode 1 в internal;
+  versionCode 2 — `fastlane android closed` в закрытое тестирование). Изменения листинга API Play сразу
+  отправляет на проверку, поэтому `fastlane android metadata` падает с «The caller does not have permission»,
+  пока у приложения не прошла первая проверка: до этого всё отправляется на проверку только из консоли
+  (Обзор публикации). Первую карточку (en-US: тексты, значок, баннер, скриншоты) заполнили в консоли. При первой загрузке —
   включить Play App Signing. Заполнить Data safety, рейтинг контента, целевую аудиторию, «App access»,
   «Ads» (ответы — ниже), контактный e-mail разработчика.
 - **App Store Connect:** App Privacy, Age Rating, цена (бесплатно), контакт для App Review (имя,
