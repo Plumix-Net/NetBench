@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="auto">
 	<uses-permission android:name="android.permission.INTERNET" />
+	<!-- ScreenOrientation.Portrait у MainActivity неявно делает android.hardware.screen.portrait обязательной:
+	     Google Play тогда скрывает приложение на устройствах, чей профиль в Play эту функцию не заявляет
+	     (так было с эмулятором Pixel 6a на android-37.1 ps16k: «Your device isn't compatible»).
+	     Ориентация остаётся портретной, требование к устройству снимаем. -->
+	<uses-feature android:name="android.hardware.screen.portrait" android:required="false" />
 	<!-- usesCleartextTraffic: нагрузочный тест часто бьёт в локальный/стейджинговый стенд по http:// —
 	     без cleartext Android молча режет такие запросы, и прогон даёт 100% ошибок.
 	     enableOnBackInvokedCallback: predictive back — PlumixMainActivity регистрирует
