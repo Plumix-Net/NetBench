@@ -66,7 +66,8 @@ public sealed class MonitorScreen : StatelessWidget
                         new Avalonia.Thickness(20, 12, 20, 0),
                         new BlocConsumer<TestRunCubit, TestRunState>(
                             listener: OnStateChanged,
-                            listenWhen: static (previous, next) => previous.Phase != next.Phase,
+                            listenWhen: static (previous, next) =>
+                                previous.Phase is RunInProgress && next.Phase is RunCompleted,
                             builder: BuildBody)))));
     }
 
@@ -97,10 +98,9 @@ public sealed class MonitorScreen : StatelessWidget
     /// <summary>Прогон завершён — заменяем монитор экраном результата (домой можно вернуться кнопкой «назад»).</summary>
     private static void OnStateChanged(BuildContext context, TestRunState state)
     {
-        if (state.Phase != TestRunPhase.Completed || state.Report is null)
+        if (state.Phase is not RunCompleted(var report))
             return;
 
-        var report = state.Report;
         var stoppedInBackground = state.StoppedInBackground;
         _ = Navigator.Of(context).PushAndRemoveUntil(
             new MaterialPageRoute(

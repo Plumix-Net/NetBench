@@ -50,7 +50,7 @@ public sealed class TestRunCubit : Cubit<TestRunState>
     /// </summary>
     public void StopInBackground()
     {
-        if (State.Phase != TestRunPhase.Running || _cts is null || _cts.IsCancellationRequested)
+        if (State.Phase is not RunInProgress || _cts is null || _cts.IsCancellationRequested)
             return;
 
         Emit(State with { StoppedInBackground = true });
@@ -59,7 +59,7 @@ public sealed class TestRunCubit : Cubit<TestRunState>
 
     private void ApplyStats(TestRunStats stats)
     {
-        if (IsClosed || State.Phase == TestRunPhase.Completed)
+        if (IsClosed || State.Phase is RunCompleted)
             return;
 
         var points = new List<double>(Math.Min(State.RpsPoints.Count + 1, MaxPoints));
@@ -77,7 +77,7 @@ public sealed class TestRunCubit : Cubit<TestRunState>
             return;
 
         _reports.Save(report);
-        Emit(State with { Phase = TestRunPhase.Completed, Stats = report.Summary, Report = report });
+        Emit(State with { Phase = new RunCompleted(report), Stats = report.Summary });
     }
 
     public override void Close()
