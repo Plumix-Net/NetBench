@@ -13,9 +13,9 @@ jobs:
 
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 11.0.x
 
-      # Общий проект мультитаргетный (net10.0 + android/ios); на runner'е без
+      # Общий проект мультитаргетный (net11.0 + android/ios); на runner'е без
       # мобильных workloads отключаем мобильные таргеты флагом MobileTargets=false.
       - name: Build (Desktop)
         run: dotnet build NetBench/NetBench.Desktop/NetBench.Desktop.csproj -c Release -p:MobileTargets=false
@@ -23,7 +23,7 @@ jobs:
       - name: Test
         run: dotnet test NetBench/NetBench.Tests/NetBench.Tests.csproj -c Release -p:MobileTargets=false
 
-      # Мобильная (Plumix) презентация в headless-окне: исходники компилируются под net10.0,
+      # Мобильная (Plumix) презентация в headless-окне: исходники компилируются под net11.0,
       # мобильные workloads не нужны.
       - name: Test (Mobile UI, headless)
         run: dotnet test NetBench/NetBench.Mobile.Tests/NetBench.Mobile.Tests.csproj -c Release
@@ -35,7 +35,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 11.0.x
 
       - name: Install Android workload
         run: dotnet workload install android
@@ -43,7 +43,7 @@ jobs:
       # Проверяем Plumix-флейвор общего проекта; iOS-таргет на linux недоступен,
       # поэтому ограничиваем TargetFrameworks одним android.
       - name: Build (Mobile, android)
-        run: dotnet build NetBench/NetBench/NetBench.csproj -c Release -p:TargetFrameworks=net10.0-android
+        run: dotnet build NetBench/NetBench/NetBench.csproj -c Release -p:TargetFrameworks=net11.0-android
 
   # Android-голова целиком, как для Google Play: Release AAB с versionCode из номера прогона.
   # Подписывается upload-ключом, если заданы секреты ANDROID_KEYSTORE_BASE64 / ANDROID_KEY_ALIAS /
@@ -58,7 +58,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 11.0.x
 
       - name: Install Android workload
         run: dotnet workload install android
@@ -80,19 +80,23 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: netbench-android-aab
-          path: NetBench/NetBench.Android/bin/Release/net10.0-android/publish/*-Signed.aab
+          path: NetBench/NetBench.Android/bin/Release/net11.0-android/publish/*-Signed.aab
           if-no-files-found: error
 
   # iOS-флейвор общего проекта и голова — под симулятор, без подписи: проверка, что всё
   # собирается на macOS-раннере. Подписанный IPA для TestFlight — store/README.md.
   build-ios:
-    runs-on: macos-26
+    runs-on: xcode-27
     steps:
       - uses: actions/checkout@v4
 
+      # iOS-workload .NET 11 собран под Xcode 27.2; на образе по умолчанию более ранний.
+      - name: Select Xcode 27.2
+        run: sudo xcode-select -s /Applications/Xcode_27.2.app
+
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 11.0.x
 
       - name: Install iOS workload
         run: dotnet workload install ios
@@ -111,7 +115,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 11.0.x
 
       - name: Render screenshots
         run: dotnet run --project NetBench/NetBench.Screenshots/NetBench.Screenshots.csproj -c Release -- --output "$RUNNER_TEMP/shots"

@@ -1,6 +1,5 @@
 using Avalonia.Headless.XUnit;
 using NetBench.Features.Scenarios.Data;
-using NetBench.Features.Scenarios.Domain;
 using NetBench.Localization;
 using NetBench.Mobile.Tests.Infrastructure;
 using Plumix.Rendering;

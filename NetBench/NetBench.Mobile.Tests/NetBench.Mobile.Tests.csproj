@@ -2,9 +2,9 @@
 
   <!-- Headless-тесты мобильной (Plumix) презентации. Общий проект собирает Plumix-половину только
        в android/ios-таргетах, поэтому исходники мобильной версии компилируются здесь напрямую под
-       net10.0: так тесты идут на любом runner'е без мобильных workloads. -->
+       net11.0: так тесты идут на любом runner'е без мобильных workloads. -->
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <OutputType>Exe</OutputType>
     <RootNamespace>NetBench.Mobile.Tests</RootNamespace>

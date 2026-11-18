@@ -4,7 +4,6 @@ using Avalonia.Themes.Fluent;
 using NetBench.Features.Settings.Domain;
 using NetBench.Localization;
 using NetBench.Screenshots;
-using SkiaSharp;
 
 // Скриншоты для App Store (iPhone 6.9", 1320×2868) и Google Play (телефон, 1080×1920) на каждом языке
 // листинга. Запуск из корня репозитория: bundle exec fastlane screenshots, или напрямую

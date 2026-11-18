@@ -1,12 +1,16 @@
 <Project>
   <!-- Общие настройки всех проектов решения. TargetFramework не задаём:
-       у платформенных голов он свой (net10.0-android, net10.0-ios, net10.0-browser). -->
+       у платформенных голов он свой (net11.0-android, net11.0-ios, net11.0-browser). -->
   <PropertyGroup>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <AnalysisLevel>latest</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!-- Без XML-документации IDE0005 (лишние usings) не работает при сборке, и SDK 11 считает это
+         предупреждением, а в NetBench.csproj оно становится ошибкой. Сами комментарии не требуем. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591;CS1573</NoWarn>
   </PropertyGroup>
 
   <!-- Версия приложения — единый источник для Android/iOS-голов и экрана «О приложении».

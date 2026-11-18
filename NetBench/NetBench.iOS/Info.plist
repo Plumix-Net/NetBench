@@ -13,8 +13,13 @@
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+	</dict>
 	<key>MinimumOSVersion</key>
-	<string>13.0</string>
+	<string>15.0</string>
 	<!-- Только iPhone и только портрет: вёрстка рассчитана на телефон в вертикальной ориентации. -->
 	<key>UIDeviceFamily</key>
 	<array>

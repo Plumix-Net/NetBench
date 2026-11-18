@@ -30,12 +30,12 @@ NetBench/                        # the only shared project
 └── Mobile/                      # app shell for mobile: MobileApp (PlumixApplication)
 ```
 
-`NetBench.csproj` targets `net10.0;net10.0-android;net10.0-ios`. Platform heads are bootstrap-only and pick the nearest target:
+`NetBench.csproj` targets `net11.0;net11.0-android;net11.0-ios`. Platform heads are bootstrap-only and pick the nearest target:
 
 | Head | Target | UI stack | State management |
 |------|--------|----------|------------------|
-| Desktop, Browser | `net10.0` | Avalonia controls (XAML) | MVVM, CommunityToolkit.Mvvm |
-| Android, iOS | `net10.0-android` / `-ios` | [Plumix](https://github.com/Plumix-Net/Plumix) — Flutter-like widgets in C# | `Cubit<TState>` + immutable records ([Plumix.Bloc](https://www.nuget.org/packages/Plumix.Bloc)) |
+| Desktop, Browser | `net11.0` | Avalonia controls (XAML) | MVVM, CommunityToolkit.Mvvm |
+| Android, iOS | `net11.0-android` / `-ios` | [Plumix](https://github.com/Plumix-Net/Plumix) — Flutter-like widgets in C# | `Cubit<TState>` + immutable records ([Plumix.Bloc](https://www.nuget.org/packages/Plumix.Bloc)) |
 
 Only the Domain and Data layers are shared between platforms; each UI stack brings its own state management. Conditional `Compile`/`AvaloniaXaml` items exclude the other platform's half from every compilation.
 
@@ -50,7 +50,7 @@ Load generation is the whole point, so the hot path is allocation-free:
 
 ## Getting started
 
-Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download). The shared project multi-targets mobile frameworks, so `android`/`ios` workloads are needed for a full restore — or pass `-p:MobileTargets=false` to build desktop-only without them.
+Requires the [.NET 11 SDK](https://dotnet.microsoft.com/download). The shared project multi-targets mobile frameworks, so `android`/`ios` workloads are needed for a full restore — or pass `-p:MobileTargets=false` to build desktop-only without them.
 
 ```bash
 # Run the desktop app
@@ -63,7 +63,7 @@ dotnet test NetBench/NetBench.Tests/NetBench.Tests.csproj
 dotnet build NetBench/NetBench.Desktop/NetBench.Desktop.csproj -p:MobileTargets=false
 
 # Mobile (Plumix) flavor
-dotnet build NetBench/NetBench/NetBench.csproj -f net10.0-android   # shared project only
+dotnet build NetBench/NetBench/NetBench.csproj -f net11.0-android   # shared project only
 dotnet build NetBench/NetBench.Android/NetBench.Android.csproj      # full APK
 ```
 

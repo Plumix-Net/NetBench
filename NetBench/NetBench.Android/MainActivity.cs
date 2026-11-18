@@ -1,5 +1,4 @@
 using Android.Content.PM;
-using Android.OS;
 using Plumix.Android;
 
 namespace NetBench.Android;

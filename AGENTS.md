@@ -20,7 +20,7 @@ dotnet test NetBench/NetBench.Mobile.Tests/NetBench.Mobile.Tests.csproj
 dotnet run --project NetBench/NetBench.Desktop/NetBench.Desktop.csproj
 
 # Мобильный (Plumix) флейвор общего проекта — быстрая проверка компиляции
-dotnet build NetBench/NetBench/NetBench.csproj -f net10.0-android
+dotnet build NetBench/NetBench/NetBench.csproj -f net11.0-android
 
 # Полная Android-голова (APK)
 dotnet build NetBench/NetBench.Android/NetBench.Android.csproj
@@ -37,7 +37,7 @@ bundle exec fastlane check
 scripts/pack-desktop.sh osx-arm64
 ```
 
-Общий проект `NetBench` мультитаргетный (`net10.0;net10.0-android;net10.0-ios`) — его restore требует установленных workloads android/ios. В окружении без workloads добавляй `-p:MobileTargets=false` (оставляет только `net10.0`) — так делает CI.
+Общий проект `NetBench` мультитаргетный (`net11.0;net11.0-android;net11.0-ios`) — его restore требует установленных workloads android/ios. В окружении без workloads добавляй `-p:MobileTargets=false` (оставляет только `net11.0`) — так делает CI.
 
 ## Структура
 
@@ -48,8 +48,8 @@ NetBench/
 ├── Directory.Build.props      # общие настройки: Nullable, ImplicitUsings, LangVersion, анализаторы
 ├── Directory.Packages.props   # central package management; версия Avalonia — $(AvaloniaVersion)
 ├── NetBench/                  # ЕДИНСТВЕННЫЙ общий проект (мультитаргет, TreatWarningsAsErrors)
-│   ├── NetBench.csproj        # net10.0 → Desktop/Browser (Avalonia), net10.0-android/-ios → Mobile (Plumix);
-│   │                          #   Desktop\** и Presentation\Desktop компилируются только в net10.0,
+│   ├── NetBench.csproj        # net11.0 → Desktop/Browser (Avalonia), net11.0-android/-ios → Mobile (Plumix);
+│   │                          #   Desktop\** и Presentation\Desktop компилируются только в net11.0,
 │   │                          #   Mobile\** и Presentation\Mobile — только в android/ios (условные Compile/AvaloniaXaml/пакеты)
 │   ├── Features/              # clean architecture по фичам
 │   │   ├── Scenarios/
@@ -70,9 +70,9 @@ NetBench/
 │   │                          #   Platform/IPlatformServices (share/экран/ссылки — реализуют головы),
 │   │                          #   Licenses/ (тексты OSS-лицензий для LicensePage)
 │   └── Assets/
-├── NetBench.Tests/            # xUnit-тесты domain/data-слоёв (собираются против net10.0)
+├── NetBench.Tests/            # xUnit-тесты domain/data-слоёв (собираются против net11.0)
 ├── NetBench.Mobile.Tests/     # headless-тесты мобильной презентации (xunit v3 + Avalonia.Headless.XUnit):
-│                              #   компилирует исходники Mobile/Presentation\Mobile под net10.0,
+│                              #   компилирует исходники Mobile/Presentation\Mobile под net11.0,
 │                              #   Infrastructure/MobileHarness — MobileShell в окне 390×780, тапы по семантике
 └── NetBench.{Desktop,Android,iOS,Browser}/  # головы, только bootstrap:
                                # Desktop/Browser → App, Android/iOS → MobileApp
@@ -135,7 +135,7 @@ e2e/                           # (в корне репозитория) Maestro-
 - Тексты витрины — `fastlane/metadata/{ios,android}/<язык>/`; «Что нового» — только в
   `metadata/ios/*/release_notes.txt` (в Play копируется при выгрузке); заметки GitHub Release — раздел
   версии в `CHANGELOG.md`. Лимиты длины проверяет `bundle exec fastlane check`.
-- `NetBench.Screenshots` — генератор скриншотов: компилирует мобильные исходники под net10.0, как
+- `NetBench.Screenshots` — генератор скриншотов: компилирует мобильные исходники под net11.0, как
   `NetBench.Mobile.Tests`; демо-данные (`DemoData`) раскладываются во временный каталог для
   `MobileShell(dataDirectory)`, живой прогон идёт через `DemoTarget` (локальный http_proxy). Новый экран в наборе —
   шаг в `Program.cs` (тапы по подписям семантики) и подпись в `Listing`.

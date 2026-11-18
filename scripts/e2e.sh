@@ -35,7 +35,7 @@ case "$PLATFORM" in
     DEVICE="${ANDROID_SERIAL:-$(adb devices | awk 'NR > 1 && $2 == "device" { print $1; exit }')}"
     [[ -n "$DEVICE" ]] || { echo "no Android device: start an emulator or set ANDROID_SERIAL" >&2; exit 1; }
     # Сборки в APK целиком: fast deployment раскладывает сборки по другому устройству, когда их несколько
-    APK=NetBench/NetBench.Android/bin/Debug/net10.0-android/$APP_ID-Signed.apk
+    APK=NetBench/NetBench.Android/bin/Debug/net11.0-android/$APP_ID-Signed.apk
     if $BUILD; then
       dotnet build NetBench/NetBench.Android/NetBench.Android.csproj -c Debug \
         -p:EmbedAssembliesIntoApk=true -p:AndroidPackageFormat=apk
@@ -53,7 +53,7 @@ case "$PLATFORM" in
       | python3 -c 'import json, sys; print(next((d["udid"] for r in json.load(sys.stdin)["devices"].values() for d in r if d["state"] == "Booted"), ""))')}"
     [[ -n "$DEVICE" ]] || { echo "no booted iOS simulator: boot one or set IOS_SIMULATOR" >&2; exit 1; }
     # Release: Debug-сборка под симулятор падает при старте рантайма Mono, ещё до кода приложения
-    APP=NetBench/NetBench.iOS/bin/Release/net10.0-ios/iossimulator-arm64/NetBench.iOS.app
+    APP=NetBench/NetBench.iOS/bin/Release/net11.0-ios/iossimulator-arm64/NetBench.iOS.app
     if $BUILD; then
       dotnet build NetBench/NetBench.iOS/NetBench.iOS.csproj -c Release -r iossimulator-arm64
     fi

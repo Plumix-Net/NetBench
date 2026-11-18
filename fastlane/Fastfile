@@ -117,7 +117,7 @@ platform :ios do
     dotnet("publish", "NetBench/NetBench.iOS/NetBench.iOS.csproj", "-c", "Release",
            "-p:NetBenchBuildNumber=#{build_number}", "-p:CodesignProvision=#{profile}")
 
-    ipa = Dir[File.join(ROOT, "NetBench/NetBench.iOS/bin/Release/net10.0-ios/ios-arm64/publish/*.ipa")].first
+    ipa = Dir[File.join(ROOT, "NetBench/NetBench.iOS/bin/Release/net11.0-ios/ios-arm64/publish/*.ipa")].first
     UI.user_error!("IPA not found") unless ipa
     lane_context[:NETBENCH_IPA] = ipa
     UI.success("IPA #{netbench_version} (#{build_number}): #{ipa}")
@@ -205,7 +205,7 @@ platform :android do
     dotnet("publish", "NetBench/NetBench.Android/NetBench.Android.csproj", "-c", "Release",
            "-p:NetBenchBuildNumber=#{version_code}")
 
-    aab = Dir[File.join(ROOT, "NetBench/NetBench.Android/bin/Release/net10.0-android/publish/*-Signed.aab")].first
+    aab = Dir[File.join(ROOT, "NetBench/NetBench.Android/bin/Release/net11.0-android/publish/*-Signed.aab")].first
     UI.user_error!("AAB not found") unless aab
     UI.success("AAB #{netbench_version} (#{version_code}): #{aab}")
     aab

@@ -53,7 +53,7 @@ bundle install
 
 Первый AAB для ручной загрузки в Play (versionCode задаётся явно: без ключа Play лейн не узнает
 последний загруженный): `NETBENCH_BUILD_NUMBER=1 bundle exec fastlane android build` →
-`NetBench/NetBench.Android/bin/Release/net10.0-android/publish/net.plumix.netbench-Signed.aab`.
+`NetBench/NetBench.Android/bin/Release/net11.0-android/publish/net.plumix.netbench-Signed.aab`.
 
 ## Ключи для fastlane и CI
 
