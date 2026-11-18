@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net11.0;net11.0-android;net11.0-ios</TargetFrameworks>
+    <TargetFrameworks>net11.0;net11.0-android</TargetFrameworks>
+    <!-- На Linux iOS-workload не существует, и SDK 11 падает на restore (NETSDK1178) -->
+    <TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('Linux'))">$(TargetFrameworks);net11.0-ios</TargetFrameworks>
     <!-- Нужен CI: на runner'е без мобильных workloads собираем только desktop (-p:MobileTargets=false) -->
     <TargetFrameworks Condition="'$(MobileTargets)' == 'false'">net11.0</TargetFrameworks>
 

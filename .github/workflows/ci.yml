@@ -98,8 +98,9 @@ jobs:
         with:
           dotnet-version: 11.0.x
 
-      - name: Install iOS workload
-        run: dotnet workload install ios
+      # Android нужен restore общего проекта: он мультитаргетный
+      - name: Install iOS and Android workloads
+        run: dotnet workload install ios android
 
       - name: Build (iOS head, simulator)
         run: >-
