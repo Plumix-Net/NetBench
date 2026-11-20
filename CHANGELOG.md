@@ -9,6 +9,7 @@ separately per language in `fastlane/metadata/ios/*/release_notes.txt`.
 - Android 10–14: status and navigation bars are transparent again, and no dark frame outlines the screen
   (Plumix 1.0.0-preview.3).
 - Android: text stays sharp while a list stretches at its end; latency bars have round ends (Plumix 1.0.0-preview.3).
+- Android: the back swipe closes the screen again (Plumix 1.0.0-preview.4).
 
 ## v1.0.0
 - First release: Android and iOS (Plumix UI) with quick test, scenarios, live monitor, run history and shareable

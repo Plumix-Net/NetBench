@@ -5,7 +5,7 @@
     <AvaloniaVersion>12.1.4</AvaloniaVersion>
     <!-- Все пакеты Plumix (и Plumix.Bloc/Plumix.Slang из Plumix.Packages) выходят одной версией. Проверка непубликованного
          Plumix: -p:PlumixVersion=<версия из локального фида> -p:RestoreAdditionalProjectSources=<фид>. -->
-    <PlumixVersion>1.0.0-preview.3</PlumixVersion>
+    <PlumixVersion>1.0.0-preview.4</PlumixVersion>
   </PropertyGroup>
   <ItemGroup>
     <!-- Avalonia packages -->
