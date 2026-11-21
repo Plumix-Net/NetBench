@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
@@ -52,7 +53,11 @@ internal sealed class ShotSession : IDisposable
         IsDark = settings.Theme == ThemePreference.Dark;
         _dataDirectory = Directory.CreateTempSubdirectory("netbench-screenshots-").FullName;
         Seed(_dataDirectory, settings, data);
-        LocaleSettings<Strings>.SetLocaleRaw(settings.Culture ?? "en-US");
+        var culture = settings.Culture ?? "en-US";
+        LocaleSettings<Strings>.SetLocaleRaw(culture);
+        // Числа и даты приложение форматирует по региональной культуре устройства; без этого кадры
+        // en-US получали формат машины, на которой их рендерят (на en_RU — «1 130» и «0,4 %»).
+        CultureInfo.CurrentCulture = CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo(culture);
 
         _semantics = SemanticsBinding.Instance.EnsureSemantics();
         _clock = SchedulerBinding.Instance.CurrentSystemFrameTimeStamp;
