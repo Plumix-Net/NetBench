@@ -1,1 +1,1 @@
-First release: quick HTTP load tests from your phone with live requests per second, p95 latency and error rate, saved scenarios, run history and shareable reports (text, HTML, CSV, JSON).
+Android fixes: small text no longer turns into blocks after switching screens, system bars are transparent again on Android 10–14, text stays sharp while a list stretches at its end, and the back swipe closes the screen again.

@@ -5,6 +5,8 @@ notes and the desktop update notes (`scripts/release-notes.sh`); store "What's n
 separately per language in `fastlane/metadata/ios/*/release_notes.txt`.
 
 ## Unreleased
+
+## v1.0.1
 - Android: small text no longer turns into block glyphs after moving between screens (Plumix 1.0.0-preview.2).
 - Android 10–14: status and navigation bars are transparent again, and no dark frame outlines the screen
   (Plumix 1.0.0-preview.3).
