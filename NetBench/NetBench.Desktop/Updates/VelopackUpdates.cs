@@ -8,12 +8,20 @@ namespace NetBench.Desktop;
 /// Автообновление установленной (через Velopack) desktop-версии из GitHub Releases:
 /// новая версия качается в фоне и ставится после выхода из приложения — следующий запуск
 /// уже на ней. Запуск из IDE / dotnet run (приложение не установлено) обновления не трогает.
+/// В сборку для Mac App Store не входит — там <c>StoreUpdates.cs</c>.
 /// </summary>
-internal static class DesktopUpdater
+internal static class Updates
 {
     private const string RepositoryUrl = "https://github.com/Plumix-Net/NetBench";
 
-    public static async Task DownloadInBackgroundAsync()
+    /// <summary>Первой строкой <c>Main</c>: установщик/апдейтер Velopack запускает exe с хуками и ждёт быстрого выхода.</summary>
+    public static void Start()
+    {
+        VelopackApp.Build().Run();
+        _ = Task.Run(DownloadInBackgroundAsync);
+    }
+
+    private static async Task DownloadInBackgroundAsync()
     {
         try
         {

@@ -22,6 +22,8 @@
 
   <ItemGroup>
     <AssemblyMetadata Include="BuildNumber" Value="$(NetBenchBuildNumber)" />
+    <!-- Генератор desktop-скриншотов собирает окно из композиции (internal Composition) -->
+    <InternalsVisibleTo Include="NetBench.Screenshots.Desktop" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,9 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <!-- net11.0 — Windows и Linux (и запуск из IDE на любой ОС); net11.0-macos — macOS: .app собирает
+       и подписывает SDK, он же делает универсальный бинарник и .pkg для Mac App Store.
+       macOS-голова есть только на Mac и требует workload macos (Xcode 27.2); без него —
+       -p:MacTarget=false. Мобильные таргеты общего проекта ей не нужны (-p:MobileTargets=false). -->
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <!--If you are willing to use platform-specific APIs, use conditional compilation.
-    See https://docs.avaloniaui.net/docs/guides/platforms/platform-specific-code/dotnet for more details.-->
-    <TargetFramework>net11.0</TargetFramework>
+    <TargetFrameworks>net11.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX')) and '$(MacTarget)' != 'false'">net11.0;net11.0-macos</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -15,9 +17,58 @@
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
+  <!-- Release — Native AOT на всех платформах: быстрый старт и один нативный бинарник без JIT.
+       Сериализация, DI и биндинги и так source-generated, предупреждений тримминга нет. -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <PublishAot>true</PublishAot>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net11.0'">
+    <OutputType>WinExe</OutputType>
+  </PropertyGroup>
+
+  <!-- macOS. Две сборки из одной головы:
+       - Developer ID (по умолчанию): Velopack-установщик в GitHub Releases с автообновлением;
+       - Mac App Store (-p:NetBenchAppStore=true): песочница, без Velopack, bundle id — тот же, что у iOS
+         (одна запись в App Store Connect), .pkg подписывается для загрузки в стор (scripts/pack-mac-appstore.sh). -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net11.0-macos'">
+    <OutputType>Exe</OutputType>
+    <ApplicationId>$(NetBenchApplicationId).desktop</ApplicationId>
+    <ApplicationId Condition="'$(NetBenchAppStore)' == 'true'">$(NetBenchApplicationId)</ApplicationId>
+    <ApplicationTitle>NetBench</ApplicationTitle>
+    <ApplicationDisplayVersion>$(NetBenchVersion)</ApplicationDisplayVersion>
+    <ApplicationVersion>$(NetBenchBuildNumber)</ApplicationVersion>
+    <!-- Ниже 14.0 (Sonoma) macOS SDK из .NET 11 не собирает. -->
+    <SupportedOSPlatformVersion>14.0</SupportedOSPlatformVersion>
+    <AppBundleManifest>macOS/Info.plist</AppBundleManifest>
+    <AppIcon>AppIcon</AppIcon>
+    <CodesignEntitlements>macOS/DeveloperId.entitlements</CodesignEntitlements>
+    <CodesignEntitlements Condition="'$(NetBenchAppStore)' == 'true'">macOS/AppStore.entitlements</CodesignEntitlements>
+    <!-- Установщик для Developer ID делает Velopack; .pkg SDK нужен только Mac App Store. -->
+    <CreatePackage>false</CreatePackage>
+    <CreatePackage Condition="'$(NetBenchAppStore)' == 'true'">true</CreatePackage>
+    <EnablePackageSigning Condition="'$(NetBenchAppStore)' == 'true'">true</EnablePackageSigning>
+    <!-- Mac App Store — один универсальный бинарник (arm64 + x86_64); Velopack-сборки — по архитектуре (-r). -->
+    <RuntimeIdentifiers Condition="'$(NetBenchAppStore)' == 'true'">osx-arm64;osx-x64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net11.0-macos'">
+    <!-- Переводы строк Info.plist (запрос доступа к локальной сети) — в Contents/Resources/*.lproj. -->
+    <BundleResource Include="macOS/Resources/**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <!-- Сборка для Mac App Store обновляется через стор: Velopack и проверка GitHub Releases в неё не попадают
+       (самообновление App Review не пропускает). -->
+  <ItemGroup Condition="'$(NetBenchAppStore)' == 'true'">
+    <Compile Remove="Updates/VelopackUpdates.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(NetBenchAppStore)' != 'true'">
+    <Compile Remove="Updates/StoreUpdates.cs" />
+    <PackageReference Include="Velopack" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" />
-    <PackageReference Include="Velopack" />
     <PackageReference Include="AvaloniaUI.DiagnosticsSupport">
       <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>

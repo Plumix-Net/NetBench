@@ -1,6 +1,6 @@
 # Релиз: App Store, Google Play и desktop
 
-Актуально на 2026-10-25 (1.0.0). Здесь — как устроен релиз, какие ключи нужны и что остаётся
+Актуально на 2026-11-21 (1.0.1). Здесь — как устроен релиз, какие ключи нужны и что остаётся
 сделать руками в консолях сторов. Исходные тексты витрины (копирайт) — в umbrella-репо:
 `docs/marketing/netbench-store-listing.md`; то, что реально выгружается, — в `fastlane/metadata`.
 
@@ -8,17 +8,21 @@
 fastlane/
 ├── Fastfile, Appfile          лейны выгрузки (bundle exec fastlane lanes)
 ├── .env.example               образец локальных ключей → fastlane/.env (в .gitignore)
-├── metadata/ios/<язык>/       App Store: name, subtitle, description, keywords, release_notes, URL…
+├── metadata/ios/<язык>/       App Store (iPhone): name, subtitle, description, keywords, release_notes, URL…
 │   └── review_information/    заметки для App Review
+├── metadata/macos/<язык>/     Mac App Store: description, keywords, promotional_text, URL (name/subtitle — общие с iOS)
+│   └── review_information/    заметки для App Review (macOS)
 ├── metadata/android/<язык>/   Google Play: title, short/full description,
 │   └── images/                icon, featureGraphic, phoneScreenshots/
-└── screenshots/ios/<язык>/    скриншоты iPhone 6.9" (1320×2868)
+├── screenshots/ios/<язык>/    скриншоты iPhone 6.9" (1320×2868)
+└── screenshots/macos/<язык>/  скриншоты Mac (2880×1800)
 CHANGELOG.md                   заметки версии → GitHub Release и desktop-обновление
-scripts/pack-desktop.sh        desktop-установщики (Velopack)
+scripts/pack-desktop.sh        desktop-установщики (Native AOT + Velopack)
+scripts/pack-mac-appstore.sh   универсальный .pkg для Mac App Store (из fastlane mac beta)
 .github/workflows/release.yml  релиз по тегу vX.Y.Z
 ```
 
-Языки: App Store — `en-US`, `ru`; Google Play — `en-US`, `ru-RU`.
+Языки: App Store (iPhone и Mac) — `en-US`, `ru`; Google Play — `en-US`, `ru-RU`.
 
 ## Как выпустить версию
 
@@ -29,9 +33,10 @@ scripts/pack-desktop.sh        desktop-установщики (Velopack)
 4. Если менялся мобильный UI — перегенерировать скриншоты (ниже) и закоммитить.
 5. `git tag vX.Y.Z && git push origin vX.Y.Z` — workflow **Release**:
    - IPA → TestFlight, тексты и скриншоты → App Store Connect (версия создаётся, на ревью не уходит);
+   - универсальный .pkg → App Store Connect (Mac App Store), тексты и скриншоты macOS-версии;
    - AAB → внутреннее тестирование Play, листинг и скриншоты → Play;
    - установщики Windows/macOS/Linux → черновик GitHub Release `vX.Y.Z` с заметками из CHANGELOG.
-6. Руками: в App Store Connect выбрать билд у версии и «Add for Review»; в Play — продвинуть релиз
+6. Руками: в App Store Connect выбрать билд у версий iOS и macOS и «Add for Review»; в Play — продвинуть релиз
    из internal в closed/production; на GitHub — опубликовать черновик релиза (после публикации
    установленные desktop-копии обновятся сами).
 
@@ -62,7 +67,8 @@ bundle install
 | Секрет | Откуда |
 |---|---|
 | `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8_BASE64` | App Store Connect → Users and Access → Integrations → App Store Connect API → ключ с ролью **App Manager**; `base64 -i AuthKey_XXXX.p8`. Тот же ключ нотаризует macOS-сборку. |
-| `IOS_DIST_CERT_P12_BASE64`, `IOS_DIST_CERT_PASSWORD` | Связка ключей → «Apple Distribution: …» → экспорт в .p12 с паролем; `base64 -i dist.p12`. Профиль App Store fastlane создаёт сам через API. |
+| `IOS_DIST_CERT_P12_BASE64`, `IOS_DIST_CERT_PASSWORD` | Связка ключей → «Apple Distribution: …» → экспорт в .p12 с паролем; `base64 -i dist.p12`. Профиль App Store fastlane создаёт сам через API. Этим же сертификатом подписывается .app для Mac App Store. |
+| `MAC_INSTALLER_P12_BASE64`, `MAC_INSTALLER_P12_PASSWORD` | «3rd Party Mac Developer Installer: …» (тип Mac Installer Distribution) — подпись .pkg для Mac App Store. Заведён 2026-11-21 через API, действует до 2027-11-21; ключ — в связке ключей. |
 | `PLAY_JSON_KEY` | Заведён: GCP-проект `plumix-netbench`, сервисный аккаунт `netbench-play@plumix-netbench.iam.gserviceaccount.com` (Android Publisher API включён), ключ — `~/.android-keys/netbench-play-service-account.json`; в Play Console приглашён с правами на NetBench: просмотр, выпуск рабочей и тестовых версий, тестировщики, страница приложения (без финансов). Право на рабочую версию нужно и для листинга: Play сам отправляет изменения карточки на проверку, и без него фиксация правки падает с «The caller does not have permission». В секрет — содержимое файла целиком. |
 | `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEY_ALIAS`, `ANDROID_KEYSTORE_PASSWORD` | upload-ключ (ниже), `base64 -i netbench-upload.jks`. |
 | `MACOS_DEVELOPER_ID_P12_BASE64`, `MACOS_DEVELOPER_ID_P12_PASSWORD` | «Developer ID Application: …» (и «Developer ID Installer: …», если есть — тогда собирается подписанный .pkg) → экспорт в один .p12. Без секрета macOS-сборка неподписанная. |
@@ -99,7 +105,7 @@ Fastlane не умеет (или API не даёт) — сделать рука�
 - **iOS:** сертификат «Apple Distribution» (связка ключей / секрет CI); App Store-профиль для
   `net.plumix.netbench` fastlane скачивает или создаёт сам (`get_provisioning_profile`).
 - **macOS desktop:** «Developer ID Application» + нотаризация (Velopack: `--signAppIdentity`,
-  `--notaryProfile`), hardened runtime с `NetBench.Desktop/Packaging/netbench.entitlements`.
+  `--notaryProfile`), hardened runtime с `NetBench.Desktop/macOS/DeveloperId.entitlements`. Mac App Store — «Apple Distribution» + «3rd Party Mac Developer Installer» (раздел ниже).
   Локально нотаризация: `xcrun notarytool store-credentials netbench-notary --key AuthKey.p8 --key-id … --issuer …`,
   затем `MACOS_NOTARY_PROFILE=netbench-notary`.
 - **Windows desktop:** без подписи (SmartScreen покажет предупреждение при первом запуске);
@@ -107,25 +113,46 @@ Fastlane не умеет (или API не даёт) — сделать рука�
 
 ## Desktop (Windows, macOS, Linux)
 
-`scripts/pack-desktop.sh <rid>` — self-contained publish и упаковка
-[Velopack](https://velopack.io) (`vpk` — локальный dotnet-tool из `.config/dotnet-tools.json`). Пакует только
-под свою ОС, поэтому в CI — матрица раннеров:
+`scripts/pack-desktop.sh <rid>` — Native AOT publish и упаковка [Velopack](https://velopack.io) (`vpk` —
+локальный dotnet-tool из `.config/dotnet-tools.json`). Native AOT и vpk собирают только под свою ОС, поэтому
+в CI — матрица раннеров:
 
-| RID | Что получается |
-|---|---|
-| `win-x64` | `NetBench-win-x64-Setup.exe`, `-Portable.zip` |
-| `osx-arm64`, `osx-x64` | `NetBench-osx-*-Portable.zip` (NetBench.app); `-Setup.pkg` — при сертификате Developer ID Installer |
-| `linux-x64` | `NetBench-linux-x64.AppImage` |
+| RID | Раннер | Что получается |
+|---|---|---|
+| `win-x64`, `win-arm64` | `windows-latest`, `windows-11-arm` | `NetBench-win-*-Setup.exe`, `-Portable.zip` |
+| `osx-arm64`, `osx-x64` | `xcode-27` (x64 — кросс-компиляцией) | `NetBench-osx-*-Portable.zip` (NetBench.app), `-Setup.pkg` |
+| `linux-x64`, `linux-arm64` | `ubuntu-22.04`, `ubuntu-22.04-arm` | `NetBench-linux-*.AppImage` (glibc 2.35+) |
 
 Плюс пакеты обновления (`*-full.nupkg`, `*-delta.nupkg`, `releases.<rid>.json`): установленное приложение
-(`NetBench.Desktop/DesktopUpdater.cs`) при запуске проверяет GitHub Releases своего канала (= RID), качает
+(`NetBench.Desktop/Updates/VelopackUpdates.cs`) при запуске проверяет GitHub Releases своего канала (= RID), качает
 новую версию в фоне и ставит её после выхода. Черновики и пре-релизы обновлением не считаются.
-Иконки desktop — `scripts/generate_icons.py` (`Assets/netbench.ico`, `Packaging/netbench.{icns,png}`).
+
+macOS-сборку (.app с Info.plist и иконкой из каталога ассетов `NetBench.Desktop/macOS/`) делает голова
+`net11.0-macos` — ей нужен workload macos, совпадающий с Xcode (27.2), минимальная macOS — 14.0. vpk подписывает
+её Developer ID с hardened runtime (`macOS/DeveloperId.entitlements` пустой: AOT не нужен JIT) и нотаризует.
+Native AOT локально: Windows — Visual Studio с «Desktop development with C++», Linux — `clang` и `zlib1g-dev`.
+Иконки desktop — `scripts/generate_icons.py` (`Assets/netbench.ico`, `Packaging/netbench.png`, `macOS/Assets.xcassets`).
+
+## Mac App Store
+
+Та же запись в App Store Connect и тот же Bundle ID `net.plumix.netbench`, что у iOS (общая покупка; у записи две
+платформы). Developer ID-сборка из GitHub Releases — отдельное приложение `net.plumix.netbench.desktop`.
+
+`bundle exec fastlane mac beta` — профиль Mac App Store (создаётся через API), build number = последний Mac-билд + 1,
+`scripts/pack-mac-appstore.sh`: `-p:NetBenchAppStore=true` → универсальный (arm64 + x86_64) Native AOT .app в
+песочнице (`macOS/AppStore.entitlements`: сеть-клиент, файлы из «Сохранить как»), без Velopack
+(`Updates/StoreUpdates.cs` — App Review не пропускает самообновление), подпись «Apple Distribution», .pkg —
+«3rd Party Mac Developer Installer»; затем загрузка через altool. Готовый .pkg: `fastlane mac beta pkg:<путь>`.
+Тексты и скриншоты macOS-версии — `fastlane mac metadata`. Анкеты App Privacy, возрастной рейтинг, цена и страны —
+общие для записи (заполнены для iOS).
+
+Локальная нотаризация desktop-сборки: `xcrun notarytool store-credentials netbench-notary --key <p8> --key-id …
+--issuer …` (профиль уже есть в связке ключей), затем `MACOS_NOTARY_PROFILE=netbench-notary`.
 
 ## Скриншоты
 
-`bundle exec fastlane screenshots` (или `dotnet run --project NetBench/NetBench.Screenshots -c Release -- --output .`)
-рендерит мобильный UI headless (Avalonia.Headless + Skia, как на устройстве) и пишет оба набора:
+`bundle exec fastlane screenshots` запускает два генератора. `NetBench.Screenshots` рендерит мобильный UI headless
+(Avalonia.Headless + Skia, как на устройстве) и пишет оба мобильных набора:
 
 - App Store — `fastlane/screenshots/ios/<язык>/` 1320×2868 (iPhone 6.9");
 - Google Play — `fastlane/metadata/android/<язык>/images/phoneScreenshots/` 1080×1920.
@@ -137,6 +164,11 @@ Fastlane не умеет (или API не даёт) — сделать рука�
 не читаются и не пишутся. Подписи кадров — `Program.cs` (`Listing`),
 рамка и статус-бар — `StoreFrame.cs`. Генерировать на macOS: моноширинный шрифт приложения системный, и
 на Mac он ближе всего к iOS (CI-джоба `screenshots` на Linux — проверка сценариев, её кадры не выгружаются).
+
+`NetBench.Screenshots.Desktop` — настоящее desktop-окно 1100×688 (×2) на тех же демо-данных во временном каталоге
+(`DesktopStorage`) с живым прогоном через `DemoTarget`: прогон → отчёт → сравнение сценариев → редактор, тёмная и
+светлая темы, в рамке окна macOS → `fastlane/screenshots/macos/<язык>/` 2880×1800. Подписи — `MacListing` в его
+`Program.cs`, рамка — `MacFrame.cs`.
 
 Feature graphic и иконка Play — `scripts/generate_store_graphics.py`, `scripts/generate_icons.py`.
 

@@ -1,0 +1,1 @@
+Point NetBench at your API, set users, duration and ramp-up, and watch requests per second, p95 latency and error rate live. Compare runs and export HTML, CSV or JSON.

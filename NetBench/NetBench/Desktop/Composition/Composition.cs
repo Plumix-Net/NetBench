@@ -2,6 +2,8 @@ using NetBench.Features.Scenarios.Domain;
 using NetBench.Features.TestRun.Domain;
 using NetBench.Features.Scenarios.Data;
 using NetBench.Features.TestRun.Data;
+using NetBench.Features.Settings.Data;
+using NetBench.Features.Settings.Domain;
 using NetBench.Features.Report.Presentation.Desktop;
 using NetBench.Features.Scenarios.Presentation.Desktop;
 using NetBench.Features.Shell.Presentation.Desktop;
@@ -16,13 +18,17 @@ internal partial class Composition
 {
     static void Setup() => DI.Setup(nameof(Composition))
         .Hint(Hint.Resolve, "Off")
+        .Arg<DesktopStorage>("storage")
 
         // Singletons
         .Bind<INavigationService>().As(Singleton).To<NavigationService>()
-        .Bind<IScenarioRepository>().As(Singleton).To<JsonScenarioRepository>()
+        .Bind<IScenarioRepository>().As(Singleton).To((DesktopStorage storage) => new JsonScenarioRepository(storage.ScenariosDirectory))
         .Bind<IReportStore>().As(Singleton).To<InMemoryReportStore>()
         .Bind<IThemeService>().As(Singleton).To<ThemeService>()
         .Bind<IFileSaveService>().As(Singleton).To<FileSaveService>()
+        .Bind<IAppSettingsStore>().As(Singleton).To((DesktopStorage storage) => new JsonAppSettingsStore(storage.SettingsPath))
+        .Bind<IConfirmationDialog>().As(Singleton).To<ConfirmationDialog>()
+        .Bind<RunConsent>().As(Singleton).To<RunConsent>()
         .Bind<ScenarioListViewModel>().As(Singleton).To<ScenarioListViewModel>()
         .Bind<ShellViewModel>().As(Singleton).To<ShellViewModel>()
 
@@ -34,6 +40,8 @@ internal partial class Composition
 
         // Roots
         .Root<ShellViewModel>("Root")
+        // Генератор скриншотов заполняет историю прогонов до показа окна
+        .Root<IReportStore>("Reports")
         .Root<Func<ScenarioViewModel, ScenarioEditorViewModel>>("CreateEditor")
         .Root<Func<LoadScenario, TestRunViewModel>>("CreateTestRun")
         .Root<Func<TestRunReport, ReportViewModel>>("CreateReport")

@@ -18,6 +18,7 @@ ANDROID_RES = ROOT / "NetBench" / "NetBench.Android" / "Resources"
 IOS_ASSETS = ROOT / "NetBench" / "NetBench.iOS" / "Assets.xcassets"
 APP_ASSETS = ROOT / "NetBench" / "NetBench" / "Assets"
 DESKTOP_PACKAGING = ROOT / "NetBench" / "NetBench.Desktop" / "Packaging"
+MAC_ASSETS = ROOT / "NetBench" / "NetBench.Desktop" / "macOS" / "Assets.xcassets"
 PLAY_METADATA = ROOT / "fastlane" / "metadata" / "android"
 PLAY_LANGUAGES = ("en-US", "ru-RU")
 
@@ -205,9 +206,18 @@ def desktop():
     # macOS: сетка Big Sur — плитка 824 в кадре 1024 со скруглением ~22.5% и прозрачными полями.
     mac = Image.new("RGBA", (1024, 1024), (0, 0, 0, 0))
     mac.paste(masked(render(824), 0.225), (100, 100))
-    DESKTOP_PACKAGING.mkdir(parents=True, exist_ok=True)
-    mac.save(DESKTOP_PACKAGING / "netbench.icns")
-    print("wrote", (DESKTOP_PACKAGING / "netbench.icns").relative_to(ROOT))
+    # Каталог ассетов macOS-головы (net11.0-macos, <AppIcon>): из него actool собирает
+    # AppIcon.icns и Assets.car — и для Velopack-сборки, и для Mac App Store.
+    iconset = MAC_ASSETS / "AppIcon.appiconset"
+    images = []
+    for points in (16, 32, 128, 256, 512):
+        for scale in (1, 2):
+            name = f"icon_{points}x{points}{'@2x' if scale == 2 else ''}.png"
+            save_png(mac.resize((points * scale, points * scale), Image.LANCZOS), iconset / name)
+            images.append(f'    {{ "filename" : "{name}", "idiom" : "mac", "scale" : "{scale}x", "size" : "{points}x{points}" }}')
+    save_text(iconset / "Contents.json", '{\n  "images" : [\n' + ",\n".join(images)
+              + '\n  ],\n  "info" : { "author" : "xcode", "version" : 1 }\n}\n')
+    save_text(MAC_ASSETS / "Contents.json", '{\n  "info" : { "author" : "xcode", "version" : 1 }\n}\n')
 
 
 if __name__ == "__main__":

@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Скриншоты Mac App Store: настоящее desktop-окно NetBench (Avalonia) в headless-режиме с отрисовкой
+       Skia, демо-данные во временном каталоге и живой прогон против DemoTarget — как у мобильного
+       генератора (NetBench.Screenshots, его DemoData и DemoTarget подключены отсюда).
+       Запуск: bundle exec fastlane screenshots (оба генератора). -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net11.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\NetBench.Screenshots\DemoData.cs" Link="Shared\DemoData.cs" />
+    <Compile Include="..\NetBench.Screenshots\DemoTarget.cs" Link="Shared\DemoTarget.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Skia" />
+    <PackageReference Include="Avalonia.Headless" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NetBench\NetBench.csproj" />
+  </ItemGroup>
+
+</Project>

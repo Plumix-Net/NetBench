@@ -125,9 +125,6 @@
     "toggleTheme": "Switch theme",
     "emptyHint": "No saved scenarios yet. Start with a quick test: enter a URL and run it.",
     "willRequest": "Will request {url: string}",
-    "ownTargetsTitle": "Test only your own servers",
-    "ownTargetsMessage": "NetBench sends many requests in a short time. Run tests only against servers you own or are allowed to test: load on someone else's service can disrupt it and may be illegal.",
-    "ownTargetsConfirm": "I understand",
     "users": "USERS",
     "duration": "DURATION",
     "method": "METHOD",
@@ -166,7 +163,10 @@
     "totalRequests": "TOTAL REQUESTS",
     "connections": "CONNECTIONS",
     "throughputChart": "THROUGHPUT (RPS)",
-    "latencyChart": "P95 LATENCY (MS)"
+    "latencyChart": "P95 LATENCY (MS)",
+    "ownTargetsTitle": "Test only your own servers",
+    "ownTargetsMessage": "NetBench sends many requests in a short time. Run tests only against servers you own or are allowed to test: load on someone else's service can disrupt it and may be illegal.",
+    "ownTargetsConfirm": "I understand"
   },
   "about": {
     "title": "About",

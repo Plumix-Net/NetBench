@@ -18,17 +18,17 @@ public sealed class RunConsentTests
 
         app.OpenQuickTest(target.Url);
         app.Tap(En.Mobile.Run);
-        Assert.True(app.HasLabel(En.Mobile.OwnTargetsTitle));
+        Assert.True(app.HasLabel(En.TestRun.OwnTargetsTitle));
 
         // «Отмена» — прогона нет, согласие не запомнено
         app.Tap(En.Common.Cancel);
-        Assert.False(app.HasLabel(En.Mobile.OwnTargetsTitle));
+        Assert.False(app.HasLabel(En.TestRun.OwnTargetsTitle));
         Assert.False(app.HasLabel(En.Mobile.Stop));
         Assert.False(app.ReadSettings().OwnTargetsConfirmed);
 
         app.Tap(En.Mobile.Run);
-        Assert.True(app.HasLabel(En.Mobile.OwnTargetsTitle));
-        app.Tap(En.Mobile.OwnTargetsConfirm);
+        Assert.True(app.HasLabel(En.TestRun.OwnTargetsTitle));
+        app.Tap(En.TestRun.OwnTargetsConfirm);
         await app.WaitForMonitorAsync();
         // Согласие на диске — переживёт перезапуск
         Assert.True(app.ReadSettings().OwnTargetsConfirmed);
@@ -38,7 +38,7 @@ public sealed class RunConsentTests
         app.Tap(En.Mobile.Back);
         app.OpenQuickTest(target.Url);
         app.Tap(En.Mobile.Run);
-        Assert.False(app.HasLabel(En.Mobile.OwnTargetsTitle));
+        Assert.False(app.HasLabel(En.TestRun.OwnTargetsTitle));
         await app.WaitForMonitorAsync();
         await app.StopRunAsync();
     }

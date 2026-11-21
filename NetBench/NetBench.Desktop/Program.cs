@@ -1,5 +1,4 @@
 using Avalonia;
-using Velopack;
 
 namespace NetBench.Desktop;
 
@@ -12,8 +11,7 @@ sealed class Program
     public static void Main(string[] args)
     {
         // Первой строкой: установщик/апдейтер Velopack запускает exe с хуками и ждёт быстрого выхода.
-        VelopackApp.Build().Run();
-        _ = Task.Run(DesktopUpdater.DownloadInBackgroundAsync);
+        Updates.Start();
 
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }

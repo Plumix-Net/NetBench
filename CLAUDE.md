@@ -29,12 +29,16 @@ dotnet build NetBench/NetBench.Android/NetBench.Android.csproj
 scripts/e2e.sh android
 scripts/e2e.sh ios
 
-# Скриншоты сторов (headless-рендер мобильного UI) и лимиты текстов витрины
+# Desktop-голова под macOS (net11.0-macos, нужен workload macos; без него — -p:MacTarget=false)
+dotnet build NetBench/NetBench.Desktop/NetBench.Desktop.csproj -f net11.0-macos
+
+# Скриншоты сторов (headless: мобильный UI и desktop-окно для Mac App Store) и лимиты текстов витрины
 bundle exec fastlane screenshots
 bundle exec fastlane check
 
-# Desktop-установщик под текущую ОС (Velopack)
+# Desktop-установщик под текущую ОС (Native AOT + Velopack) и .pkg для Mac App Store
 scripts/pack-desktop.sh osx-arm64
+bundle exec fastlane mac beta
 ```
 
 Общий проект `NetBench` мультитаргетный (`net11.0;net11.0-android;net11.0-ios`) — его restore требует установленных workloads android/ios. В окружении без workloads добавляй `-p:MobileTargets=false` (оставляет только `net11.0`) — так делает CI.
@@ -74,8 +78,11 @@ NetBench/
 ├── NetBench.Mobile.Tests/     # headless-тесты мобильной презентации (xunit v3 + Avalonia.Headless.XUnit):
 │                              #   компилирует исходники Mobile/Presentation\Mobile под net11.0,
 │                              #   Infrastructure/MobileHarness — MobileShell в окне 390×780, тапы по семантике
+├── NetBench.Screenshots{,.Desktop}/  # генераторы скриншотов сторов: мобильный UI / desktop-окно (Mac App Store)
 └── NetBench.{Desktop,Android,iOS,Browser}/  # головы, только bootstrap:
-                               # Desktop/Browser → App, Android/iOS → MobileApp
+                               # Desktop/Browser → App, Android/iOS → MobileApp;
+                               # Desktop: net11.0 (Windows/Linux) + net11.0-macos (.app, macOS/: Info.plist,
+                               #   entitlements, иконки), Native AOT в Release, флейвор Mac App Store (NetBenchAppStore)
 e2e/                           # (в корне репозитория) Maestro-флоу настоящего приложения на Android/iOS,
                                #   запуск — scripts/e2e.sh, правила — e2e/README.md
 ```
@@ -127,7 +134,7 @@ e2e/                           # (в корне репозитория) Maestro-
   `MonitorScreen` применяет их к любому сценарию. Перед первым прогоном — `RunConsent` («только свои серверы»).
 - **Платформенное в мобиле** (share sheet, keep-screen-on, открытие ссылок) — через `IPlatformServices`:
   интерфейс в `Mobile/Platform`, реализации в `NetBench.Android`/`NetBench.iOS`, без `#if`.
-- CI (GitHub Actions): job `build-and-test` собирает Desktop (`-p:MobileTargets=false`) и гоняет оба тестовых проекта; job `build-mobile` ставит android workload и собирает Plumix-флейвор; `build-android-release` — подписанный (при наличии секретов) Release AAB; `build-ios` — iOS-голова под симулятор на macOS-раннере.
+- CI (GitHub Actions): job `build-and-test` собирает Desktop (`-p:MobileTargets=false`) и гоняет оба тестовых проекта; job `build-mobile` ставит android workload и собирает Plumix-флейвор; `build-android-release` — подписанный (при наличии секретов) Release AAB; `build-ios` — iOS-голова под симулятор и macOS-голова desktop на macOS-раннере; `screenshots` — оба генератора скриншотов.
 - Версия и id приложения — `NetBenchVersion`/`NetBenchBuildNumber`/`NetBenchApplicationId` в `Directory.Build.props`.
   Релиз в сторы, подпись, анкеты и заметки для ревью — `store/README.md`; иконки и графика — `scripts/generate_*.py`.
 
@@ -137,13 +144,22 @@ e2e/                           # (в корне репозитория) Maestro-
 
 - Тег `vX.Y.Z` (= `NetBenchVersion`) запускает `.github/workflows/release.yml`: fastlane выгружает IPA в TestFlight
   и AAB во внутреннее тестирование Play, тексты и скриншоты — в оба стора; desktop-установщики Windows/macOS/Linux
-  (Velopack, `scripts/pack-desktop.sh`) — в черновик GitHub Release. Production и ревью — вручную.
-- Тексты витрины — `fastlane/metadata/{ios,android}/<язык>/`; «Что нового» — только в
+  (Native AOT + Velopack, `scripts/pack-desktop.sh`) — в черновик GitHub Release, универсальный .pkg — в
+  Mac App Store (`fastlane mac beta`). Production и ревью — вручную.
+- Тексты витрины — `fastlane/metadata/{ios,macos,android}/<язык>/`; «Что нового» — только в
   `metadata/ios/*/release_notes.txt` (в Play копируется при выгрузке); заметки GitHub Release — раздел
   версии в `CHANGELOG.md`. Лимиты длины проверяет `bundle exec fastlane check`.
 - `NetBench.Screenshots` — генератор скриншотов: компилирует мобильные исходники под net11.0, как
   `NetBench.Mobile.Tests`; демо-данные (`DemoData`) раскладываются во временный каталог для
   `MobileShell(dataDirectory)`, живой прогон идёт через `DemoTarget` (локальный http_proxy). Новый экран в наборе —
   шаг в `Program.cs` (тапы по подписям семантики) и подпись в `Listing`.
-- Desktop-голова обновляется сама из GitHub Releases (`DesktopUpdater`, канал = RID); `VelopackApp.Build().Run()`
-  должен оставаться первой строкой `Main`.
+- Desktop-голова собирается Native AOT (`PublishAot` в Release) под win-x64/arm64, linux-x64/arm64, osx-arm64/x64
+  и обновляется сама из GitHub Releases (`Updates/VelopackUpdates.cs`, канал = RID); `Updates.Start()`
+  (внутри — `VelopackApp.Build().Run()`) должен оставаться первой строкой `Main`. Код, который AOT не переварит
+  (рефлексия, динамические биндинги), в desktop-половину не добавлять.
+- Mac App Store — тот же Bundle ID, что у iOS (`-p:NetBenchAppStore=true`): универсальный бинарник, песочница
+  (`macOS/AppStore.entitlements`), без Velopack (`Updates/StoreUpdates.cs`). Сборка и выгрузка —
+  `scripts/pack-mac-appstore.sh` из `fastlane mac beta`; тексты — `fastlane/metadata/macos/`.
+- Перед первым прогоном desktop, как и мобила, спрашивает «тестирую только свои серверы» (`RunConsent`
+  в `Features/TestRun/Presentation/Desktop`); данные desktop — в `DesktopStorage` (генератор скриншотов
+  подменяет каталог на временный).

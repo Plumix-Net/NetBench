@@ -1,0 +1,18 @@
+NetBench is an HTTP load-testing tool for developers who want a quick, honest answer to "how does my API hold up?" — without writing scripts.
+
+Create a scenario: a target URL, the number of virtual users, duration, ramp-up and think time, and optional request steps. Start the run and watch live metrics:
+
+• Requests per second with a live throughput chart
+• p95 latency with its own timeline, updated four times per second
+• Error rate, total requests and open connections
+
+When the run finishes you get a full report: latency distribution (min, p50, mean, p95, p99, max), p95 latency over time and HTTP response codes. Compare the latest runs of two scenarios side by side, and export the report as HTML, CSV or JSON.
+
+Built for testing your own services:
+• High load from a single Mac: the engine is allocation-free on its hot path and compiled to native code
+• Plain http:// is allowed, so you can test local and staging servers
+• Scenarios and reports stay on your Mac — no account, no analytics, no ads, no tracking
+
+Use NetBench only against servers you own or are allowed to test.
+
+NetBench is open source. The desktop app is built with .NET and Avalonia; the iPhone version is a showcase for Plumix, a Flutter-like UI framework for .NET.

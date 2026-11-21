@@ -2,8 +2,8 @@ name: Release
 
 # Тег vX.Y.Z (равный NetBenchVersion в NetBench/Directory.Build.props) собирает всё и выкладывает
 # в бета-каналы: IPA → TestFlight, AAB → внутреннее тестирование Play (черновиком, пока приложение
-# не опубликовано), тексты и скриншоты — в оба стора (без отправки на ревью), desktop-установщики —
-# в черновик GitHub Release. Production и отправка на ревью — вручную в консолях (store/README.md).
+# не опубликовано), универсальный .pkg → App Store Connect (Mac App Store), тексты и скриншоты — во все
+# сторы (без отправки на ревью), desktop-установщики (Native AOT) — в черновик GitHub Release. Production и отправка на ревью — вручную в консолях (store/README.md).
 # Ручной запуск — та же цепочка для текущей версии, с выбором платформ.
 on:
   push:
@@ -20,6 +20,10 @@ on:
         default: true
       desktop:
         description: Desktop installers → GitHub Release (draft)
+        type: boolean
+        default: true
+      macappstore:
+        description: macOS → App Store Connect (Mac App Store) + metadata
         type: boolean
         default: true
 
@@ -118,6 +122,56 @@ jobs:
           path: NetBench/NetBench.iOS/bin/Release/net11.0-ios/ios-arm64/publish/*.ipa
           if-no-files-found: error
 
+  # Mac App Store: универсальный (arm64 + x86_64) Native AOT .pkg в песочнице → App Store Connect,
+  # тексты и скриншоты macOS-версии. Отправка на ревью — вручную (store/README.md).
+  mac-appstore:
+    needs: version
+    if: github.event_name == 'push' || inputs.macappstore
+    runs-on: xcode-27
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+      IOS_DIST_CERT_P12_BASE64: ${{ secrets.IOS_DIST_CERT_P12_BASE64 }}
+      IOS_DIST_CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+      MAC_INSTALLER_P12_BASE64: ${{ secrets.MAC_INSTALLER_P12_BASE64 }}
+      MAC_INSTALLER_P12_PASSWORD: ${{ secrets.MAC_INSTALLER_P12_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 27.2
+        run: sudo xcode-select -s /Applications/Xcode_27.2.app
+
+      - name: Check secrets
+        run: |
+          for name in ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8_BASE64 IOS_DIST_CERT_P12_BASE64 IOS_DIST_CERT_PASSWORD \
+                      MAC_INSTALLER_P12_BASE64 MAC_INSTALLER_P12_PASSWORD; do
+            [[ -n "${!name}" ]] || { echo "::error::Secret $name is not set (store/README.md)"; exit 1; }
+          done
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 11.0.x
+
+      - name: Install macos workload
+        run: dotnet workload install macos
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: pkg → App Store Connect
+        run: bundle exec fastlane mac beta
+
+      - name: Metadata and screenshots → App Store Connect (macOS)
+        run: bundle exec fastlane mac metadata
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: netbench-mac-appstore-pkg
+          path: artifacts/mac-appstore/*.pkg
+          if-no-files-found: error
+
   android:
     needs: version
     if: github.event_name == 'push' || inputs.android
@@ -164,18 +218,28 @@ jobs:
   desktop:
     needs: version
     if: github.event_name == 'push' || inputs.desktop
+    # Native AOT собирает только под ОС раннера, поэтому у каждой ОС/архитектуры свой раннер.
+    # Linux — на 22.04 (glibc 2.35): нативный бинарник берёт версии символов glibc сборочной машины,
+    # и собранный на 22.04 запускается на Ubuntu 22.04+, Debian 12+, Fedora 36+.
+    # arm64-раннеры (windows-11-arm, ubuntu-22.04-arm) бесплатны для публичных репозиториев.
+    # macOS — xcode-27: .app собирает net11.0-macos-голова (workload macos ↔ Xcode 27.2);
+    # osx-x64 на Apple Silicon — кросс-компиляцией.
     strategy:
       fail-fast: false
       matrix:
         include:
           - rid: win-x64
             os: windows-latest
+          - rid: win-arm64
+            os: windows-11-arm
           - rid: linux-x64
-            os: ubuntu-latest
+            os: ubuntu-22.04
+          - rid: linux-arm64
+            os: ubuntu-22.04-arm
           - rid: osx-arm64
-            os: macos-26
+            os: xcode-27
           - rid: osx-x64
-            os: macos-26
+            os: xcode-27
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -189,6 +253,18 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 11.0.x
+
+      - name: Native AOT prerequisites (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang zlib1g-dev
+
+      - name: Xcode 27.2 and macos workload
+        if: runner.os == 'macOS'
+        run: |
+          sudo xcode-select -s /Applications/Xcode_27.2.app
+          dotnet workload install macos
 
       # Подпись Developer ID и нотаризация: p12 с «Developer ID Application» (и, если есть, «Developer ID
       # Installer» — тогда собирается и .pkg) во временную связку ключей; нотаризация — тем же ключом

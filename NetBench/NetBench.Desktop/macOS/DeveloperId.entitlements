@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Developer ID: hardened runtime для нотаризации. Native AOT не пишет исполняемую память,
+	     а нативные библиотеки (SkiaSharp, HarfBuzz, Avalonia.Native) SDK переподписывает нашим
+	     сертификатом — исключения hardened runtime не нужны. -->
+</dict>
+</plist>

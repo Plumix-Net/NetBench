@@ -26,15 +26,15 @@ public static class RunConsent
         var confirmed = await MaterialDialogs.ShowDialog<bool>(
             context,
             dialogContext => new AlertDialog(
-                title: new Text(strings.Mobile.OwnTargetsTitle),
-                content: new Text(strings.Mobile.OwnTargetsMessage),
+                title: new Text(strings.TestRun.OwnTargetsTitle),
+                content: new Text(strings.TestRun.OwnTargetsMessage),
                 actions:
                 [
                     new TextButton(
                         child: new Text(strings.Common.Cancel),
                         onPressed: () => Navigator.Pop(dialogContext, false)),
                     new TextButton(
-                        child: new Text(strings.Mobile.OwnTargetsConfirm),
+                        child: new Text(strings.TestRun.OwnTargetsConfirm),
                         onPressed: () => Navigator.Pop(dialogContext, true)),
                 ]));
 

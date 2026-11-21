@@ -5,6 +5,9 @@ notes and the desktop update notes (`scripts/release-notes.sh`); store "What's n
 separately per language in `fastlane/metadata/ios/*/release_notes.txt`.
 
 ## Unreleased
+- Desktop: native builds (Native AOT) — faster start and smaller downloads; new Windows on Arm and Linux arm64 builds.
+- Desktop: NetBench asks to confirm you test only your own servers before the first run, as on mobile.
+- macOS: NetBench comes to the Mac App Store (universal app for Apple silicon and Intel); macOS 14 or later.
 
 ## v1.0.1
 - Android: small text no longer turns into block glyphs after moving between screens (Plumix 1.0.0-preview.2).

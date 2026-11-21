@@ -11,7 +11,7 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        var composition = new Composition.Composition();
+        var composition = new Composition.Composition(Composition.DesktopStorage.Default);
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {

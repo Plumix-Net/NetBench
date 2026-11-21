@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- CFBundleIdentifier, CFBundleShortVersionString, CFBundleVersion, CFBundleDisplayName и
+	     LSMinimumSystemVersion вписывает сборка из NetBench.Desktop.csproj. -->
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>ru</string>
+	</array>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.developer-tools</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 2026 Plumix-Net</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<!-- Только системный TLS (.NET), своей криптографии нет — экспортная декларация не нужна. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<!-- macOS 15+ спрашивает разрешение, когда цель — адрес в локальной сети. Переводы — Resources/*.lproj. -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>NetBench sends test requests to the servers you enter, including ones on your local network.</string>
+</dict>
+</plist>

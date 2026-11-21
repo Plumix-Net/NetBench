@@ -18,6 +18,7 @@ public partial class ScenarioListViewModel : ObservableObject
     private readonly Func<ScenarioViewModel, ScenarioEditorViewModel> _createEditor;
     private readonly Func<LoadScenario, TestRunViewModel> _createTestRun;
     private readonly Func<TestRunReport, ReportViewModel> _createReport;
+    private readonly RunConsent _consent;
 
     [ObservableProperty]
     private ObservableCollection<ScenarioViewModel> _scenarios = [];
@@ -32,7 +33,8 @@ public partial class ScenarioListViewModel : ObservableObject
         IThemeService theme,
         Func<ScenarioViewModel, ScenarioEditorViewModel> createEditor,
         Func<LoadScenario, TestRunViewModel> createTestRun,
-        Func<TestRunReport, ReportViewModel> createReport)
+        Func<TestRunReport, ReportViewModel> createReport,
+        RunConsent consent)
     {
         _repository = repository;
         _navigation = navigation;
@@ -41,6 +43,7 @@ public partial class ScenarioListViewModel : ObservableObject
         _createEditor = createEditor;
         _createTestRun = createTestRun;
         _createReport = createReport;
+        _consent = consent;
         _theme.Changed += () => OnPropertyChanged(nameof(IsDark));
     }
 
@@ -91,7 +94,7 @@ public partial class ScenarioListViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void RunScenario(ScenarioViewModel scenario)
+    private async Task RunScenarioAsync(ScenarioViewModel scenario)
     {
         SelectedScenario = scenario;
 
@@ -101,6 +104,10 @@ public partial class ScenarioListViewModel : ObservableObject
             _navigation.NavigateTo(_createEditor(scenario));
             return;
         }
+
+        // Первый прогон — только после «тестирую свои серверы».
+        if (!await _consent.EnsureAsync())
+            return;
 
         _navigation.NavigateTo(_createTestRun(scenario.Model));
     }
