@@ -1,4 +1,3 @@
-using Avalonia.Media;
 using NetBench.Localization;
 using NetBench.Mobile;
 using NetBench.Mobile.Controls;
@@ -6,6 +5,7 @@ using NetBench.Mobile.Licenses;
 using NetBench.Mobile.Platform;
 using NetBench.Mobile.Theme;
 using Plumix.Bloc;
+using Plumix.UI;
 using Plumix.Material;
 using Plumix.Rendering;
 using Plumix.Slang;
@@ -28,7 +28,7 @@ public sealed class AboutScreen : StatelessWidget
         return new Scaffold(
             body: new SafeArea(
                 new Padding(
-                    new Avalonia.Thickness(20, 8, 20, 0),
+                    EdgeInsets.FromLTRB(20, 8, 20, 0),
                     new Column(
                         crossAxisAlignment: CrossAxisAlignment.Stretch,
                         children:
@@ -67,7 +67,7 @@ public sealed class AboutScreen : StatelessWidget
 
     private static Padding BuildTopBar(BuildContext context, NetBenchPalette palette, string title) =>
         new(
-            new Avalonia.Thickness(0, 0, 0, 8),
+            EdgeInsets.FromLTRB(0, 0, 0, 8),
             new Row(
                 spacing: 12,
                 children:
@@ -90,7 +90,7 @@ public sealed class AboutScreen : StatelessWidget
                     strings.App.Title,
                     style: new TextStyle(
                         FontSize: 26,
-                        FontWeight: FontWeight.ExtraBold,
+                        FontWeight: FontWeight.W800,
                         Color: palette.TextHi,
                         LetterSpacing: -0.5,
                         FontFamily: NetBenchFonts.Ui)),

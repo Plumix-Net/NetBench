@@ -117,7 +117,7 @@ internal sealed class ShotSession : IDisposable
     public void Tap(SemanticsNode node)
     {
         var rect = node.GlobalRect;
-        var point = new Point(rect.X + rect.Width / 2, rect.Y + rect.Height / 2);
+        var point = new Point(rect.Left + rect.Width / 2, rect.Top + rect.Height / 2);
         _window.MouseDown(point, MouseButton.Left);
         Pump(2);
         _window.MouseUp(point, MouseButton.Left);

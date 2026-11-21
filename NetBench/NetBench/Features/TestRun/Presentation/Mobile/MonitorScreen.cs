@@ -1,4 +1,3 @@
-using Avalonia.Media;
 using NetBench.Features.Report.Presentation.Mobile;
 using NetBench.Features.Scenarios.Domain;
 using NetBench.Features.TestRun.Domain;
@@ -16,7 +15,6 @@ using Plumix.UI;
 using Plumix.Widgets;
 using AlertDialog = Plumix.Material.AlertDialog;
 using Colors = Plumix.Material.Colors;
-using Color = Plumix.UI.Color;
 
 namespace NetBench.Features.TestRun.Presentation.Mobile;
 
@@ -63,7 +61,7 @@ public sealed class MonitorScreen : StatelessWidget
             child: new Scaffold(
                 body: new SafeArea(
                     new Padding(
-                        new Avalonia.Thickness(20, 12, 20, 0),
+                        EdgeInsets.FromLTRB(20, 12, 20, 0),
                         new BlocConsumer<TestRunCubit, TestRunState>(
                             listener: OnStateChanged,
                             listenWhen: static (previous, next) =>
@@ -198,7 +196,7 @@ public sealed class MonitorScreen : StatelessWidget
                                     unit: strings.Common.Percent,
                                     valueColor: errorColor),
                                 new Padding(
-                                    new Avalonia.Thickness(0, 18, 0, 6),
+                                    EdgeInsets.FromLTRB(0, 18, 0, 6),
                                     new Sparkline(state.RpsPoints, palette.Rps, palette.RpsTint)),
                                 BuildProgress(palette, strings.Mobile.Duration, progress, Format(elapsed), Format(duration)),
                                 new SizedBox(height: 14),
@@ -238,7 +236,7 @@ public sealed class MonitorScreen : StatelessWidget
                     textScaler: MediaQuery.TextScalerOf(context).Clamp(maxScaleFactor: MaxDigitScale),
                     style: new TextStyle(
                         FontSize: 52,
-                        FontWeight: FontWeight.ExtraBold,
+                        FontWeight: FontWeight.W800,
                         Color: valueColor,
                         FontFamily: NetBenchFonts.Mono,
                         Height: 1.1),
@@ -247,19 +245,19 @@ public sealed class MonitorScreen : StatelessWidget
         if (!string.IsNullOrEmpty(unit))
         {
             valueRow.Add(new Padding(
-                new Avalonia.Thickness(0, 0, 0, 9),
+                EdgeInsets.FromLTRB(0, 0, 0, 9),
                 new Text(
                     unit,
                     textScaler: TextScaler.Linear(MaxDigitScale),
                     style: new TextStyle(
                         FontSize: 20,
-                        FontWeight: FontWeight.ExtraBold,
+                        FontWeight: FontWeight.W800,
                         Color: valueColor,
                         FontFamily: NetBenchFonts.Mono))));
         }
 
         return new Padding(
-            new Avalonia.Thickness(0, 14),
+            EdgeInsets.Symmetric(horizontal: 0, vertical: 14),
             new MergeSemantics(new Column(
                 crossAxisAlignment: CrossAxisAlignment.Start,
                 children:
@@ -276,7 +274,7 @@ public sealed class MonitorScreen : StatelessWidget
                                 label.ToUpperInvariant(),
                                 style: new TextStyle(
                                     FontSize: 12,
-                                    FontWeight: FontWeight.SemiBold,
+                                    FontWeight: FontWeight.W600,
                                     Color: palette.TextMid,
                                     LetterSpacing: 0.6,
                                     FontFamily: NetBenchFonts.Ui)),
@@ -342,7 +340,7 @@ public sealed class MonitorScreen : StatelessWidget
                                 label,
                                 style: new TextStyle(
                                     FontSize: 17,
-                                    FontWeight: FontWeight.ExtraBold,
+                                    FontWeight: FontWeight.W800,
                                     Color: Colors.White,
                                     FontFamily: NetBenchFonts.Ui)),
                         ]))));

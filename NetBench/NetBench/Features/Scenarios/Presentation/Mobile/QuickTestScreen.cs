@@ -1,4 +1,3 @@
-using Avalonia.Media;
 using NetBench.Features.Scenarios.Domain;
 using NetBench.Features.TestRun.Presentation.Mobile;
 using NetBench.Localization;
@@ -63,7 +62,7 @@ internal sealed class QuickTestScreenState : State, IDisposable
         return new Scaffold(
             body: new SafeArea(
                 new Padding(
-                    new Avalonia.Thickness(20, 8, 20, 0),
+                    EdgeInsets.FromLTRB(20, 8, 20, 0),
                     new Column(
                         crossAxisAlignment: CrossAxisAlignment.Stretch,
                         children:
@@ -123,12 +122,12 @@ internal sealed class QuickTestScreenState : State, IDisposable
 
     private static Padding BuildLabel(NetBenchPalette palette, string text) =>
         new(
-            new Avalonia.Thickness(0, 0, 0, 8),
+            EdgeInsets.FromLTRB(0, 0, 0, 8),
             new Text(
                 text,
                 style: new TextStyle(
                     FontSize: 12,
-                    FontWeight: FontWeight.SemiBold,
+                    FontWeight: FontWeight.W600,
                     Color: palette.TextMid,
                     LetterSpacing: 0.5,
                     FontFamily: NetBenchFonts.Ui)));
@@ -180,7 +179,7 @@ internal sealed class QuickTestScreenState : State, IDisposable
                 filled: true,
                 fillColor: palette.BgCard,
                 isDense: true,
-                contentPadding: new Avalonia.Thickness(16, 14),
+                contentPadding: EdgeInsets.Symmetric(horizontal: 16, vertical: 14),
                 border: new OutlineInputBorder(
                     borderRadius: BorderRadius.Circular(10),
                     borderSide: new BorderSide(Colors.Transparent, style: BorderStyle.None)),
@@ -219,7 +218,7 @@ internal sealed class QuickTestScreenState : State, IDisposable
                                 label,
                                 style: new TextStyle(
                                     FontSize: 17,
-                                    FontWeight: FontWeight.ExtraBold,
+                                    FontWeight: FontWeight.W800,
                                     Color: foreground,
                                     FontFamily: NetBenchFonts.Ui)),
                         ]))));

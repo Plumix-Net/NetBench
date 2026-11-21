@@ -58,7 +58,7 @@ public sealed class ScenarioEditorTests
     }
 
     private static List<SemanticsNode> TextFields(MobileHarness app) =>
-        [.. app.Nodes().Where(node => node.Flags.HasFlag(SemanticsFlags.IsTextField)).OrderBy(node => node.GlobalRect.Y)];
+        [.. app.Nodes().Where(node => node.Flags.HasFlag(SemanticsFlags.IsTextField)).OrderBy(node => node.GlobalRect.Top)];
 
     private static string ScenariosPath(MobileHarness app) => Path.Combine(app.DataDirectory, "scenarios");
 }

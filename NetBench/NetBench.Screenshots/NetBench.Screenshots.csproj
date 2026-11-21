@@ -39,6 +39,7 @@
     <PackageReference Include="HdrHistogram" />
     <PackageReference Include="Slang.Net" />
     <PackageReference Include="Plumix" />
+    <PackageReference Include="Plumix.Avalonia" />
     <PackageReference Include="Plumix.Material" />
     <PackageReference Include="Plumix.Bloc" />
     <PackageReference Include="Plumix.Slang" />

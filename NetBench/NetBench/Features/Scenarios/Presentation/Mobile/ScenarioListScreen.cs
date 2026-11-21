@@ -1,4 +1,3 @@
-using Avalonia.Media;
 using NetBench.Features.Report.Presentation.Mobile;
 using NetBench.Features.Scenarios.Domain;
 using NetBench.Features.Settings.Presentation.Mobile;
@@ -35,14 +34,14 @@ public sealed class ScenarioListScreen : StatelessWidget
         // снекбаром, иначе снекбар («Некорректный URL», «Сценарий удалён») накрывал кнопку.
         return new Scaffold(
             floatingActionButton: new Padding(
-                new Avalonia.Thickness(20, 0, 20, 12),
+                EdgeInsets.FromLTRB(20, 0, 20, 12),
                 new SizedBox(
                     width: double.PositiveInfinity,
                     child: BuildQuickTestButton(context, palette, strings.Mobile.QuickTest))),
             floatingActionButtonLocation: FloatingActionButtonLocation.CenterFloat,
             body: new SafeArea(
                 new Padding(
-                    new Avalonia.Thickness(20, 12, 20, 0),
+                    EdgeInsets.FromLTRB(20, 12, 20, 0),
                     new Column(
                         crossAxisAlignment: CrossAxisAlignment.Stretch,
                         children:
@@ -81,7 +80,7 @@ public sealed class ScenarioListScreen : StatelessWidget
                                     title,
                                     style: new TextStyle(
                                         FontSize: 26,
-                                        FontWeight: FontWeight.ExtraBold,
+                                        FontWeight: FontWeight.W800,
                                         Color: palette.TextHi,
                                         LetterSpacing: -0.5,
                                         FontFamily: NetBenchFonts.Ui)))),
@@ -149,7 +148,7 @@ public sealed class ScenarioListScreen : StatelessWidget
             color: palette.Rps,
             backgroundColor: palette.BgCard,
             child: new ListView(
-                padding: new Avalonia.Thickness(0, 0, 0, 100),
+                padding: EdgeInsets.FromLTRB(0, 0, 0, 100),
                 physics: new BouncingScrollPhysics(),
                 children: children));
     }
@@ -168,7 +167,7 @@ public sealed class ScenarioListScreen : StatelessWidget
 
     private static Padding BuildSectionHead(NetBenchPalette palette, string title) =>
         new Padding(
-            new Avalonia.Thickness(0, 14, 0, 12),
+            EdgeInsets.FromLTRB(0, 14, 0, 12),
             new Semantics(header: true, child: new Text(
                 title.ToUpperInvariant(),
                 style: new TextStyle(
@@ -203,7 +202,7 @@ public sealed class ScenarioListScreen : StatelessWidget
                         onTap: () => _ = Navigator.Of(context).Push(
                             new MaterialPageRoute(_ => new ResultScreen(report))),
                         child: new Container(
-                            padding: new Avalonia.Thickness(0, 12),
+                            padding: EdgeInsets.Symmetric(horizontal: 0, vertical: 12),
                             child: new Row(
                                 spacing: 10,
                                 crossAxisAlignment: CrossAxisAlignment.Center,
@@ -225,7 +224,7 @@ public sealed class ScenarioListScreen : StatelessWidget
                                                     strings.DisplayNameOf(report.Scenario),
                                                     style: new TextStyle(
                                                         FontSize: 14,
-                                                        FontWeight: FontWeight.SemiBold,
+                                                        FontWeight: FontWeight.W600,
                                                         Color: palette.TextHi,
                                                         FontFamily: NetBenchFonts.Ui),
                                                     maxLines: 1),
@@ -247,7 +246,7 @@ public sealed class ScenarioListScreen : StatelessWidget
                                                 strings.Mobile.SessionRps(FormatRps(report.Summary.RequestsPerSecond)),
                                                 style: new TextStyle(
                                                     FontSize: 12.5,
-                                                    FontWeight: FontWeight.SemiBold,
+                                                    FontWeight: FontWeight.W600,
                                                     Color: palette.Rps,
                                                     FontFamily: NetBenchFonts.Mono),
                                                 maxLines: 1),
@@ -354,8 +353,8 @@ public sealed class ScenarioListScreen : StatelessWidget
 
     private static Container BuildDeleteBackground(NetBenchPalette palette, string label) =>
         new Container(
-            margin: new Avalonia.Thickness(0, 0, 0, 12),
-            padding: new Avalonia.Thickness(20, 0),
+            margin: EdgeInsets.FromLTRB(0, 0, 0, 12),
+            padding: EdgeInsets.Symmetric(horizontal: 20, vertical: 0),
             alignment: Alignment.CenterRight,
             decoration: new BoxDecoration(
                 Color: palette.Error,
@@ -395,7 +394,7 @@ public sealed class ScenarioListScreen : StatelessWidget
         var radius = BorderRadius.Circular(10);
 
         return new Padding(
-            new Avalonia.Thickness(0, 0, 0, 12),
+            EdgeInsets.FromLTRB(0, 0, 0, 12),
             new Material(
                 color: palette.BgCard,
                 borderRadius: radius,
@@ -406,7 +405,7 @@ public sealed class ScenarioListScreen : StatelessWidget
                         onTap: () => _ = OpenScenarioAsync(context, scenario),
                         borderRadius: radius,
                         child: new Padding(
-                            new Avalonia.Thickness(16),
+                            EdgeInsets.All(16),
                             new Column(
                                 crossAxisAlignment: CrossAxisAlignment.Start,
                                 children:

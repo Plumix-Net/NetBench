@@ -5,7 +5,7 @@
     <AvaloniaVersion>12.1.4</AvaloniaVersion>
     <!-- Все пакеты Plumix (и Plumix.Bloc/Plumix.Slang из Plumix.Packages) выходят одной версией. Проверка непубликованного
          Plumix: -p:PlumixVersion=<версия из локального фида> -p:RestoreAdditionalProjectSources=<фид>. -->
-    <PlumixVersion>1.0.0-preview.4</PlumixVersion>
+    <PlumixVersion>1.0.0-preview.5</PlumixVersion>
   </PropertyGroup>
   <ItemGroup>
     <!-- Avalonia packages -->
@@ -22,6 +22,7 @@
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <!-- Plumix (мобильный UI: Flutter-подобные виджеты + Bloc) -->
     <PackageVersion Include="Plumix" Version="$(PlumixVersion)" />
+    <PackageVersion Include="Plumix.Avalonia" Version="$(PlumixVersion)" />
     <PackageVersion Include="Plumix.Material" Version="$(PlumixVersion)" />
     <PackageVersion Include="Plumix.Bloc" Version="$(PlumixVersion)" />
     <PackageVersion Include="Plumix.Slang" Version="$(PlumixVersion)" />

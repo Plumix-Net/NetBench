@@ -1,4 +1,3 @@
-using Avalonia.Media;
 using NetBench.Mobile.Theme;
 using Plumix.UI;
 using Plumix.Widgets;
@@ -21,7 +20,7 @@ public sealed class ScreenTitle(string text) : StatelessWidget
                 text,
                 style: new TextStyle(
                     FontSize: 20,
-                    FontWeight: FontWeight.ExtraBold,
+                    FontWeight: FontWeight.W800,
                     Color: palette.TextHi,
                     FontFamily: NetBenchFonts.Ui),
                 maxLines: 2,

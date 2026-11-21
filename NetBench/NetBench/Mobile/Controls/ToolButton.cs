@@ -24,8 +24,8 @@ public sealed class ToolButton(Widget icon, Action onPressed, string tooltip, do
             style: IconButton.StyleFrom(
                 backgroundColor: palette.BgCard,
                 shape: BorderRadius.Circular(radius),
-                fixedSize: new Avalonia.Size(size, size),
-                minimumSize: new Avalonia.Size(size, size),
-                padding: default(Avalonia.Thickness)));
+                fixedSize: new Plumix.UI.Size(size, size),
+                minimumSize: new Plumix.UI.Size(size, size),
+                padding: EdgeInsets.Zero));
     }
 }

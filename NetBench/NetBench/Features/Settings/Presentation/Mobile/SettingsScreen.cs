@@ -1,5 +1,4 @@
 using System.Globalization;
-using Avalonia.Media;
 using NetBench.Features.Settings.Domain;
 using NetBench.Localization;
 using NetBench.Mobile.Controls;
@@ -29,7 +28,7 @@ public sealed class SettingsScreen : StatelessWidget
         return new Scaffold(
             body: new SafeArea(
                 new Padding(
-                    new Avalonia.Thickness(20, 8, 20, 0),
+                    EdgeInsets.FromLTRB(20, 8, 20, 0),
                     new Column(
                         crossAxisAlignment: CrossAxisAlignment.Stretch,
                         children:
@@ -65,7 +64,7 @@ public sealed class SettingsScreen : StatelessWidget
 
     private static Padding BuildTopBar(BuildContext context, NetBenchPalette palette, string title) =>
         new Padding(
-            new Avalonia.Thickness(0, 0, 0, 8),
+            EdgeInsets.FromLTRB(0, 0, 0, 8),
             new Row(
                 spacing: 12,
                 children:
@@ -81,7 +80,7 @@ public sealed class SettingsScreen : StatelessWidget
 
     private static Padding BuildSectionHead(NetBenchPalette palette, string title) =>
         new Padding(
-            new Avalonia.Thickness(0, 26, 0, 12),
+            EdgeInsets.FromLTRB(0, 26, 0, 12),
             new Semantics(header: true, child: new Text(
                 title.ToUpperInvariant(),
                 style: new TextStyle(
@@ -192,7 +191,7 @@ public sealed class SettingsScreen : StatelessWidget
                     label,
                     style: new TextStyle(
                         FontSize: 15,
-                        FontWeight: selected ? FontWeight.SemiBold : FontWeight.Normal,
+                        FontWeight: selected ? FontWeight.W600 : FontWeight.Normal,
                         Color: selected ? palette.TextHi : palette.Text,
                         FontFamily: NetBenchFonts.Ui),
                     maxLines: 1)),
@@ -227,7 +226,7 @@ public sealed class SettingsScreen : StatelessWidget
                 onTap: onTap,
                 child: new Container(
                     // 15 + 15 + строка ≈ 52 — комфортная цель для пальца
-                    padding: new Avalonia.Thickness(16, 15),
+                    padding: EdgeInsets.Symmetric(horizontal: 16, vertical: 15),
                     child: new Row(spacing: 10, children: children))));
     }
 
@@ -239,7 +238,7 @@ public sealed class SettingsScreen : StatelessWidget
             child: new InkWell(
                 onTap: onTap,
                 child: new Container(
-                    padding: new Avalonia.Thickness(16, 15),
+                    padding: EdgeInsets.Symmetric(horizontal: 16, vertical: 15),
                     child: new Row(
                         spacing: 10,
                         children:

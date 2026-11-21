@@ -1,8 +1,8 @@
-using Avalonia.Media;
 using NetBench.Features.Settings.Domain;
 using Plumix.Material;
+using Plumix.Rendering;
+using Plumix.UI;
 using Plumix.Widgets;
-using Color = Plumix.UI.Color;
 
 namespace NetBench.Mobile.Theme;
 
@@ -101,11 +101,24 @@ public sealed record NetBenchPalette
 /// <summary>Шрифты дизайн-системы: Inter — интерфейс, моноширинный — метрики и URL.</summary>
 public static class NetBenchFonts
 {
-    public static FontFamily Ui { get; } = FontFamily.Parse("fonts:Inter#Inter");
+    // Начертания Inter лежат ресурсами пакета Avalonia.Fonts.Inter; регистрируем их под семейством
+    // "Inter" через FontLoader до первой отрисовки текста.
+    static NetBenchFonts()
+    {
+        var loader = new FontLoader("Inter");
+        foreach (var face in new[] { "Thin", "Light", "Regular", "Medium", "SemiBold", "Bold" })
+            loader.AddFont(PlatformAssetBundle.Root.LoadBytesAsync($"packages/Avalonia.Fonts.Inter/Assets/Inter-{face}.ttf"));
+        _ = loader.Load();
+    }
 
-    // JetBrains Mono не встроен — деградируем на системные моноширинные (как на desktop)
-    public static FontFamily Mono { get; } =
-        FontFamily.Parse("JetBrains Mono,SF Mono,Menlo,Roboto Mono,Consolas,monospace");
+    public static string Ui { get; } = "Inter";
+
+    // JetBrains Mono не встроен — берём системный моноширинный шрифт платформы
+    public static string Mono { get; } =
+        OperatingSystem.IsAndroid() ? "monospace"
+        : OperatingSystem.IsIOS() || OperatingSystem.IsMacOS() ? "Menlo"
+        : OperatingSystem.IsWindows() ? "Consolas"
+        : "monospace";
 }
 
 /// <summary>

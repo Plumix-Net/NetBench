@@ -1,8 +1,7 @@
-using Avalonia;
-using Avalonia.Media;
 using Plumix.Rendering;
+using Plumix.UI;
 using Plumix.Widgets;
-using Color = Plumix.UI.Color;
+using Path = Plumix.UI.Path;
 
 namespace NetBench.Mobile.Controls;
 
@@ -62,27 +61,31 @@ internal sealed class SparklinePainter : CustomPainter
         const double inset = 2;
         var drawableHeight = Math.Max(1, size.Height - inset * 2);
 
-        var points = new Point[_values.Count];
+        var line = new Path();
+        var area = new Path();
+        area.MoveTo(0, size.Height);
         for (var i = 0; i < _values.Count; i++)
         {
             var x = i / (double)(_values.Count - 1) * size.Width;
             var y = size.Height - inset - (_values[i] - min) / range * drawableHeight;
-            points[i] = new Point(x, y);
+            if (i == 0)
+                line.MoveTo(x, y);
+            else
+                line.LineTo(x, y);
+            area.LineTo(x, y);
         }
 
-        var fillPoints = new Point[points.Length + 2];
-        points.CopyTo(fillPoints, 0);
-        fillPoints[^2] = new Point(size.Width, size.Height);
-        fillPoints[^1] = new Point(0, size.Height);
-        context.Canvas.DrawPolygon(new SolidColorBrush(_fill), null, fillPoints);
-
-        var pen = new Pen(
-            new SolidColorBrush(_stroke),
-            2,
-            lineCap: PenLineCap.Round,
-            lineJoin: PenLineJoin.Round);
-        for (var i = 1; i < points.Length; i++)
-            context.Canvas.DrawLine(pen, points[i - 1], points[i]);
+        area.LineTo(size.Width, size.Height);
+        area.Close();
+        context.Canvas.DrawPath(area, new Paint { Color = _fill });
+        context.Canvas.DrawPath(line, new Paint
+        {
+            Color = _stroke,
+            Style = PaintingStyle.Stroke,
+            StrokeWidth = 2,
+            StrokeCap = StrokeCap.Round,
+            StrokeJoin = StrokeJoin.Round,
+        });
     }
 
     public override bool ShouldRepaint(CustomPainter oldDelegate) =>

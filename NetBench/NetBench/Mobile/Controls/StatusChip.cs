@@ -1,6 +1,6 @@
-using Avalonia.Media;
 using NetBench.Mobile.Theme;
 using Plumix.Rendering;
+using Plumix.UI;
 using Plumix.Widgets;
 
 namespace NetBench.Mobile.Controls;
@@ -31,7 +31,7 @@ public sealed class StatusChip : StatelessWidget
             : (palette.SuccessTint, palette.Success);
 
         return new Container(
-            padding: new Avalonia.Thickness(9, 4),
+            padding: EdgeInsets.Symmetric(horizontal: 9, vertical: 4),
             decoration: new BoxDecoration(
                 Color: background,
                 BorderRadius: BorderRadius.Circular(100)),
@@ -39,7 +39,7 @@ public sealed class StatusChip : StatelessWidget
                 _text,
                 style: new TextStyle(
                     FontSize: 11.5,
-                    FontWeight: FontWeight.SemiBold,
+                    FontWeight: FontWeight.W600,
                     Color: foreground,
                     FontFamily: NetBenchFonts.Ui),
                 maxLines: 1));

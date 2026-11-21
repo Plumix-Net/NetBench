@@ -1,4 +1,3 @@
-using Avalonia.Media;
 using NetBench.Features.Report.Domain;
 using NetBench.Features.Scenarios.Presentation.Mobile;
 using NetBench.Features.TestRun.Domain;
@@ -6,13 +5,13 @@ using NetBench.Localization;
 using NetBench.Mobile.Controls;
 using NetBench.Mobile.Theme;
 using Plumix.Bloc;
+using Plumix.UI;
 using Plumix.Material;
 using Plumix.Painting;
 using Plumix.Rendering;
 using Plumix.Slang;
 using Plumix.Widgets;
 using Colors = Plumix.Material.Colors;
-using Color = Plumix.UI.Color;
 
 namespace NetBench.Features.Report.Presentation.Mobile;
 
@@ -40,7 +39,7 @@ public sealed class ResultScreen : StatelessWidget
         return new Scaffold(
             body: new SafeArea(
                 new Padding(
-                    new Avalonia.Thickness(20, 8, 20, 0),
+                    EdgeInsets.FromLTRB(20, 8, 20, 0),
                     new Column(
                         crossAxisAlignment: CrossAxisAlignment.Stretch,
                         children:
@@ -72,7 +71,7 @@ public sealed class ResultScreen : StatelessWidget
     private static Padding BuildTopBar(BuildContext context, NetBenchPalette palette, string title)
     {
         return new Padding(
-            new Avalonia.Thickness(0, 0, 0, 8),
+            EdgeInsets.FromLTRB(0, 0, 0, 8),
             new Row(
                 spacing: 12,
                 children:
@@ -97,7 +96,7 @@ public sealed class ResultScreen : StatelessWidget
             seconds.ToString("F0"));
 
         return new Container(
-            padding: new Avalonia.Thickness(18),
+            padding: EdgeInsets.All(18),
             decoration: new BoxDecoration(
                 Color: palette.BgCard,
                 BorderRadius: BorderRadius.Circular(10)),
@@ -109,7 +108,7 @@ public sealed class ResultScreen : StatelessWidget
                         strings.DisplayNameOf(scenario),
                         style: new TextStyle(
                             FontSize: 19,
-                            FontWeight: FontWeight.ExtraBold,
+                            FontWeight: FontWeight.W800,
                             Color: palette.TextHi,
                             FontFamily: NetBenchFonts.Ui),
                         maxLines: 1),
@@ -166,7 +165,7 @@ public sealed class ResultScreen : StatelessWidget
     private static Padding BuildSectionHead(NetBenchPalette palette, string title)
     {
         return new Padding(
-            new Avalonia.Thickness(0, 26, 0, 12),
+            EdgeInsets.FromLTRB(0, 26, 0, 12),
             new Semantics(header: true, child: new Text(
                 title.ToUpperInvariant(),
                 style: new TextStyle(
@@ -214,7 +213,7 @@ public sealed class ResultScreen : StatelessWidget
             var pct = bucket.Count * 100.0 / total;
 
             yield return new MergeSemantics(new Container(
-                padding: new Avalonia.Thickness(0, 10),
+                padding: EdgeInsets.Symmetric(horizontal: 0, vertical: 10),
                 decoration: new BoxDecoration(),
                 child: new Row(
                     spacing: 10,
@@ -266,8 +265,8 @@ public sealed class ResultScreen : StatelessWidget
             yield break;
 
         yield return new Container(
-            margin: new Avalonia.Thickness(0, 0, 0, 12),
-            padding: new Avalonia.Thickness(14, 12),
+            margin: EdgeInsets.FromLTRB(0, 0, 0, 12),
+            padding: EdgeInsets.Symmetric(horizontal: 14, vertical: 12),
             decoration: new BoxDecoration(
                 Color: palette.LatencyTint,
                 BorderRadius: BorderRadius.Circular(10)),
@@ -275,7 +274,7 @@ public sealed class ResultScreen : StatelessWidget
                 strings.Mobile.StoppedInBackground,
                 style: new TextStyle(
                     FontSize: 13,
-                    FontWeight: FontWeight.SemiBold,
+                    FontWeight: FontWeight.W600,
                     Color: palette.TextHi,
                     FontFamily: NetBenchFonts.Ui)));
     }
@@ -375,14 +374,14 @@ public sealed class ResultScreen : StatelessWidget
 
         // Шторка рисуется до низа экрана — последний пункт не должен лечь под жестовую панель.
         return new Padding(
-            new Avalonia.Thickness(0, 0, 0, 12 + MediaQuery.ViewPaddingOf(context).Bottom),
+            EdgeInsets.FromLTRB(0, 0, 0, 12 + MediaQuery.ViewPaddingOf(context).Bottom),
             new Column(
                 mainAxisSize: MainAxisSize.Min,
                 crossAxisAlignment: CrossAxisAlignment.Stretch,
                 children:
                 [
                     new Padding(
-                        new Avalonia.Thickness(24, 0, 24, 8),
+                        EdgeInsets.FromLTRB(24, 0, 24, 8),
                         new Semantics(
                             header: true,
                             child: new Text(

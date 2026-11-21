@@ -1,6 +1,6 @@
-using Avalonia.Media;
 using NetBench.Mobile.Theme;
 using Plumix.Rendering;
+using Plumix.UI;
 using Plumix.Widgets;
 
 namespace NetBench.Mobile.Controls;
@@ -49,7 +49,7 @@ public sealed class MetricCard : StatelessWidget
                 _value,
                 style: new TextStyle(
                     FontSize: 24,
-                    FontWeight: FontWeight.ExtraBold,
+                    FontWeight: FontWeight.W800,
                     Color: toneColor,
                     FontFamily: NetBenchFonts.Mono),
                 maxLines: 1),
@@ -57,7 +57,7 @@ public sealed class MetricCard : StatelessWidget
         if (!string.IsNullOrEmpty(_unit))
         {
             valueRow.Add(new Padding(
-                new Avalonia.Thickness(1, 0, 0, 2),
+                EdgeInsets.FromLTRB(1, 0, 0, 2),
                 new Text(
                     _unit,
                     style: new TextStyle(
@@ -69,7 +69,7 @@ public sealed class MetricCard : StatelessWidget
 
         // Один узел семантики на карточку: «P95 latency, 5 ms», а не три отдельные строки
         return new MergeSemantics(new Container(
-            padding: new Avalonia.Thickness(14),
+            padding: EdgeInsets.All(14),
             decoration: new BoxDecoration(
                 Color: palette.BgCard,
                 BorderRadius: BorderRadius.Circular(10)),

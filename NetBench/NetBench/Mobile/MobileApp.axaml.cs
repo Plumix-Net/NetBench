@@ -19,6 +19,6 @@ public partial class MobileApp : PlumixApplication
     protected override PlumixOptions CreateOptions() => new()
     {
         Title = Strings.Instance.Root.App.Title,
-        InitialWindowSize = new Avalonia.Size(390, 780),
+        InitialWindowSize = new Plumix.UI.Size(390, 780),
     };
 }

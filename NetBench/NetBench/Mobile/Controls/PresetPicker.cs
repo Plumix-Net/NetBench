@@ -1,4 +1,3 @@
-using Avalonia.Media;
 using NetBench.Mobile.Theme;
 using Plumix.Material;
 using Plumix.Rendering;
@@ -51,7 +50,7 @@ public sealed class PresetPicker<T>(
                         // 48 dp — минимальная цель касания из гайдлайнов Android/iOS
                         constraints: new BoxConstraints(MinHeight: 48),
                         alignment: Alignment.Center,
-                        padding: new Avalonia.Thickness(4, 8),
+                        padding: EdgeInsets.Symmetric(horizontal: 4, vertical: 8),
                         decoration: new BoxDecoration(
                             BorderRadius: radius,
                             Border: Border.All(
@@ -65,7 +64,7 @@ public sealed class PresetPicker<T>(
                                 text,
                                 style: new TextStyle(
                                     FontSize: 14,
-                                    FontWeight: isSelected ? FontWeight.Bold : FontWeight.Medium,
+                                    FontWeight: isSelected ? FontWeight.Bold : FontWeight.W500,
                                     Color: isSelected ? palette.Rps : palette.Text,
                                     FontFamily: NetBenchFonts.Mono),
                                 textAlign: TextAlign.Center,

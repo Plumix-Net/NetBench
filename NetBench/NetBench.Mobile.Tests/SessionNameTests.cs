@@ -41,5 +41,5 @@ public sealed class SessionNameTests
 
     /// <summary>Строка истории — под заголовком «Последние сессии», с именем сценария в подписи.</summary>
     private static bool IsSessionRow(Plumix.Rendering.SemanticsNode node, string name, Plumix.Rendering.SemanticsNode header) =>
-        node.GlobalRect.Y > header.GlobalRect.Y && node.Label.Split('\n').Contains(name);
+        node.GlobalRect.Top > header.GlobalRect.Top && node.Label.Split('\n').Contains(name);
 }
