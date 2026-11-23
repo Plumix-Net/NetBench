@@ -107,7 +107,7 @@ internal sealed record MacListing(string Culture, string AppStore, string[] Capt
 
 /// <summary>
 /// Desktop-окно NetBench на демо-данных: сценарии и настройки — во временном каталоге
-/// (<see cref="DesktopStorage"/>), история прогонов — в памяти композиции. Данные машины не трогаются.
+/// и история прогонов — во временном каталоге (<see cref="DesktopStorage"/>). Данные машины не трогаются.
 /// </summary>
 internal sealed class DesktopSession : IDisposable
 {

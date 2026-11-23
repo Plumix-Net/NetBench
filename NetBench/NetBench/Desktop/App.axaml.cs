@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using NetBench.Features.Shell.Presentation.Desktop;
@@ -7,7 +8,15 @@ namespace NetBench.Desktop;
 
 public partial class App : Application
 {
-    public override void Initialize() => AvaloniaXamlLoader.Load(this);
+    public override void Initialize()
+    {
+        AvaloniaXamlLoader.Load(this);
+
+        // Своё меню приложения (на macOS — меню «NetBench»): без него Avalonia подставляет «About Avalonia».
+        // Ставить именно здесь: Avalonia читает его сразу после Initialize, до OnFrameworkInitializationCompleted.
+        NativeMenu.SetMenu(this, Views.MainMenu.CreateApplicationMenu(() => Views.MainMenu.ShowAbout(
+            (ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow)));
+    }
 
     public override void OnFrameworkInitializationCompleted()
     {
@@ -15,10 +24,13 @@ public partial class App : Application
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new Views.MainWindow
+            var window = new Views.MainWindow
             {
                 DataContext = composition.Root,
             };
+            desktop.MainWindow = window;
+
+            Views.MainMenu.Attach(window, composition.Root);
         }
         else if (ApplicationLifetime is IActivityApplicationLifetime activity)
         {

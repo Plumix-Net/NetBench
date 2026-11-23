@@ -21,7 +21,8 @@ public sealed class CompareSide(TestRunReport report)
     public string Target { get; } = report.Scenario.Target;
     public string MetaText { get; } = ReportFormatting.Meta(report);
     public string RpsText { get; } = report.Summary.RequestsPerSecond.ToString("N0");
-    public string P95Text { get; } = report.Summary.LatencyP95Ms.ToString("F0");
+    public string P95Text { get; } = ReportFormatting.Latency(report.Summary, report.Summary.LatencyP95Ms);
+    public string LatencyUnit { get; } = ReportFormatting.LatencyUnit(report.Summary);
     public string ErrorPctText { get; } = ReportFormatting.ErrorPct(report.Summary);
     public MetricTone ErrorTone { get; } = ReportFormatting.ErrorTone(report.Summary);
     public IReadOnlyList<LatencyRow> LatencyRows { get; } = ReportFormatting.LatencyRows(report.Summary);

@@ -2,6 +2,8 @@ using NetBench.Features.Scenarios.Domain;
 using NetBench.Features.TestRun.Domain;
 using System.Buffers;
 using System.Diagnostics;
+using System.Net.Sockets;
+using System.Security.Authentication;
 using System.Threading.Channels;
 
 namespace NetBench.Features.TestRun.Data;
@@ -12,7 +14,7 @@ public sealed class LoadEngine : IAsyncDisposable
 
     private readonly HttpClient _httpClient;
     private readonly Channel<RequestResult> _channel;
-    private readonly StatisticsAggregator _aggregator;
+    private StatisticsAggregator _aggregator;
 
     private Task? _consumerTask;
     private CancellationTokenSource? _cts;
@@ -30,6 +32,9 @@ public sealed class LoadEngine : IAsyncDisposable
         {
             PooledConnectionLifetime = TimeSpan.FromMinutes(2),
             ConnectTimeout = TimeSpan.FromSeconds(10),
+            // Виртуальные пользователи независимы: общий контейнер cookie склеил бы их сессии
+            // (и сериализовал бы запросы на его lock).
+            UseCookies = false,
         })
         {
             Timeout = TimeSpan.FromSeconds(30),
@@ -44,9 +49,16 @@ public sealed class LoadEngine : IAsyncDisposable
 
     public async Task RunAsync(LoadScenario scenario, CancellationToken externalToken = default)
     {
+        // Без абсолютного http(s)-адреса каждый запрос падает, не дойдя до сети, — за секунду
+        // набегают миллионы «ошибок» и бессмысленный RPS. Такой прогон не запускаем вовсе.
+        if (!TargetUrl.IsValid(scenario.Target))
+            throw new ArgumentException($"Target is not an absolute http(s) URL: '{scenario.Target}'", nameof(scenario));
+
         _cts = CancellationTokenSource.CreateLinkedTokenSource(externalToken);
         var token = _cts.Token;
         var startedAt = DateTime.UtcNow;
+        // Время прогона — с его старта, а не с создания движка.
+        _aggregator = new StatisticsAggregator();
 
         _consumerTask = Task.Run(ConsumeResultsAsync);
 
@@ -108,21 +120,36 @@ public sealed class LoadEngine : IAsyncDisposable
             ? scenario.Requests
             : [_defaultStep];
 
-        while (!token.IsCancellationRequested &&
-               Stopwatch.GetTimestamp() < deadlineTimestamp)
+        _aggregator.IncrementActiveUsers();
+        try
         {
-            foreach (var step in steps)
+            while (!token.IsCancellationRequested &&
+                   Stopwatch.GetTimestamp() < deadlineTimestamp)
             {
-                if (token.IsCancellationRequested || Stopwatch.GetTimestamp() >= deadlineTimestamp)
-                    break;
+                foreach (var step in steps)
+                {
+                    if (token.IsCancellationRequested || Stopwatch.GetTimestamp() >= deadlineTimestamp)
+                        break;
 
-                var result = await ExecuteStepAsync(scenario.Target, step, token).ConfigureAwait(false);
-                _aggregator.Record(in result);
-                await _channel.Writer.WriteAsync(result, token).ConfigureAwait(false);
+                    var result = await ExecuteStepAsync(scenario.Target, step, token).ConfigureAwait(false);
+                    _aggregator.Record(in result);
+                    await _channel.Writer.WriteAsync(result, token).ConfigureAwait(false);
+
+                    // Битый запрос не исправится от повторов: останавливаем прогон, отчёт покажет причину.
+                    if (result.ErrorKind == RequestErrorKind.InvalidRequest)
+                    {
+                        await _cts!.CancelAsync().ConfigureAwait(false);
+                        return;
+                    }
+                }
+
+                if (scenario.Load.ThinkTime > TimeSpan.Zero)
+                    await Task.Delay(scenario.Load.ThinkTime, token).ConfigureAwait(false);
             }
-
-            if (scenario.Load.ThinkTime > TimeSpan.Zero)
-                await Task.Delay(scenario.Load.ThinkTime, token).ConfigureAwait(false);
+        }
+        finally
+        {
+            _aggregator.DecrementActiveUsers();
         }
     }
 
@@ -147,8 +174,10 @@ public sealed class LoadEngine : IAsyncDisposable
                 request.Content = new StringContent(step.Body,
                     System.Text.Encoding.UTF8, "application/json");
 
+            // ResponseHeadersRead + чтение потока в буфер из пула: тело считается, но не копится
+            // целиком в памяти (ResponseContentRead буферизовал бы каждый ответ).
             using var response = await _httpClient.SendAsync(request,
-                HttpCompletionOption.ResponseContentRead, token).ConfigureAwait(false);
+                HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
 
             var bytes = 0;
             if (response.Content is not null)
@@ -172,15 +201,95 @@ public sealed class LoadEngine : IAsyncDisposable
             var isError = statusCode >= 400;
             return new RequestResult(startNs, endNs, statusCode, bytes, isError);
         }
-        catch (Exception) when (!token.IsCancellationRequested)
+        catch (Exception) when (token.IsCancellationRequested)
+        {
+            // Остановка прогона: обрыв запроса — не ошибка цели. Наружу — всегда отмена,
+            // какое бы исключение ни бросил обрываемый запрос.
+            throw new OperationCanceledException(token);
+        }
+        catch (Exception ex)
         {
             var endNs = MonotonicClock.NowNanoseconds();
-            return RequestResult.Error(startNs, endNs);
+            var kind = Classify(ex);
+            if (_aggregator.NeedsErrorMessage(kind))
+                _aggregator.RecordErrorMessage(kind, Describe(ex));
+            return RequestResult.Error(startNs, endNs, kind);
         }
         finally
         {
             _aggregator.DecrementActiveConnections();
         }
+    }
+
+    /// <summary>Причина сбоя запроса — для разбивки ошибок в отчёте.</summary>
+    internal static RequestErrorKind Classify(Exception ex)
+    {
+        switch (ex)
+        {
+            // Тайм-аут HttpClient приходит как отмена, но наш токен не отменён (это отфильтровано выше).
+            case TaskCanceledException or OperationCanceledException or TimeoutException:
+                return RequestErrorKind.Timeout;
+
+            case HttpRequestException http:
+                switch (http.HttpRequestError)
+                {
+                    case HttpRequestError.NameResolutionError:
+                        return RequestErrorKind.Dns;
+                    case HttpRequestError.SecureConnectionError:
+                        return RequestErrorKind.Tls;
+                    case HttpRequestError.HttpProtocolError or HttpRequestError.InvalidResponse
+                        or HttpRequestError.ResponseEnded or HttpRequestError.VersionNegotiationError:
+                        return RequestErrorKind.Protocol;
+                    case HttpRequestError.ConnectionError:
+                        return FindSocketError(ex) switch
+                        {
+                            SocketError.ConnectionRefused => RequestErrorKind.ConnectionRefused,
+                            SocketError.TimedOut => RequestErrorKind.Timeout,
+                            SocketError.HostNotFound or SocketError.NoData or SocketError.TryAgain => RequestErrorKind.Dns,
+                            _ => RequestErrorKind.Connection,
+                        };
+                }
+
+                if (ex.InnerException is AuthenticationException)
+                    return RequestErrorKind.Tls;
+                return FindSocketError(ex) is { } socketError
+                    ? socketError == SocketError.ConnectionRefused ? RequestErrorKind.ConnectionRefused : RequestErrorKind.Connection
+                    : RequestErrorKind.Other;
+
+            case IOException or SocketException:
+                return RequestErrorKind.Connection;
+
+            // Запрос не собрать: относительный/битый URI, недопустимый метод, схема не http(s).
+            case InvalidOperationException or UriFormatException or FormatException
+                or NotSupportedException or ArgumentException:
+                return RequestErrorKind.InvalidRequest;
+
+            default:
+                return RequestErrorKind.Other;
+        }
+    }
+
+    private static SocketError? FindSocketError(Exception? ex)
+    {
+        for (; ex is not null; ex = ex.InnerException)
+        {
+            if (ex is SocketException socket)
+                return socket.SocketErrorCode;
+        }
+
+        return null;
+    }
+
+    /// <summary>Самое конкретное сообщение из цепочки исключений — его и покажем пользователю.</summary>
+    private static string Describe(Exception ex)
+    {
+        var innermost = ex;
+        while (innermost.InnerException is not null)
+            innermost = innermost.InnerException;
+
+        return innermost == ex || string.IsNullOrWhiteSpace(innermost.Message)
+            ? ex.Message
+            : $"{ex.Message} ({innermost.Message})";
     }
 
     private async Task ConsumeResultsAsync()

@@ -14,7 +14,9 @@
     "p95": "P95",
     "p99": "P99",
     "millisecondsShort": "мс",
-    "percent": "%"
+    "percent": "%",
+    "avgRps": "СРЕДНИЙ RPS",
+    "close": "Закрыть"
   },
   "diagnostics": {
     "viewNotFound": "Представление для {typeName: string} не найдено"
@@ -45,7 +47,33 @@
       "errors": "Ошибки",
       "responseCodes": "Коды ответов",
       "code": "Код",
-      "count": "Количество"
+      "count": "Количество",
+      "reason": "Причина",
+      "details": "Подробности"
+    },
+    "allFailedReason": "Ни один запрос не получил ответа. {reason: string}: {hint: string}",
+    "totals": "запросов: {requests: string} · пользователей: {users: string} · получено {data: string}",
+    "errorsSection": "ЗАПРОСЫ БЕЗ ОТВЕТА",
+    "reason": "ПРИЧИНА",
+    "errorKind": {
+      "dns": "Хост не найден (DNS)",
+      "connectionRefused": "Соединение отклонено",
+      "connection": "Ошибка соединения",
+      "timeout": "Тайм-аут",
+      "tls": "Ошибка TLS",
+      "protocol": "Некорректный HTTP-ответ",
+      "invalidRequest": "Некорректный запрос",
+      "other": "Другая ошибка"
+    },
+    "errorHint": {
+      "dns": "имя хоста не разрешается — проверьте, нет ли опечатки",
+      "connectionRefused": "на этом хосте и порту никто не слушает — сервер запущен?",
+      "connection": "соединение не установилось или оборвалось",
+      "timeout": "сервер не ответил вовремя (подключение 10 с, ответ 30 с)",
+      "tls": "сертификат или протокол TLS отклонён — если сервер работает по обычному HTTP, укажите http:// в Target URL",
+      "protocol": "сервер ответил не по протоколу HTTP",
+      "invalidRequest": "проверьте URL, метод и заголовки сценария — прогон остановлен",
+      "other": "точный текст — в подробностях"
     }
   },
   "scenarios": {
@@ -80,14 +108,17 @@
       "pathPlaceholder": "/path",
       "removeStep": "Убрать шаг",
       "noSteps": "Шагов нет — нагрузка пойдёт GET-запросами прямо в Target URL.",
-      "addRequest": "+ Добавить запрос"
+      "addRequest": "+ Добавить запрос",
+      "targetInvalid": "Укажите полный http(s)-адрес, например https://api.example.com/health",
+      "saved": "Сохранено"
     }
   },
   "shell": {
     "emptyTitle": "Пока нет сценариев",
     "emptyDescription": "Создайте сценарий, чтобы начать нагрузочное тестирование.",
     "createFirst": "+ Создать первый сценарий",
-    "targetRequired": "Укажите Target URL, чтобы запустить"
+    "targetRequired": "Укажите Target URL, чтобы запустить",
+    "targetInvalid": "Target URL — не корректный http(s)-адрес"
   },
   "mobile": {
     "homeSubtitle": "Дежурный мониторинг",
@@ -168,7 +199,11 @@
     "latencyChart": "ЗАДЕРЖКА P95 (МС)",
     "ownTargetsTitle": "Тестируйте только свои серверы",
     "ownTargetsMessage": "NetBench отправляет много запросов за короткое время. Запускайте тесты только против своих серверов или тех, что вам разрешил тестировать владелец: нагрузка на чужой сервис может нарушить его работу и бывает незаконной.",
-    "ownTargetsConfirm": "Понятно"
+    "ownTargetsConfirm": "Понятно",
+    "users": "ПОЛЬЗОВАТЕЛИ",
+    "liveRps": "RPS СЕЙЧАС",
+    "topError": "{reason: string}: {hint: string}",
+    "noValue": "—"
   },
   "about": {
     "title": "О приложении",
@@ -181,5 +216,36 @@
     "sourceCode": "Исходный код",
     "licenses": "Лицензии открытого ПО",
     "openFailed": "Не удалось открыть ссылку"
+  },
+  "menu": {
+    "about": "О программе NetBench",
+    "file": "Файл",
+    "newScenario": "Новый сценарий",
+    "editScenario": "Изменить сценарий",
+    "run": "Запустить тест",
+    "stop": "Остановить тест",
+    "exportReport": "Экспорт отчёта",
+    "exportJson": "JSON…",
+    "exportHtml": "HTML…",
+    "exportCsv": "CSV…",
+    "closeWindow": "Закрыть окно",
+    "edit": "Правка",
+    "undo": "Отменить",
+    "redo": "Повторить",
+    "cut": "Вырезать",
+    "copy": "Скопировать",
+    "paste": "Вставить",
+    "selectAll": "Выбрать все",
+    "view": "Вид",
+    "toggleTheme": "Тёмная / светлая тема",
+    "window": "Окно",
+    "minimize": "Свернуть",
+    "zoom": "Изменить масштаб",
+    "help": "Справка",
+    "website": "Сайт NetBench",
+    "reportIssue": "Сообщить о проблеме…",
+    "privacy": "Политика конфиденциальности",
+    "terms": "Условия использования",
+    "sourceCode": "Исходный код"
   }
 }

@@ -21,20 +21,24 @@
                                        LetterSpacing="0.6"
                                        Foreground="{DynamicResource TextMid}" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                            <TextBlock Name="PART_Value"
-                                       Text="{TemplateBinding Value}"
-                                       FontFamily="{DynamicResource MonoFont}"
-                                       FontSize="30" FontWeight="ExtraBold"
-                                       Foreground="{DynamicResource TextHi}" />
-                            <TextBlock Name="PART_Unit"
-                                       Text="{TemplateBinding Unit}"
-                                       FontSize="15" FontWeight="Bold"
-                                       Margin="2,0,0,4"
-                                       VerticalAlignment="Bottom"
-                                       Foreground="{DynamicResource TextHi}"
-                                       IsVisible="False" />
-                        </StackPanel>
+                        <!-- Длинное значение («50 / 50», «13,755») ужимается под ширину карточки, а не вылезает за неё. -->
+                        <Viewbox Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left"
+                                 Margin="0,6,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Name="PART_Value"
+                                           Text="{TemplateBinding Value}"
+                                           FontFamily="{DynamicResource MonoFont}"
+                                           FontSize="30" FontWeight="ExtraBold"
+                                           Foreground="{DynamicResource TextHi}" />
+                                <TextBlock Name="PART_Unit"
+                                           Text="{TemplateBinding Unit}"
+                                           FontSize="15" FontWeight="Bold"
+                                           Margin="2,0,0,4"
+                                           VerticalAlignment="Bottom"
+                                           Foreground="{DynamicResource TextHi}"
+                                           IsVisible="False" />
+                            </StackPanel>
+                        </Viewbox>
                     </StackPanel>
                 </Border>
             </ControlTemplate>

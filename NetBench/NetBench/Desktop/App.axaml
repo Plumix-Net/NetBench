@@ -2,7 +2,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="using:NetBench.Desktop"
              x:Class="NetBench.Desktop.App"
+             Name="NetBench"
              RequestedThemeVariant="Dark">
+             <!-- Name — имя процесса и заголовок меню приложения на macOS (иначе «Avalonia Application»). -->
              <!-- Дизайн-система NetBench: тёмная тема по умолчанию, светлая — по кнопке в сайдбаре. -->
 
     <Application.DataTemplates>

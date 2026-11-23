@@ -25,7 +25,7 @@
                      Text="{Binding Target}"
                      PlaceholderText="{Binding Root.Scenarios.Editor.TargetPlaceholder, Source={x:Static l10n:Strings.Instance}}" />
             <TextBlock Classes="err" Margin="0,6,0,0"
-                       Text="{Binding Root.Scenarios.Editor.TargetRequired, Source={x:Static l10n:Strings.Instance}}"
+                       Text="{Binding TargetError}"
                        IsVisible="{Binding HasTargetError}" />
 
             <!-- Параметры нагрузки -->
@@ -69,7 +69,7 @@
                                     <TextBox Grid.Column="2" Classes="mono"
                                              Text="{Binding Path}" PlaceholderText="{Binding Root.Scenarios.Editor.PathPlaceholder, Source={x:Static l10n:Strings.Instance}}" />
                                     <Button Grid.Column="4" Classes="sact danger" Width="26" Height="26"
-                                            ToolTip.Tip="{Binding Root.Scenarios.Editor.RemoveStep, Source={x:Static l10n:Strings.Instance}}" Background="Transparent"
+                                            ToolTip.Tip="{Binding Root.Scenarios.Editor.RemoveStep, Source={x:Static l10n:Strings.Instance}}" AutomationProperties.Name="{Binding Root.Scenarios.Editor.RemoveStep, Source={x:Static l10n:Strings.Instance}}" Background="Transparent"
                                             Command="{Binding $parent[UserControl].((vm:ScenarioEditorViewModel)DataContext).RemoveRequestCommand}"
                                             CommandParameter="{Binding}">
                                         <Path Data="M1,1 L9,9 M9,1 L1,9" Width="9" Height="9"
@@ -91,6 +91,10 @@
             <!-- Действия -->
             <StackPanel Orientation="Horizontal" Spacing="10"
                         HorizontalAlignment="Right" Margin="0,28,0,0">
+                <TextBlock Text="{Binding Root.Scenarios.Editor.Saved, Source={x:Static l10n:Strings.Instance}}"
+                           Foreground="{DynamicResource Success}" FontSize="12"
+                           VerticalAlignment="Center" Margin="0,0,6,0"
+                           IsVisible="{Binding JustSaved}" />
                 <Button Classes="ghost" Content="{Binding Root.Common.Cancel, Source={x:Static l10n:Strings.Instance}}" Command="{Binding CancelCommand}" />
                 <Button Classes="run" Content="{Binding Root.Common.Save, Source={x:Static l10n:Strings.Instance}}" Command="{Binding SaveCommand}" />
             </StackPanel>

@@ -31,7 +31,8 @@ public static class ReportExporter
                 P95: Round(s.LatencyP95Ms),
                 P99: Round(s.LatencyP99Ms),
                 Max: Round(s.LatencyMaxMs)),
-            StatusCodes: [.. report.StatusCodes.Select(b => new StatusCodeDto(b.StatusCode, b.Count))]);
+            StatusCodes: [.. report.StatusCodes.Select(b => new StatusCodeDto(b.StatusCode, b.Count))],
+            Errors: [.. report.Errors.Select(e => new ErrorDto(ErrorText.Id(e.Kind), e.Count, e.Message))]);
 
         return JsonSerializer.Serialize(dto, ReportExportJsonContext.Default.ReportExportDto);
     }
@@ -65,6 +66,14 @@ public static class ReportExporter
         foreach (var bucket in report.StatusCodes)
             sb.AppendLine($"{bucket.StatusCode.ToString(inv)},{bucket.Count.ToString(inv)}");
 
+        if (report.Errors.Count > 0)
+        {
+            sb.AppendLine();
+            sb.AppendLine("error,count,message");
+            foreach (var error in report.Errors)
+                sb.AppendLine($"{ErrorText.Id(error.Kind)},{error.Count.ToString(inv)},{Escape(error.Message ?? string.Empty)}");
+        }
+
         return sb.ToString();
     }
 
@@ -87,6 +96,22 @@ public static class ReportExporter
                 $"<tr><td>{(bucket.StatusCode == 0 ? "000" : bucket.StatusCode.ToString(inv))}</td>" +
                 $"<td>{bucket.Count.ToString("N0", inv)}</td><td>{pct.ToString("F1", inv)}" +
                 $"{Html(strings.Common.Percent)}</td></tr>");
+        }
+
+        var errorSection = new StringBuilder();
+        if (report.Errors.Count > 0)
+        {
+            errorSection.Append(inv,
+                $"<h2>{Html(strings.Report.ErrorsSection)}</h2><table><tr><th>{Html(strings.Report.Html.Reason)}</th>" +
+                $"<th>{Html(strings.Report.Html.Count)}</th><th>{Html(strings.Report.Html.Details)}</th></tr>");
+            foreach (var error in report.Errors)
+            {
+                errorSection.Append(inv,
+                    $"<tr><td>{Html(ErrorText.Label(error.Kind))}</td><td>{error.Count.ToString("N0", inv)}</td>" +
+                    $"<td>{Html(ErrorText.Hint(error.Kind))}<div class=\"meta mono\">{Html(error.Message ?? string.Empty)}</div></td></tr>");
+            }
+
+            errorSection.Append("</table>");
         }
 
         // Палитра — токены дизайн-системы NetBench (тёмная тема).
@@ -126,6 +151,7 @@ public static class ReportExporter
             </div>
             <h2>{{Html(strings.Report.Html.ResponseCodes)}}</h2>
             <table><tr><th>{{Html(strings.Report.Html.Code)}}</th><th>{{Html(strings.Report.Html.Count)}}</th><th>{{Html(strings.Common.Percent)}}</th></tr>{{statusRows}}</table>
+            {{errorSection}}
             </body>
             </html>
             """;
@@ -154,11 +180,14 @@ public sealed record ReportExportDto(
     double ErrorRatePercent,
     long TotalBytesReceived,
     LatencyDto LatencyMs,
-    IReadOnlyList<StatusCodeDto> StatusCodes);
+    IReadOnlyList<StatusCodeDto> StatusCodes,
+    IReadOnlyList<ErrorDto> Errors);
 
 public sealed record LatencyDto(double Min, double P50, double Mean, double P95, double P99, double Max);
 
 public sealed record StatusCodeDto(int Code, long Count);
+
+public sealed record ErrorDto(string Kind, long Count, string? Message);
 
 // Source-generated сериализация — рефлексия ломает trimming на мобильных таргетах.
 [JsonSourceGenerationOptions(WriteIndented = true, PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]

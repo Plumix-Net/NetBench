@@ -5,8 +5,10 @@ using NetBench.Desktop.Controls;
 using NetBench.Features.TestRun.Data;
 using NetBench.Features.Scenarios.Domain;
 using NetBench.Features.TestRun.Domain;
+using NetBench.Features.Report.Data;
 using NetBench.Features.Report.Presentation.Desktop;
 using NetBench.Desktop.Services;
+using NetBench.Localization;
 
 namespace NetBench.Features.TestRun.Presentation.Desktop;
 
@@ -25,11 +27,15 @@ public partial class TestRunViewModel : ObservableObject, IAsyncDisposable
 
     // Отформатированные значения для карточек метрик
     [ObservableProperty] private string _rpsText = "0";
-    [ObservableProperty] private string _p95Text = "0";
+    [ObservableProperty] private string _p95Text = Strings.Instance.Root.TestRun.NoValue;
+    [ObservableProperty] private string _p95Unit = "";
     [ObservableProperty] private string _errorPctText = "0.0";
     [ObservableProperty] private MetricTone _errorTone = MetricTone.Success;
     [ObservableProperty] private string _totalText = "0";
-    [ObservableProperty] private string _connectionsText = "0";
+    [ObservableProperty] private string _usersText = "0";
+
+    /// <summary>Самая частая причина запросов без ответа — чтобы 100% ошибок не оставались загадкой.</summary>
+    [ObservableProperty] private string? _topErrorText;
 
     [ObservableProperty] private double _progressPercent;
     [ObservableProperty] private string _timeLabel;
@@ -56,7 +62,9 @@ public partial class TestRunViewModel : ObservableObject, IAsyncDisposable
         _engine.RunCompleted += report => Dispatcher.UIThread.Post(() =>
         {
             _reports.Save(report);
-            _navigation.NavigateTo(_createReport(report));
+            // Пользователь мог уйти на другой сценарий (прогон тогда остановлен) — не выдёргиваем его обратно.
+            if (ReferenceEquals(_navigation.Current, this))
+                _navigation.NavigateTo(_createReport(report));
         });
 
         // Экран прогона открывается уже «записывающим» — запуск сразу
@@ -74,27 +82,47 @@ public partial class TestRunViewModel : ObservableObject, IAsyncDisposable
         }
         catch (OperationCanceledException)
         {
-            // пользователь нажал «Стоп» — отчёт всё равно придёт через RunCompleted (finally движка)
+            // «Стоп» или движок сам остановил прогон (битый запрос) — отчёт всё равно придёт
+            // через RunCompleted (finally движка)
+        }
+        catch (ArgumentException)
+        {
+            // Невалидный Target: прогон не начался. Сюда не попадаем — адрес проверяется до запуска.
+            _navigation.NavigateTo(null);
         }
         finally
         {
             IsRunning = false;
+            // Движок одноразовый: освобождаем HttpClient и его пул соединений сразу после прогона.
+            await DisposeAsync();
         }
     }
 
     [RelayCommand]
-    private void Stop() => _cts?.Cancel();
+    private void Stop()
+    {
+        if (!_disposed)
+            _cts?.Cancel();
+    }
 
     private void ApplyStats(TestRunStats stats)
     {
         CurrentStats = stats;
 
-        RpsText = stats.RequestsPerSecond.ToString("N0");
-        P95Text = stats.LatencyP95Ms.ToString("F0");
+        // Во время прогона — живые цифры за последний интервал: средний с начала RPS сглаживает
+        // всё в плоскую линию и не показывает, что сервер «лёг» на середине. Средние — в отчёте.
+        RpsText = stats.CurrentRequestsPerSecond.ToString("N0");
+        P95Text = stats.RespondedRequests > 0
+            ? ReportFormatting.Ms(stats.IntervalLatencyP95Ms > 0 ? stats.IntervalLatencyP95Ms : stats.LatencyP95Ms)
+            : Strings.Instance.Root.TestRun.NoValue;
+        P95Unit = stats.RespondedRequests > 0 ? Strings.Instance.Root.Common.MillisecondsShort : "";
         ErrorPctText = (stats.ErrorRate * 100).ToString("F1");
         ErrorTone = stats.ErrorRate >= 0.05 ? MetricTone.Error : MetricTone.Success;
         TotalText = stats.TotalRequests.ToString("N0");
-        ConnectionsText = stats.ActiveConnections.ToString("N0");
+        UsersText = $"{stats.ActiveUsers:N0} / {Scenario.Load.ConcurrentUsers:N0}";
+        TopErrorText = stats.TopError is { } error
+            ? Strings.Instance.Root.TestRun.TopError(ErrorText.Label(error.Kind), ErrorText.Hint(error.Kind))
+            : null;
 
         var duration = Scenario.Load.Duration;
         ProgressPercent = duration > TimeSpan.Zero
@@ -104,8 +132,9 @@ public partial class TestRunViewModel : ObservableObject, IAsyncDisposable
         TimeLabel = $"{Format(elapsed)} / {Format(duration)}";
 
         var t = stats.Elapsed.TotalSeconds;
-        AddPoint(RpsPoints, t, stats.RequestsPerSecond);
-        AddPoint(P95Points, t, stats.LatencyP95Ms);
+        AddPoint(RpsPoints, t, stats.CurrentRequestsPerSecond);
+        if (stats.IntervalLatencyP95Ms > 0)
+            AddPoint(P95Points, t, stats.IntervalLatencyP95Ms);
     }
 
     private static string Format(TimeSpan time) =>
@@ -118,8 +147,14 @@ public partial class TestRunViewModel : ObservableObject, IAsyncDisposable
             pts.RemoveAt(0);
     }
 
+    private bool _disposed;
+
     public async ValueTask DisposeAsync()
     {
+        if (_disposed)
+            return;
+        _disposed = true;
+
         if (_cts is not null)
             await _cts.CancelAsync();
         await _engine.DisposeAsync();

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NetBench.Features.Scenarios.Domain;
@@ -20,7 +21,14 @@ public partial class ScenarioEditorViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasTargetError))]
+    [NotifyPropertyChangedFor(nameof(TargetError))]
+    [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
     private string _target = string.Empty;
+
+    /// <summary>Черновик сохранён и с тех пор не менялся — показываем «Сохранено».</summary>
+    [ObservableProperty] private bool _justSaved;
+
+    private bool _resetting;
 
     [ObservableProperty] private int _concurrentUsers;
     [ObservableProperty] private int _durationSeconds;
@@ -32,21 +40,52 @@ public partial class ScenarioEditorViewModel : ObservableObject
         Scenario = scenario;
         _repository = repository;
         ResetFromModel();
+        Requests.CollectionChanged += (_, _) => JustSaved = false;
     }
 
     public string HeaderText => string.IsNullOrWhiteSpace(Name)
         ? Strings.Instance.Root.Scenarios.New
         : Name;
 
-    public bool HasTargetError => string.IsNullOrWhiteSpace(Target);
+    /// <summary>
+    /// Адрес можно запросить: схему разрешено не писать (подставим https://), но мусор
+    /// вроде «google» или «ftp://…» не пропускаем — с ним прогон состоял бы из одних ошибок.
+    /// </summary>
+    public bool HasTargetError => !TargetUrl.TryNormalize(Target, out _);
 
-    [RelayCommand]
+    public string TargetError => string.IsNullOrWhiteSpace(Target)
+        ? Strings.Instance.Root.Scenarios.Editor.TargetRequired
+        : Strings.Instance.Root.Scenarios.Editor.TargetInvalid;
+
+    /// <summary>Сохранить черновик; <c>false</c> — адрес невалиден, ничего не записано.</summary>
+    public async Task<bool> TrySaveAsync(CancellationToken ct = default)
+    {
+        if (!CanSave())
+            return false;
+        await SaveAsync(ct);
+        return true;
+    }
+
+    private bool CanSave() => !HasTargetError;
+
+    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+        if (!_resetting && e.PropertyName is nameof(Name) or nameof(Target) or nameof(ConcurrentUsers)
+                or nameof(DurationSeconds) or nameof(RampUpSeconds) or nameof(ThinkTimeMs))
+            JustSaved = false;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanSave))]
     private async Task SaveAsync(CancellationToken ct)
     {
+        if (!TargetUrl.TryNormalize(Target, out var target))
+            return;
+
         Scenario.Name = string.IsNullOrWhiteSpace(Name)
             ? Strings.Instance.Root.Scenarios.Unnamed
             : Name.Trim();
-        Scenario.Target = Target.Trim();
+        Scenario.Target = target;
         Name = Scenario.Name;
         Target = Scenario.Target;
 
@@ -61,6 +100,7 @@ public partial class ScenarioEditorViewModel : ObservableObject
             model.Requests.Add(Clone(req));
 
         await _repository.SaveAsync(model, ct);
+        JustSaved = true;
     }
 
     /// <summary>Откат черновика к сохранённому состоянию сценария.</summary>
@@ -76,6 +116,19 @@ public partial class ScenarioEditorViewModel : ObservableObject
         Requests.Remove(step);
 
     private void ResetFromModel()
+    {
+        _resetting = true;
+        try
+        {
+            ResetFromModelCore();
+        }
+        finally
+        {
+            _resetting = false;
+        }
+    }
+
+    private void ResetFromModelCore()
     {
         var model = Scenario.Model;
         Name = model.Name;

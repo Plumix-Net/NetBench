@@ -69,9 +69,11 @@ NetBench/
 │   │   │   └── Presentation/Desktop/
 │   │   ├── Report/Presentation/Desktop/
 │   │   └── Shell/Presentation/{Desktop,Mobile}   # Mobile: MobileShell — мобильный composition root
-│   ├── Desktop/               # внефичевое desktop: App, ViewLocator, Views, Composition (Pure.DI),
+│   ├── Desktop/               # внефичевое desktop: App, ViewLocator, Views (MainMenu — меню macOS и
+│   │                          #   сочетания Ctrl на Win/Linux, AboutWindow), Composition (Pure.DI),
 │   │                          #   Services (Navigation), Controls (LineChart)
-│   ├── Mobile/                # внефичевое mobile: AppInfo,
+│   ├── AppInfo.cs             # версия, build number и ссылки (сайт, политика, исходники) — мобила и desktop
+│   ├── Mobile/                # внефичевое mobile:
 │   │                          #   Fonts/ (Inter, встроены ресурсами — NetBenchFonts),
 │   │                          #   Platform/IPlatformServices (share/экран/ссылки — реализуют головы),
 │   │                          #   Licenses/ (тексты OSS-лицензий для LicensePage)
@@ -107,6 +109,17 @@ e2e/                           # (в корне репозитория) Maestro-
 - **Сериализация:** только source-generated `System.Text.Json` (`JsonSerializerContext`) — рефлексия ломает trimming на мобильных таргетах.
 - **Пакеты:** версии только в `Directory.Packages.props` (CPM), в csproj — `PackageReference` без `Version`. Все Avalonia-пакеты — строго `$(AvaloniaVersion)`.
 - **Общие настройки проектов** (Nullable, LangVersion и т.п.) — только в `Directory.Build.props`, не дублировать в csproj.
+
+## Метрики прогона — что значат цифры
+
+- `TestRunStats.CurrentRequestsPerSecond` / `IntervalLatencyP95Ms` — за последний интервал снапшота: живые карточки
+  и графики. `RequestsPerSecond` и перцентили — за весь прогон: отчёт, история, экспорт.
+- Задержки и перцентили — только по запросам с ответом сервера (`RespondedRequests`); запросы без ответа идут в
+  разбивку `TestRunReport.Errors` по `RequestErrorKind` (классификация — `LoadEngine.Classify`) с первым текстом
+  исключения. `InvalidRequest` останавливает прогон сразу.
+- Движок не запускает прогон с Target без абсолютного http(s)-адреса (`ArgumentException`); UI нормализует ввод через
+  `TargetUrl.TryNormalize` до запуска.
+- Меню приложения macOS ставится в `App.Initialize()`: Avalonia читает его сразу после, иначе подставит «About Avalonia».
 
 ## Перф-правила движка (Features/TestRun) — не «рефакторить»
 

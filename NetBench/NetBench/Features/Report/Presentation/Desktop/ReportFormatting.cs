@@ -1,4 +1,5 @@
 using NetBench.Desktop.Controls;
+using NetBench.Features.Report.Data;
 using NetBench.Features.TestRun.Domain;
 using NetBench.Localization;
 
@@ -25,12 +26,53 @@ public sealed class StatusRow(string codeLabel, long count, double pct, MetricTo
     public bool IsError { get; } = tone == MetricTone.Error;
 }
 
+/// <summary>Строка таблицы «Запросы без ответа»: причина, что с ней делать и точный текст исключения.</summary>
+public sealed class ErrorRow(ErrorBucket bucket, long total)
+{
+    public string Label { get; } = ErrorText.Label(bucket.Kind);
+    public string Hint { get; } = ErrorText.Hint(bucket.Kind);
+    public string? Message { get; } = bucket.Message;
+    public bool HasMessage => !string.IsNullOrWhiteSpace(Message);
+    public string CountText { get; } = bucket.Count.ToString("N0");
+    public string PctText { get; } = (bucket.Count * 100.0 / Math.Max(total, 1)).ToString("F1");
+}
+
 /// <summary>Общее форматирование отчёта для экранов «Отчёт» и «Сравнение».</summary>
 public static class ReportFormatting
 {
     public static string Meta(TestRunReport report) => Strings.Instance.Root.Report.Meta(
         report.StartedAt.ToLocalTime().ToString("g"),
         report.Summary.Elapsed.TotalSeconds.ToString("F0"));
+
+    /// <summary>Запросов, пользователей, получено данных — масштаб прогона под заголовком отчёта.</summary>
+    public static string Totals(TestRunReport report) => Strings.Instance.Root.Report.Totals(
+        report.Summary.TotalRequests.ToString("N0"),
+        report.Scenario.Load.ConcurrentUsers.ToString("N0"),
+        ErrorText.Bytes(report.Summary.TotalBytesReceived));
+
+    /// <summary>
+    /// Задержка в мс или «—», если сервер не ответил ни разу: нулевая задержка была бы враньём.
+    /// У отчётов из истории до появления <see cref="TestRunStats.RespondedRequests"/> поле равно 0,
+    /// но задержки посчитаны — их узнаём по ненулевому максимуму.
+    /// </summary>
+    public static string Latency(TestRunStats summary, double ms) =>
+        summary.RespondedRequests > 0 || summary.LatencyMaxMs > 0 || summary.TotalRequests == 0
+            ? Ms(ms)
+            : Strings.Instance.Root.TestRun.NoValue;
+
+    /// <summary>Миллисекунды: до 10 мс — с десятыми (на быстрых API «0 ms» ничего не говорит), дальше — целыми.</summary>
+    public static string Ms(double ms) => ms is > 0 and < 10 ? ms.ToString("F1") : ms.ToString("F0");
+
+    /// <summary>Есть ли что показывать в задержках (см. <see cref="Latency"/>).</summary>
+    public static bool HasLatency(TestRunStats summary) =>
+        summary.RespondedRequests > 0 || summary.LatencyMaxMs > 0;
+
+    /// <summary>Единица к задержке: у прочерка её нет.</summary>
+    public static string LatencyUnit(TestRunStats summary) =>
+        HasLatency(summary) || summary.TotalRequests == 0 ? Strings.Instance.Root.Common.MillisecondsShort : "";
+
+    public static IReadOnlyList<ErrorRow> ErrorRows(TestRunReport report) =>
+        [.. report.Errors.Select(e => new ErrorRow(e, report.Summary.TotalRequests))];
 
     public static MetricTone ErrorTone(TestRunStats summary) =>
         summary.ErrorRate >= 0.05 ? MetricTone.Error : MetricTone.Success;
@@ -52,7 +94,7 @@ public static class ReportFormatting
 
         static LatencyRow Row(string label, double ms, double max) =>
             new(label, ms / max * 100,
-                Strings.Instance.Root.Report.LatencyValue(ms.ToString("F0")));
+                Strings.Instance.Root.Report.LatencyValue(Ms(ms)));
     }
 
     public static IReadOnlyList<StatusRow> StatusRows(TestRunReport report)

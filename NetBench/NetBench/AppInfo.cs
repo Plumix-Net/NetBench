@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace NetBench.Mobile;
+namespace NetBench;
 
 /// <summary>
 /// Версия и build number приложения — из атрибутов сборки, которые проставляет
@@ -19,6 +19,8 @@ public static class AppInfo
         _assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
             .FirstOrDefault(attribute => attribute.Key == "BuildNumber")?.Value
         ?? "0";
+
+    public static Uri Website { get; } = new("https://plumix.net/netbench");
 
     public static Uri PrivacyPolicy { get; } = new("https://plumix.net/netbench/privacy");
 

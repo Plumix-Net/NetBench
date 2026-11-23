@@ -173,7 +173,7 @@ public sealed class MonitorScreen : StatelessWidget
                                     palette,
                                     strings.Mobile.RequestsPerSecond,
                                     palette.Rps,
-                                    stats?.RequestsPerSecond ?? 0,
+                                    stats?.CurrentRequestsPerSecond ?? 0,
                                     "N0",
                                     unit: null,
                                     valueColor: palette.Rps),

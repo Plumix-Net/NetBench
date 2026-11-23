@@ -66,7 +66,7 @@ public sealed class TestRunCubit : Cubit<TestRunState>
         var skip = State.RpsPoints.Count + 1 - MaxPoints;
         for (var i = Math.Max(0, skip); i < State.RpsPoints.Count; i++)
             points.Add(State.RpsPoints[i]);
-        points.Add(stats.RequestsPerSecond);
+        points.Add(stats.CurrentRequestsPerSecond);
 
         Emit(State with { Stats = stats, RpsPoints = points });
     }

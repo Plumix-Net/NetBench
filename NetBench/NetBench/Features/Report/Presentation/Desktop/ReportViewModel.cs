@@ -4,6 +4,7 @@ using NetBench.Desktop.Controls;
 using NetBench.Features.Report.Data;
 using NetBench.Features.TestRun.Domain;
 using NetBench.Desktop.Services;
+using NetBench.Localization;
 
 namespace NetBench.Features.Report.Presentation.Desktop;
 
@@ -18,16 +19,25 @@ public partial class ReportViewModel : ObservableObject
     public string ScenarioName => Report.Scenario.Name;
     public string TargetText => Report.Scenario.Target;
     public string MetaText { get; }
+    public string TotalsText { get; }
 
     public string RpsText { get; }
     public string P50Text { get; }
     public string P95Text { get; }
     public string P99Text { get; }
+    public string LatencyUnit { get; }
+
+    /// <summary>Сервер ответил хотя бы раз — иначе распределение задержек из одних нулей не показываем.</summary>
+    public bool HasLatency { get; }
     public string ErrorPctText { get; }
     public MetricTone ErrorTone { get; }
 
-    /// <summary>Все запросы упали — баннер «хост не принял ни одного соединения».</summary>
+    /// <summary>Ни один запрос не получил ответа — баннер с причиной.</summary>
     public bool AllFailed { get; }
+    public string AllFailedText { get; }
+
+    public IReadOnlyList<ErrorRow> ErrorRows { get; }
+    public bool HasErrorRows => ErrorRows.Count > 0;
 
     public IReadOnlyList<LatencyRow> LatencyRows { get; }
     public IReadOnlyList<StatusRow> StatusRows { get; }
@@ -47,13 +57,22 @@ public partial class ReportViewModel : ObservableObject
 
         var s = report.Summary;
         MetaText = ReportFormatting.Meta(report);
+        TotalsText = ReportFormatting.Totals(report);
         RpsText = s.RequestsPerSecond.ToString("N0");
-        P50Text = s.LatencyP50Ms.ToString("F0");
-        P95Text = s.LatencyP95Ms.ToString("F0");
-        P99Text = s.LatencyP99Ms.ToString("F0");
+        P50Text = ReportFormatting.Latency(s, s.LatencyP50Ms);
+        P95Text = ReportFormatting.Latency(s, s.LatencyP95Ms);
+        P99Text = ReportFormatting.Latency(s, s.LatencyP99Ms);
+        LatencyUnit = ReportFormatting.LatencyUnit(s);
+        HasLatency = ReportFormatting.HasLatency(s);
         ErrorPctText = ReportFormatting.ErrorPct(s);
         ErrorTone = ReportFormatting.ErrorTone(s);
-        AllFailed = s.TotalRequests > 0 && s.ErrorCount == s.TotalRequests;
+        ErrorRows = ReportFormatting.ErrorRows(report);
+
+        // «Все упали» — это когда ни одного ответа; 100% ответов 500 — другая история, её видно в кодах.
+        AllFailed = s.TotalRequests > 0 && report.StatusCodes.All(b => b.StatusCode == 0);
+        AllFailedText = report.Errors is [var top, ..]
+            ? Strings.Instance.Root.Report.AllFailedReason(ErrorText.Label(top.Kind), ErrorText.Hint(top.Kind))
+            : Strings.Instance.Root.Report.AllFailed;
         LatencyRows = ReportFormatting.LatencyRows(s);
         StatusRows = ReportFormatting.StatusRows(report);
         LatencyTimeline = ReportFormatting.LatencyTimeline(report);

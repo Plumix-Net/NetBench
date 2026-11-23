@@ -107,6 +107,67 @@ public class StatisticsAggregatorTests
     }
 
     [Fact]
+    public void FailedRequestsDoNotDragLatencyDown()
+    {
+        var aggregator = new StatisticsAggregator();
+        aggregator.Record(Ok(100));
+        for (var i = 0; i < 99; i++)
+            aggregator.Record(RequestResult.Error(0, 1_000, RequestErrorKind.ConnectionRefused));
+
+        var stats = aggregator.Snapshot();
+
+        Assert.Equal(100, stats.TotalRequests);
+        Assert.Equal(1, stats.RespondedRequests);
+        Assert.InRange(stats.LatencyP50Ms, 99, 101);
+        Assert.Equal(100.0, stats.LatencyMeanMs, precision: 3);
+        Assert.Equal(100.0, stats.LatencyMinMs, precision: 3);
+    }
+
+    [Fact]
+    public void ErrorsAreGroupedByKindWithFirstMessage()
+    {
+        var aggregator = new StatisticsAggregator();
+        aggregator.Record(RequestResult.Error(0, 1, RequestErrorKind.Dns));
+        aggregator.Record(RequestResult.Error(0, 1, RequestErrorKind.Timeout));
+        aggregator.Record(RequestResult.Error(0, 1, RequestErrorKind.Timeout));
+        Assert.True(aggregator.NeedsErrorMessage(RequestErrorKind.Timeout));
+        aggregator.RecordErrorMessage(RequestErrorKind.Timeout, "first");
+        aggregator.RecordErrorMessage(RequestErrorKind.Timeout, "second");
+        Assert.False(aggregator.NeedsErrorMessage(RequestErrorKind.Timeout));
+
+        var report = aggregator.BuildReport(new LoadScenario { Name = "test" }, DateTime.UtcNow);
+
+        Assert.Equal(2, report.Errors.Count);
+        Assert.Equal(RequestErrorKind.Timeout, report.Errors[0].Kind);
+        Assert.Equal(2, report.Errors[0].Count);
+        Assert.Equal("first", report.Errors[0].Message);
+        Assert.Equal(RequestErrorKind.Dns, report.Errors[1].Kind);
+        Assert.Equal(RequestErrorKind.Timeout, report.Summary.TopError?.Kind);
+    }
+
+    [Fact]
+    public async Task CurrentRpsAndIntervalLatencyCoverOnlyTheLastInterval()
+    {
+        var aggregator = new StatisticsAggregator();
+        for (var i = 0; i < 100; i++)
+            aggregator.Record(Ok(500));
+        aggregator.Snapshot();
+
+        await Task.Delay(100);
+        aggregator.Record(Ok(10));
+        var stats = aggregator.Snapshot();
+
+        // Средний RPS помнит всю сотню, текущий — только один запрос за ~100 мс.
+        Assert.True(stats.CurrentRequestsPerSecond < stats.RequestsPerSecond);
+        Assert.InRange(stats.IntervalLatencyP95Ms, 9, 11);
+        Assert.InRange(stats.LatencyP95Ms, 490, 510);
+
+        var empty = aggregator.Snapshot();
+        Assert.Equal(0, empty.IntervalLatencyP95Ms);
+        Assert.Equal(0, empty.CurrentRequestsPerSecond);
+    }
+
+    [Fact]
     public async Task RecordIsThreadSafeUnderParallelLoad()
     {
         var aggregator = new StatisticsAggregator();

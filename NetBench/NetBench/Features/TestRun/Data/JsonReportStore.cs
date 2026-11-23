@@ -65,6 +65,7 @@ public sealed class JsonReportStore : IReportStore
                 FinishedAt = report.FinishedAt,
                 Summary = report.Summary,
                 StatusCodes = report.StatusCodes,
+                Errors = report.Errors,
             });
         }
 

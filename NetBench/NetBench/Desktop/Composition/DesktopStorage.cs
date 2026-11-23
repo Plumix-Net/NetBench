@@ -14,4 +14,7 @@ public sealed record DesktopStorage(string? Root)
 
     /// <summary>Файл настроек; <c>null</c> — по умолчанию (<see cref="Features.Settings.Data.JsonAppSettingsStore"/>).</summary>
     public string? SettingsPath => Root is null ? null : Path.Combine(Root, "settings.json");
+
+    /// <summary>История прогонов; <c>null</c> — по умолчанию (<see cref="Features.TestRun.Data.JsonReportStore"/>).</summary>
+    public string? HistoryPath => Root is null ? null : Path.Combine(Root, "history.json");
 }

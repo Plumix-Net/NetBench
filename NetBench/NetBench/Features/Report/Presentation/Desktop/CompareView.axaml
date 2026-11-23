@@ -24,8 +24,8 @@
                     </StackPanel>
                 </Border>
                 <Grid ColumnDefinitions="*,14,*,14,*" Margin="0,16,0,0">
-                    <ctrl:MetricCard Grid.Column="0" Label="{Binding Root.Common.Rps, Source={x:Static l10n:Strings.Instance}}" Tone="Rps" Value="{Binding RpsText}" />
-                    <ctrl:MetricCard Grid.Column="2" Label="{Binding Root.Common.P95, Source={x:Static l10n:Strings.Instance}}" Tone="Latency" Value="{Binding P95Text}" Unit="{Binding Root.Common.MillisecondsShort, Source={x:Static l10n:Strings.Instance}}" />
+                    <ctrl:MetricCard Grid.Column="0" Label="{Binding Root.Common.AvgRps, Source={x:Static l10n:Strings.Instance}}" Tone="Rps" Value="{Binding RpsText}" />
+                    <ctrl:MetricCard Grid.Column="2" Label="{Binding Root.Common.P95, Source={x:Static l10n:Strings.Instance}}" Tone="Latency" Value="{Binding P95Text}" Unit="{Binding LatencyUnit}" />
                     <ctrl:MetricCard Grid.Column="4" Label="{Binding Root.Common.Errors, Source={x:Static l10n:Strings.Instance}}" Tone="{Binding ErrorTone}"
                                      Value="{Binding ErrorPctText}" Unit="{Binding Root.Common.Percent, Source={x:Static l10n:Strings.Instance}}" />
                 </Grid>

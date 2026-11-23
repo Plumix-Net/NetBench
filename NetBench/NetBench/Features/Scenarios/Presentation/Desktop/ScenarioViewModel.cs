@@ -15,6 +15,7 @@ public sealed partial class ScenarioViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(HostLabel))]
     [NotifyPropertyChangedFor(nameof(TargetLabel))]
     [NotifyPropertyChangedFor(nameof(HasTarget))]
+    [NotifyPropertyChangedFor(nameof(HasValidTarget))]
     private string _target;
 
     public ScenarioViewModel(LoadScenario model)
@@ -25,6 +26,9 @@ public sealed partial class ScenarioViewModel : ObservableObject
     }
 
     public bool HasTarget => !string.IsNullOrWhiteSpace(Target);
+
+    /// <summary>Target можно запросить — сразу или дописав https:// (адреса, сохранённые до валидации).</summary>
+    public bool HasValidTarget => TargetUrl.TryNormalize(Target, out _);
 
     /// <summary>Хост без схемы — подпись строки в сайдбаре.</summary>
     public string HostLabel => HasTarget

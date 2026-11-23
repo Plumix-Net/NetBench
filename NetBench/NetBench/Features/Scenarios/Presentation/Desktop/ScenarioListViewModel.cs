@@ -98,11 +98,18 @@ public partial class ScenarioListViewModel : ObservableObject
     {
         SelectedScenario = scenario;
 
-        // Без цели запускать нечего — редактор покажет ошибку валидации.
-        if (!scenario.HasTarget)
+        // Сценарии, сохранённые до валидации адреса, могли остаться с «google.com» без схемы:
+        // дописываем https:// и сохраняем. Совсем битый адрес — в редактор, он покажет ошибку.
+        if (!TargetUrl.TryNormalize(scenario.Target, out var target))
         {
             _navigation.NavigateTo(_createEditor(scenario));
             return;
+        }
+
+        if (target != scenario.Target)
+        {
+            scenario.Target = target;
+            await _repository.SaveAsync(scenario.Model);
         }
 
         // Первый прогон — только после «тестирую свои серверы».

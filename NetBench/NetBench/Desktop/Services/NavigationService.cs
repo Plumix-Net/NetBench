@@ -6,5 +6,11 @@ internal sealed class NavigationService : INavigationService
 {
     public event Action<ObservableObject?>? PageChanged;
 
-    public void NavigateTo(ObservableObject? page) => PageChanged?.Invoke(page);
+    public ObservableObject? Current { get; private set; }
+
+    public void NavigateTo(ObservableObject? page)
+    {
+        Current = page;
+        PageChanged?.Invoke(page);
+    }
 }

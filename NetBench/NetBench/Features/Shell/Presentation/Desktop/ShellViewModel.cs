@@ -6,6 +6,7 @@ using NetBench.Features.Report.Presentation.Desktop;
 using NetBench.Features.Scenarios.Presentation.Desktop;
 using NetBench.Features.TestRun.Presentation.Desktop;
 using NetBench.Desktop.Services;
+using NetBench.Localization;
 
 namespace NetBench.Features.Shell.Presentation.Desktop;
 
@@ -42,16 +43,40 @@ public partial class ShellViewModel : ObservableObject
 
     public bool ShowRunButton => !IsRunning;
 
-    public bool ShowTargetHint => ActiveScenario is { HasTarget: false };
+    public bool ShowTargetHint => ActiveScenario is { HasValidTarget: false };
+
+    public string TargetHintText => ActiveScenario is { HasTarget: true }
+        ? Strings.Instance.Root.Shell.TargetInvalid
+        : Strings.Instance.Root.Shell.TargetRequired;
+
+    public bool IsReportOpen => CurrentPage is ReportViewModel;
 
     [RelayCommand(CanExecute = nameof(CanRun))]
-    private void Run()
+    private async Task RunAsync()
     {
-        if (ActiveScenario is { } scenario)
-            Sidebar.RunScenarioCommand.Execute(scenario);
+        if (ActiveScenario is not { } scenario)
+            return;
+
+        // Запуск из открытого редактора — с тем, что в нём набрано: сначала сохраняем черновик.
+        // Невалидный адрес не сохранится, и редактор уже показывает, что с ним не так.
+        if (CurrentPage is ScenarioEditorViewModel editor && editor.Scenario == scenario &&
+            !await editor.TrySaveAsync())
+            return;
+
+        await Sidebar.RunScenarioCommand.ExecuteAsync(scenario);
     }
 
-    private bool CanRun() => ActiveScenario is { HasTarget: true } && !IsRunning;
+    private bool CanRun() => ActiveScenario is not null && !IsRunning;
+
+    /// <summary>Редактор выбранного сценария — из отчёта и меню (кнопки строки сайдбара видны только при наведении).</summary>
+    [RelayCommand(CanExecute = nameof(CanEdit))]
+    private void EditScenario()
+    {
+        if (ActiveScenario is { } scenario)
+            Sidebar.EditScenarioCommand.Execute(scenario);
+    }
+
+    private bool CanEdit() => ActiveScenario is not null && !IsRunning;
 
     [RelayCommand(CanExecute = nameof(IsRunning))]
     private void Stop()
@@ -62,10 +87,28 @@ public partial class ShellViewModel : ObservableObject
 
     // ---- Подписки ----
 
+    // ---- Меню: экспорт открытого отчёта ----
+
+    [RelayCommand(CanExecute = nameof(IsReportOpen))]
+    private Task ExportJsonAsync() => (CurrentPage as ReportViewModel)?.ExportJsonCommand.ExecuteAsync(null) ?? Task.CompletedTask;
+
+    [RelayCommand(CanExecute = nameof(IsReportOpen))]
+    private Task ExportHtmlAsync() => (CurrentPage as ReportViewModel)?.ExportHtmlCommand.ExecuteAsync(null) ?? Task.CompletedTask;
+
+    [RelayCommand(CanExecute = nameof(IsReportOpen))]
+    private Task ExportCsvAsync() => (CurrentPage as ReportViewModel)?.ExportCsvCommand.ExecuteAsync(null) ?? Task.CompletedTask;
+
     private void OnPageChanged(ObservableObject? page)
     {
         if (_observedRun is not null)
+        {
             _observedRun.PropertyChanged -= OnRunPropertyChanged;
+
+            // Ушли с экрана прогона (выбрали другой сценарий) — нагрузка не должна идти дальше
+            // невидимой: останавливаем, отчёт сохранится в историю.
+            if (_observedRun.IsRunning && !ReferenceEquals(page, _observedRun))
+                _observedRun.StopCommand.Execute(null);
+        }
 
         CurrentPage = page;
 
@@ -121,7 +164,13 @@ public partial class ShellViewModel : ObservableObject
         OnPropertyChanged(nameof(IsRunning));
         OnPropertyChanged(nameof(ShowRunButton));
         OnPropertyChanged(nameof(ShowTargetHint));
+        OnPropertyChanged(nameof(TargetHintText));
+        OnPropertyChanged(nameof(IsReportOpen));
         RunCommand.NotifyCanExecuteChanged();
         StopCommand.NotifyCanExecuteChanged();
+        EditScenarioCommand.NotifyCanExecuteChanged();
+        ExportJsonCommand.NotifyCanExecuteChanged();
+        ExportHtmlCommand.NotifyCanExecuteChanged();
+        ExportCsvCommand.NotifyCanExecuteChanged();
     }
 }

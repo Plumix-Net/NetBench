@@ -54,11 +54,12 @@
                                    FontSize="11" Foreground="{DynamicResource TextDim}" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="0" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Root.Shell.TargetRequired, Source={x:Static l10n:Strings.Instance}}"
+                        <TextBlock Text="{Binding TargetHintText}"
                                    FontSize="11" Foreground="{DynamicResource Latency}"
                                    VerticalAlignment="Center" Margin="0,0,14,0"
                                    IsVisible="{Binding ShowTargetHint}" />
                         <Button Classes="stop" Command="{Binding StopCommand}"
+                                AutomationProperties.Name="{Binding Root.Common.Stop, Source={x:Static l10n:Strings.Instance}}"
                                 IsVisible="{Binding IsRunning}">
                             <StackPanel Orientation="Horizontal" Spacing="7">
                                 <Rectangle Width="10" Height="10" Fill="{DynamicResource OnAccent}" />
@@ -66,6 +67,7 @@
                             </StackPanel>
                         </Button>
                         <Button Classes="run" Command="{Binding RunCommand}"
+                                AutomationProperties.Name="{Binding Root.Common.Run, Source={x:Static l10n:Strings.Instance}}"
                                 IsVisible="{Binding ShowRunButton}">
                             <StackPanel Orientation="Horizontal" Spacing="7">
                                 <Path Data="M0,0 L10,5.5 L0,11 Z" Width="10" Height="11"

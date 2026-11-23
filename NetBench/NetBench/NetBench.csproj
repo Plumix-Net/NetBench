@@ -15,7 +15,7 @@
     <SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-android'))">24</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-ios'))">15.0</SupportedOSPlatformVersion>
 
-    <!-- Версия из Directory.Build.props — её показывает экран «О приложении» (Mobile/AppInfo). -->
+    <!-- Версия из Directory.Build.props — её показывает «О приложении» (AppInfo) на мобиле и desktop. -->
     <Version>$(NetBenchVersion)</Version>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>

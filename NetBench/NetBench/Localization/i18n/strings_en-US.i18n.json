@@ -14,7 +14,9 @@
     "p95": "P95",
     "p99": "P99",
     "millisecondsShort": "ms",
-    "percent": "%"
+    "percent": "%",
+    "avgRps": "AVG RPS",
+    "close": "Close"
   },
   "diagnostics": {
     "viewNotFound": "No view found for {typeName: string}"
@@ -45,7 +47,33 @@
       "errors": "Errors",
       "responseCodes": "Response codes",
       "code": "Code",
-      "count": "Count"
+      "count": "Count",
+      "reason": "Reason",
+      "details": "Details"
+    },
+    "allFailedReason": "No request got a response. {reason: string}: {hint: string}",
+    "totals": "{requests: string} requests · {users: string} users · {data: string} received",
+    "errorsSection": "REQUESTS WITHOUT A RESPONSE",
+    "reason": "REASON",
+    "errorKind": {
+      "dns": "DNS lookup failed",
+      "connectionRefused": "Connection refused",
+      "connection": "Connection failed",
+      "timeout": "Timed out",
+      "tls": "TLS handshake failed",
+      "protocol": "Invalid HTTP response",
+      "invalidRequest": "Invalid request",
+      "other": "Other error"
+    },
+    "errorHint": {
+      "dns": "the host name does not resolve — check it for typos",
+      "connectionRefused": "nothing is listening on this host and port — is the server running?",
+      "connection": "the connection could not be established or was dropped",
+      "timeout": "the server did not answer in time (connect 10 s, response 30 s)",
+      "tls": "the certificate or TLS protocol was rejected — if the server speaks plain HTTP, use http:// in the Target URL",
+      "protocol": "the server answered with something that is not valid HTTP",
+      "invalidRequest": "check the URL, method and headers of the scenario — the run was stopped",
+      "other": "see the details for the exact message"
     }
   },
   "scenarios": {
@@ -78,14 +106,17 @@
       "pathPlaceholder": "/path",
       "removeStep": "Remove step",
       "noSteps": "No steps — load will use GET requests directly against the Target URL.",
-      "addRequest": "+ Add request"
+      "addRequest": "+ Add request",
+      "targetInvalid": "Enter a full http(s) address, for example https://api.example.com/health",
+      "saved": "Saved"
     }
   },
   "shell": {
     "emptyTitle": "No scenarios yet",
     "emptyDescription": "Create a scenario to start load testing.",
     "createFirst": "+ Create first scenario",
-    "targetRequired": "Enter a Target URL to run"
+    "targetRequired": "Enter a Target URL to run",
+    "targetInvalid": "The Target URL is not a valid http(s) address"
   },
   "mobile": {
     "homeSubtitle": "On-call monitoring",
@@ -166,7 +197,11 @@
     "latencyChart": "P95 LATENCY (MS)",
     "ownTargetsTitle": "Test only your own servers",
     "ownTargetsMessage": "NetBench sends many requests in a short time. Run tests only against servers you own or are allowed to test: load on someone else's service can disrupt it and may be illegal.",
-    "ownTargetsConfirm": "I understand"
+    "ownTargetsConfirm": "I understand",
+    "users": "VIRTUAL USERS",
+    "liveRps": "RPS NOW",
+    "topError": "{reason: string}: {hint: string}",
+    "noValue": "—"
   },
   "about": {
     "title": "About",
@@ -179,5 +214,36 @@
     "sourceCode": "Source code",
     "licenses": "Open source licenses",
     "openFailed": "Couldn’t open the link"
+  },
+  "menu": {
+    "about": "About NetBench",
+    "file": "File",
+    "newScenario": "New Scenario",
+    "editScenario": "Edit Scenario",
+    "run": "Run Test",
+    "stop": "Stop Test",
+    "exportReport": "Export Report",
+    "exportJson": "JSON…",
+    "exportHtml": "HTML…",
+    "exportCsv": "CSV…",
+    "closeWindow": "Close Window",
+    "edit": "Edit",
+    "undo": "Undo",
+    "redo": "Redo",
+    "cut": "Cut",
+    "copy": "Copy",
+    "paste": "Paste",
+    "selectAll": "Select All",
+    "view": "View",
+    "toggleTheme": "Toggle Dark Mode",
+    "window": "Window",
+    "minimize": "Minimize",
+    "zoom": "Zoom",
+    "help": "Help",
+    "website": "NetBench Website",
+    "reportIssue": "Report an Issue…",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use",
+    "sourceCode": "Source Code"
   }
 }

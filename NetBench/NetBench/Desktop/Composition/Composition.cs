@@ -23,7 +23,7 @@ internal partial class Composition
         // Singletons
         .Bind<INavigationService>().As(Singleton).To<NavigationService>()
         .Bind<IScenarioRepository>().As(Singleton).To((DesktopStorage storage) => new JsonScenarioRepository(storage.ScenariosDirectory))
-        .Bind<IReportStore>().As(Singleton).To<InMemoryReportStore>()
+        .Bind<IReportStore>().As(Singleton).To((DesktopStorage storage) => new JsonReportStore(storage.HistoryPath))
         .Bind<IThemeService>().As(Singleton).To<ThemeService>()
         .Bind<IFileSaveService>().As(Singleton).To<FileSaveService>()
         .Bind<IAppSettingsStore>().As(Singleton).To((DesktopStorage storage) => new JsonAppSettingsStore(storage.SettingsPath))

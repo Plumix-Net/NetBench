@@ -1,5 +1,4 @@
 using NetBench.Localization;
-using NetBench.Mobile;
 using NetBench.Mobile.Controls;
 using NetBench.Mobile.Licenses;
 using NetBench.Mobile.Platform;
