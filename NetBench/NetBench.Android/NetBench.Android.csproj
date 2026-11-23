@@ -11,6 +11,12 @@
     <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
   </PropertyGroup>
 
+  <!-- Native AOT: the Android SDK switches the runtime to NativeAOT for Release (optimized) builds and publish;
+       Debug stays CoreCLR. -->
+  <PropertyGroup>
+    <PublishAot>true</PublishAot>
+  </PropertyGroup>
+
   <!-- Release — AAB для Google Play, подписанный upload-ключом (Play App Signing переподписывает
        своим ключом приложения). Ключ хранится вне репозитория: путь, алиас и пароль приходят
        из переменных окружения NETBENCH_KEYSTORE / NETBENCH_KEY_ALIAS / NETBENCH_KEYSTORE_PASSWORD

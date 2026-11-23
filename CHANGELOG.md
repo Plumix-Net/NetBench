@@ -5,6 +5,7 @@ notes and the desktop update notes (`scripts/release-notes.sh`); store "What's n
 separately per language in `fastlane/metadata/ios/*/release_notes.txt`.
 
 ## Unreleased
+- Android and iOS: native builds (Native AOT) — about half the download size and a faster start.
 
 ## v1.1.0
 - Android: NetBench runs on Plumix's native Android host (Impeller rendering, no Avalonia): a smaller app and faster start.

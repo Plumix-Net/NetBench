@@ -172,6 +172,11 @@ e2e/                           # (в корне репозитория) Maestro-
   и обновляется сама из GitHub Releases (`Updates/VelopackUpdates.cs`, канал = RID); `Updates.Start()`
   (внутри — `VelopackApp.Build().Run()`) должен оставаться первой строкой `Main`. Код, который AOT не переварит
   (рефлексия, динамические биндинги), в desktop-половину не добавлять.
+- Мобильные головы тоже Native AOT (`PublishAot` в csproj): Android переключается на NativeAOT в Release-сборке и
+  `publish` (Debug — CoreCLR), iOS — только в `publish` (`dotnet build` идёт на CoreCLR + R2R; для симулятора AOT
+  проверяется `dotnet build -c Release -r iossimulator-arm64 -p:_IsPublishing=true`). Замеры 2026-11-23: AAB/APK
+  arm64 16,2 против 29,2 МБ, IPA 20,7 против 35,4 МБ, холодный старт на эмуляторе −23 %. Это касается и общего
+  проекта `NetBench`: рефлексию и динамический код в мобильную половину тоже не добавлять.
 - Mac App Store — тот же Bundle ID, что у iOS (`-p:NetBenchAppStore=true`): универсальный бинарник, песочница
   (`macOS/AppStore.entitlements`), без Velopack (`Updates/StoreUpdates.cs`). Сборка и выгрузка —
   `scripts/pack-mac-appstore.sh` из `fastlane mac beta`; тексты — `fastlane/metadata/macos/`.

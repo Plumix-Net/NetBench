@@ -11,6 +11,11 @@
     <AppIcon>AppIcon</AppIcon>
   </PropertyGroup>
 
+  <!-- Native AOT: takes effect on `dotnet publish` only (the iOS SDK's _UseNativeAot); `dotnet build` stays CoreCLR. -->
+  <PropertyGroup>
+    <PublishAot>true</PublishAot>
+  </PropertyGroup>
+
   <!-- Release под устройство (App Store / TestFlight): сертификат и профиль приходят снаружи —
        -p:CodesignKey="Apple Distribution: ..." -p:CodesignProvision="<имя профиля>"
        (локально — из связки ключей, в CI — секреты); без них берётся любой «Apple Distribution» из связки ключей. -->
