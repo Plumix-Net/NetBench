@@ -159,7 +159,8 @@ e2e/                           # (в корне репозитория) Maestro-
 - Тег `vX.Y.Z` (= `NetBenchVersion`) запускает `.github/workflows/release.yml`: fastlane выгружает IPA в TestFlight
   и AAB во внутреннее тестирование Play, тексты и скриншоты — в оба стора; desktop-установщики Windows/macOS/Linux
   (Native AOT + Velopack, `scripts/pack-desktop.sh`) — в черновик GitHub Release, универсальный .pkg — в
-  Mac App Store (`fastlane mac beta`). Production и ревью — вручную.
+  Mac App Store (`fastlane mac beta`). На ревью — `fastlane ios submit` / `mac submit`; Play production — вручную
+  (у аккаунта пока нет доступа к production).
 - Тексты витрины — `fastlane/metadata/{ios,macos,android}/<язык>/`; «Что нового» — только в
   `metadata/ios/*/release_notes.txt` (в Play копируется при выгрузке); заметки GitHub Release — раздел
   версии в `CHANGELOG.md`. Лимиты длины проверяет `bundle exec fastlane check`.

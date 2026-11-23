@@ -73,7 +73,8 @@ dotnet build NetBench/NetBench.Android/NetBench.Android.csproj      # full APK
 
 - **Desktop** — Windows (`Setup.exe`), macOS (`.app`, Apple Silicon and Intel) and Linux (`AppImage`) on
   [GitHub Releases](https://github.com/Plumix-Net/NetBench/releases); installed copies update themselves.
-- **Mobile** — App Store and Google Play (coming with 1.0).
+- **iPhone** — [App Store](https://apps.apple.com/app/id6826672326).
+- **Android** — Google Play (in closed testing; public listing coming).
 
 Releases are cut by pushing a `vX.Y.Z` tag: CI builds every platform and uploads to TestFlight, Play internal
 testing and a draft GitHub Release with fastlane and Velopack — see [store/README.md](store/README.md).
