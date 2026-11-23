@@ -17,7 +17,7 @@
        NetBenchVersion — то, что видит пользователь; NetBenchBuildNumber — versionCode/CFBundleVersion,
        обязан монотонно расти: CI передаёт -p:NetBenchBuildNumber=${{ github.run_number }}. -->
   <PropertyGroup>
-    <NetBenchVersion>1.1.0</NetBenchVersion>
+    <NetBenchVersion>1.1.1</NetBenchVersion>
     <NetBenchBuildNumber Condition="'$(NetBenchBuildNumber)' == ''">1</NetBenchBuildNumber>
     <NetBenchApplicationId>net.plumix.netbench</NetBenchApplicationId>
   </PropertyGroup>

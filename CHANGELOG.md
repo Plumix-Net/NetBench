@@ -5,6 +5,8 @@ notes and the desktop update notes (`scripts/release-notes.sh`); store "What's n
 separately per language in `fastlane/metadata/ios/*/release_notes.txt`.
 
 ## Unreleased
+
+## v1.1.1
 - Android and iOS: native builds (Native AOT) — about half the download size and a faster start.
 
 ## v1.1.0
