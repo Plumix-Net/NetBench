@@ -71,7 +71,7 @@ NetBench/
 │   │   └── Shell/Presentation/{Desktop,Mobile}   # Mobile: MobileShell — мобильный composition root
 │   ├── Desktop/               # внефичевое desktop: App, ViewLocator, Views, Composition (Pure.DI),
 │   │                          #   Services (Navigation), Controls (LineChart)
-│   ├── Mobile/                # внефичевое mobile: MobileApp (PlumixApplication, бутстрап iOS-головы), AppInfo,
+│   ├── Mobile/                # внефичевое mobile: AppInfo,
 │   │                          #   Fonts/ (Inter, встроены ресурсами — NetBenchFonts),
 │   │                          #   Platform/IPlatformServices (share/экран/ссылки — реализуют головы),
 │   │                          #   Licenses/ (тексты OSS-лицензий для LicensePage)
@@ -82,8 +82,9 @@ NetBench/
 │                              #   Infrastructure/MobileHarness — MobileShell в окне 390×780, тапы по семантике
 ├── NetBench.Screenshots{,.Desktop}/  # генераторы скриншотов сторов: мобильный UI / desktop-окно (Mac App Store)
 └── NetBench.{Desktop,Android,iOS,Browser}/  # головы, только bootstrap:
-                               # Desktop/Browser → App, iOS → MobileApp (Avalonia),
+                               # Desktop/Browser → App;
                                # Android → MainActivity : PlumixActivity (нативный хост Plumix.Android, без Avalonia);
+                               # iOS → NetBenchViewController : PlumixViewController (нативный хост Plumix.iOS, без Avalonia);
                                # Desktop: net11.0 (Windows/Linux) + net11.0-macos (.app, macOS/: Info.plist,
                                #   entitlements, иконки), Native AOT в Release, флейвор Mac App Store (NetBenchAppStore)
 e2e/                           # (в корне репозитория) Maestro-флоу настоящего приложения на Android/iOS,

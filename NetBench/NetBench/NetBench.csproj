@@ -50,8 +50,8 @@
     <AvaloniaXaml Remove="Mobile\**;Features\**\Presentation\Mobile\**" />
   </ItemGroup>
 
-  <!-- Avalonia: desktop и iOS-голова (на Android — нативный хост Plumix.Android без Avalonia) -->
-  <ItemGroup Condition="'$(TargetFramework)' != 'net11.0-android'">
+  <!-- Avalonia: только desktop (на Android и iOS — нативные хосты Plumix.Android и Plumix.iOS без Avalonia) -->
+  <ItemGroup Condition="'$(IsMobileTarget)' != 'true'">
     <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="Avalonia.Fonts.Inter" />
@@ -79,17 +79,10 @@
     <PackageReference Include="Plumix.Bloc" />
     <PackageReference Include="Plumix.Slang" />
   </ItemGroup>
-  <!-- Android: голова — PlumixActivity нативного хоста, Avalonia-бутстрап MobileApp не нужен -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'net11.0-android'">
+  <!-- Android и iOS: головы — PlumixActivity и PlumixViewController нативных хостов, без Avalonia -->
+  <ItemGroup Condition="'$(IsMobileTarget)' == 'true'">
     <PackageReference Include="Plumix" />
     <PackageReference Include="Plumix.Material" />
-    <Compile Remove="Mobile\MobileApp.axaml.cs" />
-    <AvaloniaXaml Remove="Mobile\MobileApp.axaml" />
     <AvaloniaResource Remove="Assets\**" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net11.0-ios'">
-    <PackageReference Include="Plumix" />
-    <PackageReference Include="Plumix.Avalonia" />
-    <PackageReference Include="Plumix.Material" />
   </ItemGroup>
 </Project>

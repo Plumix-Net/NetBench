@@ -11,8 +11,8 @@ using Xunit;
 namespace NetBench.Mobile.Tests.Infrastructure;
 
 /// <summary>
-/// Замена MobileApp для headless-хоста: та же FluentTheme как источник базовых ресурсов,
-/// но без PlumixApplication-бутстрапа — корневой виджет ставит <see cref="MobileHarness"/>.
+/// Avalonia-приложение headless-хоста: FluentTheme как источник базовых ресурсов, без
+/// PlumixApplication-бутстрапа — корневой виджет ставит <see cref="MobileHarness"/>.
 /// </summary>
 public sealed class TestApp : Application
 {

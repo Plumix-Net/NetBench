@@ -1,21 +1,37 @@
-using Avalonia;
-using NetBench.Mobile;
-using Avalonia.iOS;
+using NetBench.Features.Shell.Presentation.Mobile;
+using Plumix.iOS;
+using Plumix.Widgets;
 
 namespace NetBench.iOS;
 
-// The UIApplicationDelegate for the application. This class is responsible for launching the 
-// User Interface of the application, as well as listening (and optionally responding) to 
-// application events from iOS.
+// Голова iOS на нативном хосте Plumix без Avalonia (Plumix.iOS, рендер Impeller на Metal): PlumixViewController
+// передаёт фреймворку жизненный цикл, настройки, ввод, клавиатуру, доступность и восстановление состояния — своих
+// мостов в голове не нужно. Одна сцена; её корень — NetBench-контроллер.
 [Register("AppDelegate")]
-#pragma warning disable CA1711 // Identifiers should not have incorrect suffix
-// Мобильная голова бутстрапит Plumix-версию UI (MobileApp), а не desktop-App.
-public partial class AppDelegate : AvaloniaAppDelegate<MobileApp>
-#pragma warning restore CA1711 // Identifiers should not have incorrect suffix
+#pragma warning disable CA1711 // Имя по соглашению UIKit.
+public sealed class AppDelegate : UIApplicationDelegate
+#pragma warning restore CA1711
 {
-    protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
+    public override UISceneConfiguration GetConfiguration(
+        UIApplication application, UISceneSession connectingSceneSession, UISceneConnectionOptions options) =>
+        new(null, connectingSceneSession.Role) { DelegateType = typeof(SceneDelegate) };
+}
+
+/// <summary>Сцена NetBench: окно с <see cref="NetBenchViewController"/>; состояние сохраняется вместе со сценой.</summary>
+[Register("SceneDelegate")]
+public sealed class SceneDelegate : PlumixSceneDelegate
+{
+    protected override PlumixViewController CreateViewController() => new NetBenchViewController();
+}
+
+/// <summary>Корневой контроллер: мобильный UI NetBench (<see cref="MobileShell"/>).</summary>
+public sealed class NetBenchViewController : PlumixViewController
+{
+    public NetBenchViewController()
     {
-        return base.CustomizeAppBuilder(builder)
-            .WithInterFont();
+        // Идентификатор восстановления включает восстановление состояния фреймворка (как у FlutterViewController).
+        RestorationIdentifier = "netbench";
     }
+
+    protected override Widget CreateApp() => new MobileShell();
 }

@@ -5,7 +5,7 @@ namespace NetBench.iOS;
 /// <summary>
 /// iOS-реализация <see cref="IPlatformServices"/>: «Поделиться» — UIActivityViewController
 /// поверх верхнего контроллера, экран — IdleTimerDisabled, ссылки — UIApplication.OpenUrl.
-/// Вызывается с UI-потока Avalonia, он же главный поток UIKit.
+/// Вызывается с UI-потока Plumix, он же главный поток UIKit.
 /// </summary>
 internal sealed class IosPlatformServices : IPlatformServices
 {

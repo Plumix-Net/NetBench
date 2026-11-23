@@ -18,9 +18,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Всё, кроме desktop-половины и Avalonia-приложения MobileApp (его заменяет TestApp) -->
+    <!-- Всё, кроме desktop-половины -->
     <Compile Include="$(AppSource)**\*.cs"
-             Exclude="$(AppSource)bin\**;$(AppSource)obj\**;$(AppSource)Desktop\**;$(AppSource)Features\**\Presentation\Desktop\**;$(AppSource)ViewModels\**;$(AppSource)Mobile\MobileApp.axaml.cs"
+             Exclude="$(AppSource)bin\**;$(AppSource)obj\**;$(AppSource)Desktop\**;$(AppSource)Features\**\Presentation\Desktop\**;$(AppSource)ViewModels\**"
              LinkBase="App" />
     <AdditionalFiles Include="$(AppSource)Localization\i18n\*.i18n.json" LinkBase="App\Localization\i18n" />
     <AdditionalFiles Include="$(AppSource)Localization\slang.json" LinkBase="App\Localization" />
