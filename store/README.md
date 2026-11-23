@@ -36,9 +36,12 @@ scripts/pack-mac-appstore.sh   универсальный .pkg для Mac App St
    - универсальный .pkg → App Store Connect (Mac App Store), тексты и скриншоты macOS-версии;
    - AAB → внутреннее тестирование Play, листинг и скриншоты → Play;
    - установщики Windows/macOS/Linux → черновик GitHub Release `vX.Y.Z` с заметками из CHANGELOG.
-6. Руками: в App Store Connect выбрать билд у версий iOS и macOS и «Add for Review»; в Play — продвинуть релиз
-   из internal в closed/production; на GitHub — опубликовать черновик релиза (после публикации
-   установленные desktop-копии обновятся сами).
+6. На ревью: `bundle exec fastlane ios submit` и `… mac submit` — последний обработанный билд версии, выпуск
+   автоматически после одобрения (или руками в App Store Connect: билд у версии и «Add for Review»). В Play —
+   продвинуть релиз из internal (`upload_to_play_store track:internal track_promote_to:alpha version_code:N`
+   с `skip_upload_*`); production закрыт, пока Play не выдал аккаунту доступ после закрытого теста
+   (API отвечает «Precondition check failed»). На GitHub — опубликовать черновик релиза (`gh release edit vX.Y.Z
+   --draft=false`; после публикации установленные desktop-копии обновятся сами).
 
 Build number считает fastlane: следующий после последнего в TestFlight / максимального versionCode
 во всех треках Play. Задать вручную — `NETBENCH_BUILD_NUMBER` или `build_number:` у лейна.

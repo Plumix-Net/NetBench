@@ -26,6 +26,10 @@ on:
         description: macOS → App Store Connect (Mac App Store) + metadata
         type: boolean
         default: true
+      desktop_rids:
+        description: Desktop RIDs to build, comma-separated (empty — all six); the rest stay in the release as they are
+        type: string
+        default: ''
 
 permissions:
   contents: write
@@ -39,8 +43,31 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
+      desktop_matrix: ${{ steps.desktop.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
+
+      # Native AOT собирает только под ОС раннера, поэтому у каждой ОС/архитектуры свой раннер.
+      # Linux — на 22.04 (glibc 2.35): нативный бинарник берёт версии символов glibc сборочной машины,
+      # и собранный на 22.04 запускается на Ubuntu 22.04+, Debian 12+, Fedora 36+.
+      # arm64-раннеры (windows-11-arm, ubuntu-22.04-arm) бесплатны для публичных репозиториев.
+      # macOS — xcode-27: .app собирает net11.0-macos-голова (workload macos ↔ Xcode 27.2);
+      # osx-x64 на Apple Silicon — кросс-компиляцией. Ручной запуск может пересобрать часть RID (desktop_rids).
+      - name: Desktop matrix
+        id: desktop
+        env:
+          RIDS: ${{ inputs.desktop_rids }}
+        run: |
+          all='[{"rid":"win-x64","os":"windows-latest"},{"rid":"win-arm64","os":"windows-11-arm"},
+                {"rid":"linux-x64","os":"ubuntu-22.04"},{"rid":"linux-arm64","os":"ubuntu-22.04-arm"},
+                {"rid":"osx-arm64","os":"xcode-27"},{"rid":"osx-x64","os":"xcode-27"}]'
+          if [[ -n "$RIDS" ]]; then
+            matrix=$(jq -c --arg rids "$RIDS" '[.[] | select(.rid as $r | ($rids | split(",") | map(gsub(" "; "")) | index($r)))]' <<< "$all")
+          else
+            matrix=$(jq -c . <<< "$all")
+          fi
+          [[ "$matrix" != "[]" ]] || { echo "::error::No desktop RID matches '$RIDS'"; exit 1; }
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
 
       - name: Read version
         id: version
@@ -218,28 +245,11 @@ jobs:
   desktop:
     needs: version
     if: github.event_name == 'push' || inputs.desktop
-    # Native AOT собирает только под ОС раннера, поэтому у каждой ОС/архитектуры свой раннер.
-    # Linux — на 22.04 (glibc 2.35): нативный бинарник берёт версии символов glibc сборочной машины,
-    # и собранный на 22.04 запускается на Ubuntu 22.04+, Debian 12+, Fedora 36+.
-    # arm64-раннеры (windows-11-arm, ubuntu-22.04-arm) бесплатны для публичных репозиториев.
-    # macOS — xcode-27: .app собирает net11.0-macos-голова (workload macos ↔ Xcode 27.2);
-    # osx-x64 на Apple Silicon — кросс-компиляцией.
+    # Список RID и раннеров — в джобе version (Desktop matrix).
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - rid: win-x64
-            os: windows-latest
-          - rid: win-arm64
-            os: windows-11-arm
-          - rid: linux-x64
-            os: ubuntu-22.04
-          - rid: linux-arm64
-            os: ubuntu-22.04-arm
-          - rid: osx-arm64
-            os: xcode-27
-          - rid: osx-x64
-            os: xcode-27
+        include: ${{ fromJSON(needs.version.outputs.desktop_matrix) }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -288,8 +298,11 @@ jobs:
           security set-keychain-settings -lut 21600 "$keychain"
           security unlock-keychain -p "$password" "$keychain"
           echo "$P12_BASE64" | base64 --decode > "$RUNNER_TEMP/developer-id.p12"
-          security import "$RUNNER_TEMP/developer-id.p12" -k "$keychain" -P "$P12_PASSWORD" -T /usr/bin/codesign -T /usr/bin/productsign
-          security set-key-partition-list -S apple-tool:,apple: -s -k "$password" "$keychain" >/dev/null
+          # -A: любое приложение без запроса доступа. Без него productbuild (подпись .pkg ключом Installer) висел на
+          # невидимом диалоге связки ключей до таймаута джобы (релиз 1.1.0). Связка — временная, на одноразовом раннере.
+          security import "$RUNNER_TEMP/developer-id.p12" -k "$keychain" -P "$P12_PASSWORD" -A
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$password" "$keychain" >/dev/null
+          security default-keychain -s "$keychain"
           # shellcheck disable=SC2046 # список связок ключей — отдельными аргументами
           security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
           echo "VPK_KEYCHAIN=$keychain" >> "$GITHUB_ENV"
@@ -309,7 +322,9 @@ jobs:
             echo "::warning::ASC_KEY_P8_BASE64 is not set — the macOS build is signed but not notarized"
           fi
 
+      # Сборка + нотаризация занимают ~15 минут; зависание (подпись, нотаризация) не должно съедать 6 часов.
       - name: Pack
+        timeout-minutes: 60
         run: scripts/pack-desktop.sh ${{ matrix.rid }}
 
       - name: Upload to GitHub Release (draft)

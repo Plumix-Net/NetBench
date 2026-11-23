@@ -171,6 +171,35 @@ platform :ios do
       force: true,
     )
   end
+
+  desc "Версию — на ревью App Store с последним обработанным билдом (тексты уже выгружены; build_number: — свой билд)"
+  lane :submit do |options|
+    submit_version_for_review(options[:build_number])
+  end
+end
+
+# Отправка на ревью: билд версии выбирается (по умолчанию — последний обработанный), тексты и скриншоты не трогаются.
+# Выпуск — автоматически после одобрения; шифрование — только HTTPS (ITSAppUsesNonExemptEncryption = false в Info.plist).
+def submit_version_for_review(build_number, platform: nil)
+  folder = platform == "osx" ? "macos" : "ios"
+  deliver(
+    api_key: asc_api_key,
+    app_identifier: APP_ID,
+    platform: platform || "ios",
+    app_version: netbench_version,
+    # Не выгружаются, но deliver проверяет каталоги и без этого берёт metadata/ целиком.
+    metadata_path: File.join(METADATA, folder),
+    screenshots_path: File.join(SCREENSHOTS, folder),
+    build_number: build_number&.to_s,
+    skip_binary_upload: true,
+    skip_metadata: true,
+    skip_screenshots: true,
+    submit_for_review: true,
+    automatic_release: true,
+    submission_information: { add_id_info_uses_idfa: false },
+    run_precheck_before_submit: false,
+    force: true,
+  )
 end
 
 platform :mac do
@@ -224,6 +253,11 @@ platform :mac do
       run_precheck_before_submit: false,
       force: true,
     )
+  end
+
+  desc "macOS-версию — на ревью Mac App Store с последним обработанным билдом (build_number: — свой билд)"
+  lane :submit do |options|
+    submit_version_for_review(options[:build_number], platform: "osx")
   end
 end
 
