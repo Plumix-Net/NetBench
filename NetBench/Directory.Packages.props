@@ -3,9 +3,14 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <AvaloniaVersion>12.1.4</AvaloniaVersion>
-    <!-- Все пакеты Plumix (и Plumix.Bloc/Plumix.Slang из Plumix.Packages) выходят одной версией. Проверка непубликованного
-         Plumix: -p:PlumixVersion=<версия из локального фида> -p:RestoreAdditionalProjectSources=<фид>. -->
-    <PlumixVersion>1.0.0-preview.9</PlumixVersion>
+    <!-- Пакеты Plumix носят версию портируемого upstream (Plumix/docs/VERSIONING.md): Plumix и хосты — Flutter,
+         Plumix.Material — material_ui, Plumix.Bloc — flutter_bloc (тянет Plumix.Bloc.Core — bloc), Plumix.Slang —
+         slang_flutter; -preview.N до полного паритета. Проверка непубликованного Plumix:
+         -p:PlumixVersion=<версия из локального фида> -p:RestoreAdditionalProjectSources=<фид>. -->
+    <PlumixVersion>3.47.0-preview.1</PlumixVersion>
+    <PlumixMaterialVersion>1.11.1-preview.1</PlumixMaterialVersion>
+    <PlumixBlocVersion>9.1.1-preview.1</PlumixBlocVersion>
+    <PlumixSlangVersion>4.19.0-preview.1</PlumixSlangVersion>
   </PropertyGroup>
   <ItemGroup>
     <!-- Avalonia packages -->
@@ -22,9 +27,9 @@
     <!-- Plumix (мобильный UI: Flutter-подобные виджеты + Bloc) -->
     <PackageVersion Include="Plumix" Version="$(PlumixVersion)" />
     <PackageVersion Include="Plumix.Avalonia" Version="$(PlumixVersion)" />
-    <PackageVersion Include="Plumix.Material" Version="$(PlumixVersion)" />
-    <PackageVersion Include="Plumix.Bloc" Version="$(PlumixVersion)" />
-    <PackageVersion Include="Plumix.Slang" Version="$(PlumixVersion)" />
+    <PackageVersion Include="Plumix.Material" Version="$(PlumixMaterialVersion)" />
+    <PackageVersion Include="Plumix.Bloc" Version="$(PlumixBlocVersion)" />
+    <PackageVersion Include="Plumix.Slang" Version="$(PlumixSlangVersion)" />
     <PackageVersion Include="Plumix.Android" Version="$(PlumixVersion)" />
     <PackageVersion Include="Plumix.iOS" Version="$(PlumixVersion)" />
     <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.15" />
