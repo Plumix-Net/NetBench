@@ -5,7 +5,7 @@
     <AvaloniaVersion>12.1.4</AvaloniaVersion>
     <!-- Все пакеты Plumix (и Plumix.Bloc/Plumix.Slang из Plumix.Packages) выходят одной версией. Проверка непубликованного
          Plumix: -p:PlumixVersion=<версия из локального фида> -p:RestoreAdditionalProjectSources=<фид>. -->
-    <PlumixVersion>1.0.0-preview.5</PlumixVersion>
+    <PlumixVersion>1.0.0-preview.7</PlumixVersion>
   </PropertyGroup>
   <ItemGroup>
     <!-- Avalonia packages -->
@@ -28,6 +28,8 @@
     <PackageVersion Include="Plumix.Slang" Version="$(PlumixVersion)" />
     <PackageVersion Include="Plumix.Android" Version="$(PlumixVersion)" />
     <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.15" />
+    <!-- FileProvider для «Поделиться» (раньше приходил транзитивно через Avalonia.Android) -->
+    <PackageVersion Include="Xamarin.AndroidX.Core" Version="1.17.0.2" />
     <!-- Установщики и автообновление desktop-версии -->
     <PackageVersion Include="Velopack" Version="1.2.161" />
     <!-- Скриншоты сторов: мобильный UI в headless-окне (NetBench.Screenshots) -->

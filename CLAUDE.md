@@ -52,7 +52,8 @@ NetBench/
 ├── Directory.Build.props      # общие настройки: Nullable, ImplicitUsings, LangVersion, анализаторы
 ├── Directory.Packages.props   # central package management; версия Avalonia — $(AvaloniaVersion)
 ├── NetBench/                  # ЕДИНСТВЕННЫЙ общий проект (мультитаргет, TreatWarningsAsErrors)
-│   ├── NetBench.csproj        # net11.0 → Desktop/Browser (Avalonia), net11.0-android/-ios → Mobile (Plumix);
+│   ├── NetBench.csproj        # net11.0 → Desktop/Browser (Avalonia), net11.0-android/-ios → Mobile (Plumix;
+│   │                          #   android-таргет — без пакетов Avalonia, под нативный хост Plumix.Android);
 │   │                          #   Desktop\** и Presentation\Desktop компилируются только в net11.0,
 │   │                          #   Mobile\** и Presentation\Mobile — только в android/ios (условные Compile/AvaloniaXaml/пакеты)
 │   ├── Features/              # clean architecture по фичам
@@ -70,7 +71,8 @@ NetBench/
 │   │   └── Shell/Presentation/{Desktop,Mobile}   # Mobile: MobileShell — мобильный composition root
 │   ├── Desktop/               # внефичевое desktop: App, ViewLocator, Views, Composition (Pure.DI),
 │   │                          #   Services (Navigation), Controls (LineChart)
-│   ├── Mobile/                # внефичевое mobile: MobileApp (PlumixApplication), AppInfo,
+│   ├── Mobile/                # внефичевое mobile: MobileApp (PlumixApplication, бутстрап iOS-головы), AppInfo,
+│   │                          #   Fonts/ (Inter, встроены ресурсами — NetBenchFonts),
 │   │                          #   Platform/IPlatformServices (share/экран/ссылки — реализуют головы),
 │   │                          #   Licenses/ (тексты OSS-лицензий для LicensePage)
 │   └── Assets/
@@ -80,7 +82,8 @@ NetBench/
 │                              #   Infrastructure/MobileHarness — MobileShell в окне 390×780, тапы по семантике
 ├── NetBench.Screenshots{,.Desktop}/  # генераторы скриншотов сторов: мобильный UI / desktop-окно (Mac App Store)
 └── NetBench.{Desktop,Android,iOS,Browser}/  # головы, только bootstrap:
-                               # Desktop/Browser → App, Android/iOS → MobileApp;
+                               # Desktop/Browser → App, iOS → MobileApp (Avalonia),
+                               # Android → MainActivity : PlumixActivity (нативный хост Plumix.Android, без Avalonia);
                                # Desktop: net11.0 (Windows/Linux) + net11.0-macos (.app, macOS/: Info.plist,
                                #   entitlements, иконки), Native AOT в Release, флейвор Mac App Store (NetBenchAppStore)
 e2e/                           # (в корне репозитория) Maestro-флоу настоящего приложения на Android/iOS,
@@ -94,6 +97,9 @@ e2e/                           # (в корне репозитория) Maestro-
 - **Платформенное деление в csproj, не в коде:** никаких `#if ANDROID` — desktop- и mobile-половины исключаются из компиляции условными `Compile`/`AvaloniaXaml` Remove по `$(IsMobileTarget)`. Новые платформенные файлы клади в правильную папку (`Desktop\**`, `Mobile\**`, `Presentation\{Desktop,Mobile}`) — csproj подхватит сам.
 - **Desktop (MVVM):** CommunityToolkit.Mvvm (`[ObservableProperty]`, `[RelayCommand]`). ViewModels — в `Presentation/Desktop` рядом с View.
 - **Mobile (Plumix):** Flutter-подобные виджеты (`Plumix`, `Plumix.Material`), состояние — `Cubit<TState>` + иммутабельные record-состояния (`Plumix.Bloc`); зависимости — через `RepositoryProvider`/`BlocProvider` в `MobileShell`.
+- **Мобильный код не знает хоста:** Android-голова идёт без Avalonia, поэтому в `Mobile\**` и `Presentation\Mobile` — никаких
+  типов Avalonia: колбэки фоновых потоков (движок нагрузки) возвращаются на поток UI через `EventLoop.ScheduleMicrotask`,
+  ассеты — встроенными ресурсами сборки.
 - **DI (desktop):** Pure.DI, конфигурация в `NetBench/Desktop/Composition/Composition.cs`. Новые ViewModel регистрируются там; для VM с runtime-аргументом — root вида `Func<TArg, TViewModel>`.
 - **Bindings:** compiled bindings включены по умолчанию (`AvaloniaUseCompiledBindingsByDefault`) — в axaml указывай `x:DataType`.
 - **Навигация (desktop):** через `INavigationService`.

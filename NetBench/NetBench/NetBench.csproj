@@ -36,6 +36,8 @@
   <ItemGroup Condition="'$(IsMobileTarget)' == 'true'">
     <!-- Тексты лицензий для экрана «Лицензии открытого ПО» (Mobile/Licenses/OssLicenses). -->
     <EmbeddedResource Include="Mobile\Licenses\*.txt" LogicalName="NetBench.Licenses.%(Filename).txt" />
+    <!-- Начертания Inter для Plumix-UI (Mobile/Theme/NetBenchFonts): свои, без пакета Avalonia.Fonts.Inter. -->
+    <EmbeddedResource Include="Mobile\Fonts\*.ttf" LogicalName="NetBench.Fonts.%(Filename)%(Extension)" />
     <Compile Remove="Desktop\**;Features\**\Presentation\Desktop\**" />
     <AvaloniaXaml Remove="Desktop\**;Features\**\Presentation\Desktop\**" />
     <!-- Android неявно импортирует Android.Widget — его ListView/Switch и т.п.
@@ -48,11 +50,15 @@
     <AvaloniaXaml Remove="Mobile\**;Features\**\Presentation\Mobile\**" />
   </ItemGroup>
 
-  <!-- Общее: Avalonia-инфраструктура и ядро движка -->
-  <ItemGroup>
+  <!-- Avalonia: desktop и iOS-голова (на Android — нативный хост Plumix.Android без Avalonia) -->
+  <ItemGroup Condition="'$(TargetFramework)' != 'net11.0-android'">
     <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.Themes.Fluent" />
     <PackageReference Include="Avalonia.Fonts.Inter" />
+  </ItemGroup>
+
+  <!-- Общее: ядро движка -->
+  <ItemGroup>
     <PackageReference Include="HdrHistogram" />
     <PackageReference Include="Slang.Net" />
     <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" PrivateAssets="all" />
@@ -73,10 +79,13 @@
     <PackageReference Include="Plumix.Bloc" />
     <PackageReference Include="Plumix.Slang" />
   </ItemGroup>
+  <!-- Android: голова — PlumixActivity нативного хоста, Avalonia-бутстрап MobileApp не нужен -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net11.0-android'">
     <PackageReference Include="Plumix" />
-    <PackageReference Include="Plumix.Avalonia" />
     <PackageReference Include="Plumix.Material" />
+    <Compile Remove="Mobile\MobileApp.axaml.cs" />
+    <AvaloniaXaml Remove="Mobile\MobileApp.axaml" />
+    <AvaloniaResource Remove="Assets\**" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net11.0-ios'">
     <PackageReference Include="Plumix" />

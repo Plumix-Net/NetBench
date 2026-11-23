@@ -1,7 +1,7 @@
-using Avalonia.Threading;
 using NetBench.Features.Scenarios.Domain;
 using NetBench.Features.TestRun.Data;
 using NetBench.Features.TestRun.Domain;
+using Plumix;
 using Plumix.Bloc;
 
 namespace NetBench.Features.TestRun.Presentation.Mobile;
@@ -25,8 +25,8 @@ public sealed class TestRunCubit : Cubit<TestRunState>
     {
         Scenario = scenario;
         _reports = reports;
-        _engine.StatsUpdated += stats => Dispatcher.UIThread.Post(() => ApplyStats(stats));
-        _engine.RunCompleted += report => Dispatcher.UIThread.Post(() => CompleteRun(report));
+        _engine.StatsUpdated += stats => EventLoop.ScheduleMicrotask(() => ApplyStats(stats));
+        _engine.RunCompleted += report => EventLoop.ScheduleMicrotask(() => CompleteRun(report));
     }
 
     public async Task StartAsync()

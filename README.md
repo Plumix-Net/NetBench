@@ -27,7 +27,7 @@ NetBench/                        # the only shared project
 │       ├── Desktop/             # Avalonia views + MVVM ViewModels (CommunityToolkit)
 │       └── Mobile/              # Plumix widgets + Cubit/State (Plumix.Bloc)
 ├── Desktop/                     # app shell for desktop: App, DI (Pure.DI), navigation, custom controls
-└── Mobile/                      # app shell for mobile: MobileApp (PlumixApplication)
+└── Mobile/                      # app shell for mobile: MobileApp (Avalonia bootstrap of the iOS head), fonts
 ```
 
 `NetBench.csproj` targets `net11.0;net11.0-android;net11.0-ios`. Platform heads are bootstrap-only and pick the nearest target:
@@ -36,6 +36,8 @@ NetBench/                        # the only shared project
 |------|--------|----------|------------------|
 | Desktop, Browser | `net11.0` | Avalonia controls (XAML) | MVVM, CommunityToolkit.Mvvm |
 | Android, iOS | `net11.0-android` / `-ios` | [Plumix](https://github.com/Plumix-Net/Plumix) — Flutter-like widgets in C# | `Cubit<TState>` + immutable records ([Plumix.Bloc](https://www.nuget.org/packages/Plumix.Bloc)) |
+
+On Android, Plumix runs on its native host (`Plumix.Android`, rendered with Impeller, no Avalonia); on iOS it is hosted by Avalonia (`Plumix.Avalonia`).
 
 Only the Domain and Data layers are shared between platforms; each UI stack brings its own state management. Conditional `Compile`/`AvaloniaXaml` items exclude the other platform's half from every compilation.
 

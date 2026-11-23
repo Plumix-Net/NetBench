@@ -8,7 +8,7 @@
 	<uses-feature android:name="android.hardware.screen.portrait" android:required="false" />
 	<!-- usesCleartextTraffic: нагрузочный тест часто бьёт в локальный/стейджинговый стенд по http:// —
 	     без cleartext Android молча режет такие запросы, и прогон даёт 100% ошибок.
-	     enableOnBackInvokedCallback: predictive back — PlumixMainActivity регистрирует
+	     enableOnBackInvokedCallback: predictive back — PlumixActivity регистрирует
 	     OnBackAnimationCallback, система показывает анимацию «назад на рабочий стол» на корне. -->
 	<application
 		android:label="NetBench"

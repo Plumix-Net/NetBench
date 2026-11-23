@@ -1,6 +1,5 @@
 using NetBench.Features.Settings.Domain;
 using Plumix.Material;
-using Plumix.Rendering;
 using Plumix.UI;
 using Plumix.Widgets;
 
@@ -101,14 +100,23 @@ public sealed record NetBenchPalette
 /// <summary>Шрифты дизайн-системы: Inter — интерфейс, моноширинный — метрики и URL.</summary>
 public static class NetBenchFonts
 {
-    // Начертания Inter лежат ресурсами пакета Avalonia.Fonts.Inter; регистрируем их под семейством
-    // "Inter" через FontLoader до первой отрисовки текста.
+    // Начертания Inter встроены ресурсами сборки (Mobile/Fonts) — не зависят от хоста; регистрируем их под
+    // семейством "Inter" через FontLoader до первой отрисовки текста.
     static NetBenchFonts()
     {
         var loader = new FontLoader("Inter");
         foreach (var face in new[] { "Thin", "Light", "Regular", "Medium", "SemiBold", "Bold" })
-            loader.AddFont(PlatformAssetBundle.Root.LoadBytesAsync($"packages/Avalonia.Fonts.Inter/Assets/Inter-{face}.ttf"));
+            loader.AddFont(ReadFace(face));
         _ = loader.Load();
+    }
+
+    private static ReadOnlyMemory<byte> ReadFace(string face)
+    {
+        using var stream = typeof(NetBenchFonts).Assembly.GetManifestResourceStream($"NetBench.Fonts.Inter-{face}.ttf")
+            ?? throw new InvalidOperationException($"Inter-{face}.ttf is not embedded");
+        using var bytes = new MemoryStream();
+        stream.CopyTo(bytes);
+        return bytes.ToArray();
     }
 
     public static string Ui { get; } = "Inter";

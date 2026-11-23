@@ -1,6 +1,6 @@
-using Avalonia.Threading;
 using NetBench.Features.Scenarios.Domain;
 using NetBench.Features.TestRun.Domain;
+using Plumix;
 using Plumix.Bloc;
 
 namespace NetBench.Features.Scenarios.Presentation.Mobile;
@@ -112,7 +112,7 @@ public sealed class ScenarioListCubit : Cubit<ScenarioListState>
     }
 
     // Отчёт сохраняется на UI-потоке (см. TestRunCubit), но не полагаемся на это
-    private void OnReportsChanged() => Dispatcher.UIThread.Post(
+    private void OnReportsChanged() => EventLoop.ScheduleMicrotask(
         () => EmitSafe(State with { LastRuns = SnapshotLastRuns(), Sessions = _reports.GetHistory() }));
 
     private Dictionary<Guid, TestRunReport> SnapshotLastRuns() =>

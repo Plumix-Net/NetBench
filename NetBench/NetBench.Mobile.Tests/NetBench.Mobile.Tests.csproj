@@ -25,6 +25,7 @@
     <AdditionalFiles Include="$(AppSource)Localization\i18n\*.i18n.json" LinkBase="App\Localization\i18n" />
     <AdditionalFiles Include="$(AppSource)Localization\slang.json" LinkBase="App\Localization" />
     <EmbeddedResource Include="$(AppSource)Mobile\Licenses\*.txt" LogicalName="NetBench.Licenses.%(Filename).txt" />
+    <EmbeddedResource Include="$(AppSource)Mobile\Fonts\*.ttf" LogicalName="NetBench.Fonts.%(Filename)%(Extension)" />
     <AssemblyMetadata Include="BuildNumber" Value="$(NetBenchBuildNumber)" />
   </ItemGroup>
 
