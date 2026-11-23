@@ -7,8 +7,8 @@
          Plumix.Material — material_ui, Plumix.Bloc — flutter_bloc (тянет Plumix.Bloc.Core — bloc), Plumix.Slang —
          slang_flutter; -preview.N до полного паритета. Проверка непубликованного Plumix:
          -p:PlumixVersion=<версия из локального фида> -p:RestoreAdditionalProjectSources=<фид>. -->
-    <PlumixVersion>3.47.0-preview.1</PlumixVersion>
-    <PlumixMaterialVersion>1.11.1-preview.1</PlumixMaterialVersion>
+    <PlumixVersion>3.47.0-preview.2</PlumixVersion>
+    <PlumixMaterialVersion>1.11.1-preview.2</PlumixMaterialVersion>
     <PlumixBlocVersion>9.1.1-preview.1</PlumixBlocVersion>
     <PlumixSlangVersion>4.19.0-preview.1</PlumixSlangVersion>
   </PropertyGroup>
